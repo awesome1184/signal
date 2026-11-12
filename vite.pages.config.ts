@@ -6,7 +6,7 @@ const root = resolve(process.cwd(), 'src/client');
 
 export default defineConfig({
   root,
-  base: '/devvit-krillion/',
+  base: '/signal/',
   plugins: [react()],
   build: {
     outDir: resolve(process.cwd(), 'dist/pages'),
