@@ -1434,3 +1434,262 @@ button:focus-visible,input:focus-visible {
     transform:translate(-50%,-50%) scale(var(--reticle-scale));
   }
 }
+
+
+/* Perfect acquisition: a charged carrier burst reserved for a 100-point hit. */
+.signal-capture-overlay.perfect-capture {
+  background:
+    radial-gradient(ellipse at 50% 48%,rgba(24,119,107,.2),transparent 58%),
+    rgba(2,8,14,.975);
+}
+.signal-perfect-flash {
+  position:absolute;
+  z-index:1;
+  inset:-48%;
+  pointer-events:none;
+  opacity:0;
+  background:
+    radial-gradient(circle at 50% 50%,rgba(232,255,250,.42) 0 1.5%,rgba(132,255,228,.2) 9%,rgba(67,221,206,.1) 23%,transparent 54%);
+}
+.perfect-capture .signal-capture { z-index:2; }
+.perfect-capture .signal-capture[data-phase="surging"] {
+  animation:signal-perfect-impact .56s cubic-bezier(.16,.82,.2,1) both;
+  border-color:rgba(202,255,242,.95);
+  box-shadow:0 22px 65px rgba(0,0,0,.62),0 0 54px rgba(104,255,219,.32),inset 0 1px 0 rgba(244,255,250,.24);
+}
+.perfect-capture .signal-capture[data-phase="surging"] + .signal-perfect-flash {
+  animation:signal-perfect-backdrop .72s ease-out both;
+}
+.perfect-capture .signal-capture[data-phase="surging"] .signal-screen {
+  animation:signal-perfect-screen .58s cubic-bezier(.16,.82,.2,1) both;
+  border-color:#eafff9;
+}
+.perfect-capture .signal-capture[data-phase="surging"] .signal-static {
+  opacity:0 !important;
+}
+.perfect-capture .signal-capture[data-phase="surging"] .signal-chaos-trace {
+  opacity:0 !important;
+}
+.perfect-capture .signal-capture[data-phase="surging"] .signal-clean-trace {
+  opacity:1;
+  stroke:#effff9;
+  stroke-width:3.2;
+  stroke-dashoffset:0;
+  filter:drop-shadow(0 0 12px rgba(176,255,232,1));
+}
+.perfect-capture .signal-capture[data-phase="surging"] .signal-lock-reticle {
+  opacity:1;
+  transform:translate(-50%,-50%) scale(.72);
+  filter:drop-shadow(0 0 18px rgba(189,255,240,.95));
+}
+.perfect-capture .signal-capture[data-phase="surging"] .reticle-corner {
+  border-color:#f0fff9;
+  filter:drop-shadow(0 0 8px rgba(166,255,229,.95));
+}
+.perfect-capture .signal-capture[data-phase="surging"] .signal-capture-copy h2 {
+  color:#f1fff9;
+  text-shadow:0 0 12px rgba(190,255,237,.9),0 0 36px rgba(81,255,215,.65);
+}
+.perfect-capture .signal-capture[data-phase="surging"] .signal-capture-status {
+  color:#d7fff1;
+  text-shadow:0 0 10px rgba(114,255,216,.8);
+}
+.perfect-capture .signal-capture[data-phase="surging"] .signal-station i {
+  background:#caffed;
+  box-shadow:0 0 13px rgba(174,255,226,.95);
+}
+.perfect-acquisition {
+  position:absolute;
+  z-index:8;
+  inset:0;
+  overflow:visible;
+  pointer-events:none;
+  opacity:0;
+}
+.acquisition-ring {
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:42px;
+  aspect-ratio:1;
+  border:1px solid rgba(214,255,245,.9);
+  border-radius:50%;
+  opacity:0;
+  transform:translate(-50%,-50%) scale(.2);
+  box-shadow:0 0 18px rgba(124,255,226,.3);
+}
+.acquisition-axis {
+  position:absolute;
+  top:50%;
+  left:50%;
+  opacity:0;
+  background:linear-gradient(90deg,transparent,rgba(206,255,244,.85),transparent);
+}
+.acquisition-axis.horizontal {
+  width:96%;
+  height:1px;
+  transform:translate(-50%,-50%) scaleX(.1);
+}
+.acquisition-axis.vertical {
+  width:1px;
+  height:96%;
+  background:linear-gradient(180deg,transparent,rgba(206,255,244,.85),transparent);
+  transform:translate(-50%,-50%) scaleY(.1);
+}
+.acquisition-core {
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:9px;
+  height:9px;
+  border:2px solid #fff;
+  border-radius:50%;
+  background:#caffed;
+  opacity:0;
+  transform:translate(-50%,-50%) scale(.2);
+  box-shadow:0 0 8px #fff,0 0 22px rgba(127,255,223,.95),0 0 48px rgba(90,255,218,.72);
+}
+.acquisition-ray {
+  --ray-angle:0deg;
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:2px;
+  height:35%;
+  opacity:0;
+  transform:translateX(-50%) rotate(var(--ray-angle)) scaleY(.08);
+  transform-origin:50% 0;
+  background:linear-gradient(180deg,rgba(230,255,249,.96),rgba(119,255,225,.48) 45%,transparent);
+  filter:drop-shadow(0 0 5px rgba(130,255,226,.75));
+}
+.acquisition-ray.ray-2 { --ray-angle:45deg; }
+.acquisition-ray.ray-3 { --ray-angle:90deg; }
+.acquisition-ray.ray-4 { --ray-angle:135deg; }
+.acquisition-ray.ray-5 { --ray-angle:180deg; }
+.acquisition-ray.ray-6 { --ray-angle:225deg; }
+.acquisition-ray.ray-7 { --ray-angle:270deg; }
+.acquisition-ray.ray-8 { --ray-angle:315deg; }
+.perfect-capture .signal-capture[data-phase="surging"] .perfect-acquisition {
+  opacity:1;
+}
+.perfect-capture .signal-capture[data-phase="surging"] .acquisition-ring {
+  animation:signal-acquisition-ring .58s cubic-bezier(.12,.68,.18,1) both;
+}
+.perfect-capture .signal-capture[data-phase="surging"] .ring-two { animation-delay:.08s; }
+.perfect-capture .signal-capture[data-phase="surging"] .ring-three { animation-delay:.16s; }
+.perfect-capture .signal-capture[data-phase="surging"] .acquisition-axis.horizontal {
+  animation:signal-axis-flare-horizontal .42s .04s ease-out both;
+}
+.perfect-capture .signal-capture[data-phase="surging"] .acquisition-axis.vertical {
+  animation:signal-axis-flare-vertical .42s .08s ease-out both;
+}
+.perfect-capture .signal-capture[data-phase="surging"] .acquisition-core {
+  animation:signal-core-ignite .52s cubic-bezier(.16,.8,.2,1) both;
+}
+.perfect-capture .signal-capture[data-phase="surging"] .acquisition-ray {
+  animation:signal-ray-burst .48s ease-out both;
+}
+.perfect-capture .signal-capture[data-phase="surging"] .ray-2,
+.perfect-capture .signal-capture[data-phase="surging"] .ray-6 { animation-delay:.025s; }
+.perfect-capture .signal-capture[data-phase="surging"] .ray-3,
+.perfect-capture .signal-capture[data-phase="surging"] .ray-7 { animation-delay:.05s; }
+.perfect-capture .signal-capture[data-phase="surging"] .ray-4,
+.perfect-capture .signal-capture[data-phase="surging"] .ray-8 { animation-delay:.075s; }
+.perfect-capture .signal-capture[data-phase="locked"] .perfect-acquisition {
+  opacity:.78;
+}
+.perfect-capture .signal-capture[data-phase="locked"] .acquisition-core {
+  opacity:1;
+  transform:translate(-50%,-50%) scale(1);
+  box-shadow:0 0 8px #fff,0 0 20px rgba(127,255,223,.95),0 0 38px rgba(90,255,218,.68);
+}
+.perfect-capture .signal-capture[data-phase="locked"] .signal-screen {
+  border-color:rgba(195,255,238,.9);
+  box-shadow:inset 0 0 38px rgba(36,169,139,.2),0 0 34px rgba(83,255,218,.28);
+}
+.perfect-capture .signal-capture[data-phase="locked"] .signal-capture-copy h2 {
+  animation:signal-perfect-title .5s cubic-bezier(.16,.8,.22,1) both;
+  color:#e4fff4;
+  text-shadow:0 0 12px rgba(165,255,225,.65),0 0 32px rgba(80,255,215,.42);
+}
+.perfect-capture .signal-capture[data-phase="locked"] .signal-score-readout strong {
+  animation:signal-perfect-score .58s cubic-bezier(.16,.8,.22,1) both;
+  color:#eafff5;
+  text-shadow:0 0 14px rgba(157,255,221,.75),0 0 30px rgba(88,255,213,.45);
+}
+.perfect-capture .signal-capture[data-phase="locked"] .signal-quality-track i {
+  background:linear-gradient(90deg,#8de7c7,#c8ffe8,#fff);
+  box-shadow:0 0 16px rgba(165,255,220,.9);
+}
+.perfect-capture .signal-capture[data-phase="locked"] .signal-capture-status {
+  color:#d7fff0;
+  text-shadow:0 0 10px rgba(132,255,218,.65);
+}
+@keyframes signal-perfect-impact {
+  0% {transform:translateY(0) scale(1);filter:brightness(1);}
+  28% {transform:translateY(-4px) scale(1.018);filter:brightness(1.55);}
+  52% {transform:translateY(1px) scale(.998);filter:brightness(1.12);}
+  100% {transform:translateY(0) scale(1);filter:brightness(1.18);}
+}
+@keyframes signal-perfect-backdrop {
+  0% {opacity:0;transform:scale(.72);}
+  24% {opacity:1;}
+  100% {opacity:0;transform:scale(1.18);}
+}
+@keyframes signal-perfect-screen {
+  0% {filter:brightness(1) saturate(1);}
+  30% {filter:brightness(2.15) saturate(1.55);}
+  58% {filter:brightness(1.22) saturate(1.2);}
+  100% {filter:brightness(1.5) saturate(1.4);}
+}
+@keyframes signal-acquisition-ring {
+  0% {opacity:0;transform:translate(-50%,-50%) scale(.2);}
+  22% {opacity:.95;}
+  100% {opacity:0;transform:translate(-50%,-50%) scale(4.6);}
+}
+@keyframes signal-axis-flare-horizontal {
+  0% {opacity:0;transform:translate(-50%,-50%) scaleX(.1);}
+  30% {opacity:.9;}
+  100% {opacity:0;transform:translate(-50%,-50%) scaleX(1);}
+}
+@keyframes signal-axis-flare-vertical {
+  0% {opacity:0;transform:translate(-50%,-50%) scaleY(.1);}
+  30% {opacity:.9;}
+  100% {opacity:0;transform:translate(-50%,-50%) scaleY(1);}
+}
+@keyframes signal-core-ignite {
+  0% {opacity:0;transform:translate(-50%,-50%) scale(.2);}
+  42% {opacity:1;transform:translate(-50%,-50%) scale(2.2);}
+  70% {opacity:1;transform:translate(-50%,-50%) scale(.82);}
+  100% {opacity:1;transform:translate(-50%,-50%) scale(1);}
+}
+@keyframes signal-ray-burst {
+  0% {opacity:0;transform:translateX(-50%) rotate(var(--ray-angle)) scaleY(.08);}
+  38% {opacity:.95;}
+  100% {opacity:0;transform:translateX(-50%) rotate(var(--ray-angle)) scaleY(1.1);}
+}
+@keyframes signal-perfect-title {
+  0% {opacity:.35;filter:blur(3px);letter-spacing:.28em;transform:scale(.94);}
+  62% {opacity:1;filter:blur(0);transform:scale(1.06);}
+  100% {opacity:1;letter-spacing:.1em;transform:scale(1);}
+}
+@keyframes signal-perfect-score {
+  0% {transform:scale(.65);filter:brightness(1.5);opacity:.4;}
+  58% {transform:scale(1.28);filter:brightness(1.8);opacity:1;}
+  100% {transform:scale(1);filter:brightness(1);opacity:1;}
+}
+@media (prefers-reduced-motion:reduce) {
+  .signal-perfect-flash { display:none !important; }
+  .perfect-acquisition { opacity:1; }
+  .acquisition-ring,.acquisition-axis,.acquisition-ray { display:none !important; }
+  .acquisition-core { opacity:1;transform:translate(-50%,-50%) scale(1); }
+  .perfect-capture .signal-capture[data-phase="surging"] {
+    animation:none !important;
+    filter:none !important;
+  }
+  .perfect-capture .signal-capture[data-phase="locked"] .signal-score-readout strong {
+    animation:none !important;
+    transform:none !important;
+    opacity:1 !important;
+  }
+}
