@@ -62,11 +62,11 @@ function buildReceiverPaths(seed: number, score: number): ReceiverPaths {
 type ReceiverStyle = 'classic' | 'phosphor' | 'amber' | 'blueprint' | 'vector';
 
 const WAVE_STYLE_OPTIONS: Array<{ id: ReceiverStyle; label: string; description: string }> = [
-  { id: 'classic', label: 'CLASSIC', description: 'Cool cyan oscilloscope' },
-  { id: 'phosphor', label: 'PHOSPHOR', description: 'Green analog CRT' },
-  { id: 'amber', label: 'AMBER', description: 'Warm radio instrument' },
-  { id: 'blueprint', label: 'BLUEPRINT', description: 'Precision blue trace' },
-  { id: 'vector', label: 'VECTOR', description: 'Violet high-voltage display' }
+  { id: 'classic', label: 'SERVO', description: 'Mechanical acquisition jaws' },
+  { id: 'phosphor', label: 'SCOPE', description: 'Oscilloscope trace and measurement gate' },
+  { id: 'amber', label: 'CANCEL', description: 'Interference shutters clear the carrier' },
+  { id: 'blueprint', label: 'TUNER', description: 'Frequency ruler and centering needle' },
+  { id: 'vector', label: 'PHASE', description: 'Rotating phase references synchronize' }
 ];
 
 function loadReceiverStyle(): ReceiverStyle {
@@ -87,8 +87,8 @@ function WaveStylePicker({
 }) {
   return (
     <div className="wave-style-picker">
-      <span className="wave-style-heading">WAVEFORM DISPLAY</span>
-      <div className="wave-style-options" role="group" aria-label="Choose waveform appearance">
+      <span className="wave-style-heading">RECEIVER MOTION</span>
+      <div className="wave-style-options" role="group" aria-label="Choose receiver animation">
         {WAVE_STYLE_OPTIONS.map((option) => (
           <button
             key={option.id}
@@ -101,7 +101,11 @@ function WaveStylePicker({
             onClick={() => onChange(option.id)}
           >
             <svg viewBox="0 0 54 18" aria-hidden="true">
-              <path d="M1 9H7L10 6L13 12L17 2L21 16L25 4L29 13L33 7L37 9H53" />
+              {option.id === 'classic' && <path d="M3 3H14V6H40V3H51 M3 15H14V12H40V15H51 M14 3V15 M40 3V15" />}
+              {option.id === 'phosphor' && <path d="M1 9H7L10 3L14 15L18 4L22 14L26 5L30 13L34 6L38 9H53 M27 1V17" />}
+              {option.id === 'amber' && <path d="M4 2V16 M10 5V13 M16 3V15 M22 7V11 M28 1V17 M34 5V13 M40 3V15 M46 2V16 M2 9H52" />}
+              {option.id === 'blueprint' && <path d="M2 13H52 M5 8V16 M11 10V16 M17 8V16 M23 10V16 M29 8V16 M35 10V16 M41 8V16 M47 10V16 M27 2V13" />}
+              {option.id === 'vector' && <path d="M27 9L27 1 M27 9L35 9 M27 9L27 17 M27 9L19 9 M27 2A7 7 0 1 1 26.9 2 M3 9H10L13 6L16 12L19 9" />}
             </svg>
             <small>{option.label}</small>
           </button>
@@ -109,6 +113,31 @@ function WaveStylePicker({
       </div>
     </div>
   );
+}
+
+
+function ReceiverModeOverlay({ mode }: { mode: ReceiverStyle }) {
+  if (mode === 'classic') return <div className="receiver-mode receiver-mode-servo" aria-hidden="true">
+    <i className="servo-track track-top" /><i className="servo-track track-bottom" />
+    <i className="servo-jaw jaw-top-left" /><i className="servo-jaw jaw-top-right" />
+    <i className="servo-jaw jaw-bottom-left" /><i className="servo-jaw jaw-bottom-right" />
+    <i className="servo-crossbar" />
+  </div>;
+  if (mode === 'phosphor') return <div className="receiver-mode receiver-mode-scope" aria-hidden="true">
+    <i className="scope-gate" /><i className="scope-sweep" /><i className="scope-ruler" /><i className="scope-trigger" />
+  </div>;
+  if (mode === 'amber') return <div className="receiver-mode receiver-mode-cancel" aria-hidden="true">
+    <i className="cancel-shutter cancel-left" /><i className="cancel-shutter cancel-right" />
+    <i className="cancel-front" /><i className="cancel-centerline" />
+  </div>;
+  if (mode === 'blueprint') return <div className="receiver-mode receiver-mode-frequency" aria-hidden="true">
+    <i className="frequency-scale" /><i className="frequency-target" />
+    <i className="frequency-needle" /><i className="frequency-marker" />
+  </div>;
+  return <div className="receiver-mode receiver-mode-phase" aria-hidden="true">
+    <i className="phase-orbit phase-outer" /><i className="phase-orbit phase-inner" />
+    <i className="phase-reference" /><i className="phase-pointer" /><i className="phase-center" />
+  </div>;
 }
 
 type RunState = {
@@ -638,7 +667,18 @@ function App() {
     '--lock-ring-thickness': (2.5 + tuningLockProgress * 2) + 'px',
     '--carrier-stroke-width': (1.85 + tuningLockProgress * 1.55) + 'px',
     '--carrier-glow-size': (3 + tuningLockProgress * 8) + 'px',
-    '--carrier-glow-alpha': String(.45 + tuningLockProgress * .5)
+    '--carrier-glow-alpha': String(.45 + tuningLockProgress * .5),
+    '--servo-span': (34 - tuningLockProgress * 22) + '%',
+    '--servo-rise': (31 - tuningLockProgress * 17) + '%',
+    '--scope-sweep-x': (8 + tuningLockProgress * 84) + '%',
+    '--scope-gate-width': (34 - tuningLockProgress * 28) + '%',
+    '--scope-gate-left': (tuningSignalPaths.reticleX - (17 - tuningLockProgress * 14)) + '%',
+    '--cancel-width': (48 - tuningLockProgress * 42) + '%',
+    '--cancel-opacity': String(.82 - tuningLockProgress * .68),
+    '--cancel-front': (8 + tuningLockProgress * 84) + '%',
+    '--frequency-needle-x': (8 + (tuningSignalPaths.reticleX - 8) * tuningLockProgress) + '%',
+    '--phase-rotation': ((1 - tuningLockProgress) * 165) + 'deg',
+    '--phase-counter-rotation': -((1 - tuningLockProgress) * 165) + 'deg'
   } as React.CSSProperties;
 
   useEffect(() => {
@@ -1133,6 +1173,7 @@ function App() {
                             )}
                           </g>
                         </svg>
+                        <ReceiverModeOverlay mode={waveStyle} />
                         <div className="signal-lock-reticle" aria-hidden="true">
                           <i className="reticle-corner top-left" />
                           <i className="reticle-corner top-right" />
@@ -1233,7 +1274,19 @@ function App() {
                     '--tune-duration': '0ms',
                     '--score-width': currentEntry.score + '%',
                     '--reticle-scale': String(.78 + (1 - currentEntry.score / 100) * .65),
-                    '--reticle-opacity': String(.4 + currentEntry.score / 100 * .6)
+                    '--reticle-opacity': String(.4 + currentEntry.score / 100 * .6),
+                    '--lock-progress': String(currentEntry.score / 100),
+                    '--servo-span': (34 - currentEntry.score / 100 * 22) + '%',
+                    '--servo-rise': (31 - currentEntry.score / 100 * 17) + '%',
+                    '--scope-sweep-x': (8 + currentEntry.score / 100 * 84) + '%',
+                    '--scope-gate-width': (34 - currentEntry.score / 100 * 28) + '%',
+                    '--scope-gate-left': ((resultSignalPaths?.reticleX ?? 50) - (17 - currentEntry.score / 100 * 14)) + '%',
+                    '--cancel-width': (48 - currentEntry.score / 100 * 42) + '%',
+                    '--cancel-opacity': String(.82 - currentEntry.score / 100 * .68),
+                    '--cancel-front': (8 + currentEntry.score / 100 * 84) + '%',
+                    '--frequency-needle-x': (8 + ((resultSignalPaths?.reticleX ?? 50) - 8) * currentEntry.score / 100) + '%',
+                    '--phase-rotation': ((1 - currentEntry.score / 100) * 165) + 'deg',
+                    '--phase-counter-rotation': -((1 - currentEntry.score / 100) * 165) + 'deg'
                   } as React.CSSProperties}
                 >
                   <div className="signal-capture-head">
@@ -1260,6 +1313,7 @@ function App() {
                       <path className="signal-centerline" d="M0 90H720" />
                       <path className="signal-clean-trace" d={resultSignalPaths?.carrier ?? ''} />
                     </svg>
+                    <ReceiverModeOverlay mode={waveStyle} />
                     <div className="signal-lock-reticle" aria-hidden="true">
                       <i className="reticle-corner top-left" />
                       <i className="reticle-corner top-right" />
