@@ -2230,3 +2230,28 @@ button:focus-visible,input:focus-visible {
     animation:none !important;
   }
 }
+
+
+/* After the near-miss slip, keep the recovered carrier warm and visibly imperfect. */
+.perfect-capture .signal-capture[data-grade="deep"][data-phase="locked"] {
+  border-color:rgba(255,177,105,.54);
+  box-shadow:0 18px 52px rgba(0,0,0,.5),0 0 24px rgba(255,153,82,.12),inset 0 1px 0 rgba(255,229,202,.1);
+}
+.perfect-capture .signal-capture[data-grade="deep"][data-phase="locked"] .signal-capture-copy h2,
+.perfect-capture .signal-capture[data-grade="deep"][data-phase="locked"] .signal-score-readout strong {
+  color:#ffd0a4;
+  text-shadow:0 0 12px rgba(255,174,106,.4);
+}
+.perfect-capture .signal-capture[data-grade="deep"][data-phase="locked"] .signal-screen {
+  border-color:rgba(255,184,130,.44);
+  box-shadow:inset 0 0 30px rgba(164,94,58,.12),0 0 18px rgba(255,153,93,.1);
+}
+.perfect-capture .signal-capture[data-grade="deep"][data-phase="locked"] .signal-clean-trace {
+  stroke:#f9d6b7;
+  filter:drop-shadow(0 0 6px rgba(255,179,126,.55));
+}
+.perfect-capture .signal-capture[data-grade="deep"][data-phase="locked"] .signal-station i,
+.perfect-capture .signal-capture[data-grade="deep"][data-phase="locked"] .signal-capture-status i {
+  background:#ffb16d;
+  box-shadow:0 0 9px rgba(255,164,103,.6);
+}
