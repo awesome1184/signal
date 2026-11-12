@@ -955,7 +955,14 @@ function App() {
                       <div className="signal-capture-readout">
                         <div className="signal-answer-readout">
                           <span>DECODED RESPONSE</span>
-                          <strong>{tuningAnswer}</strong>
+                          <strong aria-label={tuningAnswer}>{Array.from(tuningAnswer).map((character, index) => (
+                            <span
+                              key={index}
+                              className="signal-answer-letter"
+                              aria-hidden="true"
+                              style={{ '--letter-index': index } as React.CSSProperties}
+                            >{character === ' ' ? '\u00a0' : character}</span>
+                          ))}</strong>
                         </div>
                         <div className="signal-score-readout">
                           <span>LOCK STRENGTH</span>
