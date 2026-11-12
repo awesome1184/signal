@@ -2285,3 +2285,57 @@ button:focus-visible,input:focus-visible {
     animation:none !important;
   }
 }
+
+
+/* Small, tactile sound control that sits with the station identity. */
+.brand-row {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  flex:1;
+  min-width:0;
+}
+.sound-toggle {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  flex:0 0 auto;
+  min-height:36px;
+  padding:0 11px;
+  border:1px solid rgba(104,190,203,.25);
+  border-radius:6px;
+  background:rgba(5,20,30,.58);
+  color:#8eafb9;
+  font:8px var(--mono);
+  letter-spacing:.12em;
+  transition:background .2s ease,border-color .2s ease,color .2s ease,box-shadow .2s ease;
+}
+.sound-toggle svg {
+  width:16px;
+  height:16px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.6;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.sound-toggle[aria-pressed="true"] {
+  border-color:rgba(91,216,232,.42);
+  color:#b4e8e9;
+  background:rgba(16,57,69,.42);
+}
+.sound-toggle:hover {
+  border-color:rgba(91,216,232,.72);
+  color:#e5ffff;
+  box-shadow:0 0 15px rgba(91,216,232,.09);
+}
+.sound-toggle:focus-visible {
+  outline:2px solid #8deaf0;
+  outline-offset:3px;
+}
+@media (max-width:760px) {
+  .brand-row { width:100%; }
+  .sound-toggle { min-height:34px;padding:0 9px; }
+}
