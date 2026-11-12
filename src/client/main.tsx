@@ -636,9 +636,9 @@ function App() {
                     >
                       <div className="signal-capture-head">
                         <span className="signal-station"><i /> MT. AURORA / RECEIVER 07</span>
-                        <span className="signal-input-state">{tuningInputLabel}</span>
+                        <span className="signal-input-state" key={tuningPhase}>{tuningInputLabel}</span>
                       </div>
-                      <div className="signal-capture-copy">
+                      <div className="signal-capture-copy" key={tuningPhase}>
                         <div className="signal-capture-kicker">TRANSMISSION ANALYSIS</div>
                         <h2>{tuningHeading}</h2>
                         <p>{tuningCaption}</p>
@@ -680,7 +680,7 @@ function App() {
                           <i className="acquisition-ray ray-8" />
                         </div>
                         <span className="signal-screen-label">RF / {receiverFrequency(tuningSignalSeed)} MHZ</span>
-                        <span className="signal-screen-state">{tuningScreenState}</span>
+                        <span className="signal-screen-state" key={tuningPhase}>{tuningScreenState}</span>
                       </div>
                       <div className="signal-lock-steps" data-phase={tuningPhase} aria-hidden="true">
                         <span><i />01 / SCAN</span>
@@ -702,7 +702,7 @@ function App() {
                         <div className="signal-quality-track"><i /></div>
                         <strong>{tuningScore === null ? '—' : tuningDisplayScore + '%'}</strong>
                       </div>
-                      <div className="signal-capture-status"><i /><span>{tuningStatus}</span></div>
+                      <div className="signal-capture-status"><i /><span key={tuningPhase}>{tuningStatus}</span></div>
                     </div>
                     {(tuningScore ?? 0) >= 85 && <div className="signal-perfect-flash" aria-hidden="true" />}
                   </div>
