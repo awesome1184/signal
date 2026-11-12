@@ -3389,3 +3389,57 @@ button { user-select:none; }
     transition:none !important;
   }
 }
+
+
+/* Stronger, easier-to-read acquisition: the brackets travel farther and the
+   circular meter has enough weight to read at a glance. */
+.play-view.tuning-view .signal-lock-reticle {
+  transition:transform .22s cubic-bezier(.2,.65,.25,1),opacity .22s ease,filter .22s ease !important;
+}
+.play-view.tuning-view .signal-capture:not([data-phase="slipping"]) .signal-lock-reticle {
+  filter:drop-shadow(0 0 11px rgba(111,230,226,var(--reticle-shadow-alpha))) !important;
+}
+.play-view.tuning-view .reticle-corner {
+  width:var(--reticle-corner-size) !important;
+  height:var(--reticle-corner-size) !important;
+  border-color:rgba(166,255,242,var(--reticle-corner-opacity)) !important;
+  filter:drop-shadow(0 0 var(--reticle-corner-glow) rgba(90,243,231,.62));
+  transition:width .22s ease,height .22s ease,border-color .22s ease,filter .22s ease !important;
+}
+.play-view.tuning-view .reticle-corner.top-left { border-width:3px 0 0 3px !important; }
+.play-view.tuning-view .reticle-corner.top-right { border-width:3px 3px 0 0 !important; }
+.play-view.tuning-view .reticle-corner.bottom-left { border-width:0 0 3px 3px !important; }
+.play-view.tuning-view .reticle-corner.bottom-right { border-width:0 3px 3px 0 !important; }
+.play-view.tuning-view .reticle-center {
+  width:var(--reticle-dot-size) !important;
+  height:var(--reticle-dot-size) !important;
+  background:rgba(155,255,239,.22);
+  box-shadow:0 0 var(--reticle-center-glow) rgba(108,245,224,var(--reticle-center-alpha)) !important;
+  transition:width .22s ease,height .22s ease,box-shadow .22s ease !important;
+}
+.play-view.tuning-view .signal-lock-reticle::before {
+  inset:4%;
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - var(--lock-ring-thickness)),#000 100%);
+  mask:radial-gradient(farthest-side,transparent calc(100% - var(--lock-ring-thickness)),#000 100%);
+  filter:drop-shadow(0 0 7px rgba(115,241,222,.48));
+}
+.play-view.tuning-view .signal-capture:not([data-phase="slipping"]) .signal-clean-trace {
+  stroke-width:var(--carrier-stroke-width) !important;
+  filter:drop-shadow(0 0 var(--carrier-glow-size) rgba(110,239,239,var(--carrier-glow-alpha))) !important;
+}
+.play-view.tuning-view .signal-lock-steps[data-phase="locking"] span:nth-child(3)::after,
+.play-view.tuning-view .signal-lock-steps[data-phase="surging"] span:nth-child(3)::after {
+  top:-3px;
+  height:4px;
+  box-shadow:0 0 12px rgba(111,231,222,.7);
+}
+@media (prefers-reduced-motion:reduce) {
+  .play-view.tuning-view .signal-lock-reticle,
+  .play-view.tuning-view .reticle-corner,
+  .play-view.tuning-view .reticle-center,
+  .play-view.tuning-view .signal-lock-reticle::before,
+  .play-view.tuning-view .signal-clean-trace,
+  .play-view.tuning-view .signal-lock-steps span:nth-child(3)::after {
+    transition:none !important;
+  }
+}
