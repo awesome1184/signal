@@ -26,5 +26,9 @@
         "endpoint": "/internal/menu/create-post"
       }
     ]
+  },
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build"
   }
 }
