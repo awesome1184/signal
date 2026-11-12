@@ -943,8 +943,11 @@ function App() {
                                   href="#signal-live-carrier"
                                   startOffset="50%"
                                   textAnchor="middle"
-                                  textLength={Math.min(650, Math.max(44, tuningAnswer.length * 11.5))}
-                                  lengthAdjust="spacingAndGlyphs"
+                                  textLength={Math.min(650, Math.max(44,
+                                    tuningAnswer.replace(/\\s/g, '').length * 11.5
+                                    + Math.max(0, tuningAnswer.trim().split(/\\s+/).length - 1) * 22
+                                  ))}
+                                  lengthAdjust="spacing"
                                 >{tuningAnswer.toUpperCase()}</textPath>
                               </text>
                             )}
@@ -971,7 +974,7 @@ function App() {
                           <strong>{tuningAnswer}</strong>
                         </div>
                         <div className="signal-score-readout">
-                          <span>LOCK STRENGTH</span>
+                          <span>LIVE SCORE</span>
                           <strong>{tuningScore === null ? '···' : tuningDisplayScore}<small>/100</small></strong>
                         </div>
                       </div>
