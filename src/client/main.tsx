@@ -931,34 +931,13 @@ function App() {
                           <path className="signal-centerline" d="M0 90H720" />
                           <path className="signal-chaos-trace" d={tuningSignalPaths.noise} />
                           <path className="signal-clean-trace" d={tuningSignalPaths.carrier} />
-                          <path className="signal-motion-trace" d={tuningSignalPaths.carrier} />
                         </svg>
-                        <div className="signal-scanbeam" />
-                        <div className="signal-lock-flare" />
                         <div className="signal-lock-reticle" aria-hidden="true">
                           <i className="reticle-corner top-left" />
                           <i className="reticle-corner top-right" />
                           <i className="reticle-corner bottom-left" />
                           <i className="reticle-corner bottom-right" />
                           <b className="reticle-center" />
-                          <span className="reticle-axis horizontal" />
-                          <span className="reticle-axis vertical" />
-                        </div>
-                        <div className="perfect-acquisition" data-phase={tuningPhase} aria-hidden="true">
-                          <i className="acquisition-ring ring-one" />
-                          <i className="acquisition-ring ring-two" />
-                          <i className="acquisition-ring ring-three" />
-                          <i className="acquisition-axis horizontal" />
-                          <i className="acquisition-axis vertical" />
-                          <i className="acquisition-core" />
-                          <i className="acquisition-ray ray-1" />
-                          <i className="acquisition-ray ray-2" />
-                          <i className="acquisition-ray ray-3" />
-                          <i className="acquisition-ray ray-4" />
-                          <i className="acquisition-ray ray-5" />
-                          <i className="acquisition-ray ray-6" />
-                          <i className="acquisition-ray ray-7" />
-                          <i className="acquisition-ray ray-8" />
                         </div>
                         <span className="signal-screen-label">RF / {receiverFrequency(tuningSignalSeed)} MHZ</span>
                         <span className="signal-screen-state" key={tuningPhase}>{tuningScreenState}</span>
@@ -985,7 +964,6 @@ function App() {
                       </div>
                       <div className="signal-capture-status"><i /><span key={tuningPhase}>{tuningStatus}</span></div>
                     </div>
-                    {(tuningScore ?? 0) >= 85 && <div className="signal-perfect-flash" aria-hidden="true" />}
                   </div>
                 )}
                 {!isTuning && <>
@@ -1051,7 +1029,6 @@ function App() {
                       <path className="signal-centerline" d="M0 90H720" />
                       <path className="signal-chaos-trace" d={resultSignalPaths?.noise ?? ''} />
                       <path className="signal-clean-trace" d={resultSignalPaths?.carrier ?? ''} />
-                      <path className="signal-motion-trace" d={resultSignalPaths?.carrier ?? ''} />
                     </svg>
                     <div className="signal-lock-reticle" aria-hidden="true">
                       <i className="reticle-corner top-left" />
@@ -1059,19 +1036,7 @@ function App() {
                       <i className="reticle-corner bottom-left" />
                       <i className="reticle-corner bottom-right" />
                       <b className="reticle-center" />
-                      <span className="reticle-axis horizontal" />
-                      <span className="reticle-axis vertical" />
                     </div>
-                    {currentEntry.score === 100 && (
-                      <div className="perfect-acquisition result-acquisition" aria-hidden="true">
-                        <i className="acquisition-ring ring-one" />
-                        <i className="acquisition-ring ring-two" />
-                        <i className="acquisition-ring ring-three" />
-                        <i className="acquisition-axis horizontal" />
-                        <i className="acquisition-axis vertical" />
-                        <i className="acquisition-core" />
-                      </div>
-                    )}
                     <span className="signal-screen-label">RF / {receiverFrequency(currentEntry.signalSeed ?? 1)} MHZ</span>
                     <span className="signal-screen-state">{currentEntry.score === 100 ? 'LOCKED' : currentEntry.score >= 85 ? 'NEAR LOCK' : currentEntry.score > 0 ? 'PARTIAL LOCK' : 'NO CARRIER'}</span>
                   </div>
