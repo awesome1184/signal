@@ -3782,7 +3782,6 @@ button { user-select:none; }
 .signal-capture[data-wave-style="amber"] .reticle-corner {
   width:15px;
   height:15px;
-  border-width:3px 0 0 3px;
 }
 .signal-capture[data-wave-style="blueprint"] .signal-screen {
   border-radius:1px;
