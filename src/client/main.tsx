@@ -6,6 +6,10 @@ import { getDailyPrompts, getNewYorkDateKey, formatDay, ROUND_SECONDS, MAX_SCORE
 type Entry = { promptId: string; answer: string; score: number; tier: string; note: string; signalSeed?: number };
 type ReceiverPaths = { carrier: string; noise: string };
 
+function receiverFrequency(seed: number): string {
+  return (88 + ((Math.floor(seed) >>> 0) % 2000) / 100).toFixed(1);
+}
+
 function buildReceiverPaths(seed: number, score: number): ReceiverPaths {
   let state = (Math.floor(seed) >>> 0) || 1;
   const random = () => {
@@ -183,6 +187,7 @@ function App() {
     : tuningPhase === 'surging' ? (tuningScore === 100 ? 'CARRIER OVERLOAD' : 'PERFECT LOCK')
     : tuningPhase === 'slipping' ? 'SIGNAL SLIPPED'
     : tuningScore >= 100 ? 'SIGNAL FOUND'
+    : tuningScore >= 85 ? 'NEAR-PERFECT LOCK'
     : tuningScore >= 60 ? 'PARTIAL LOCK'
     : 'WEAK ACQUISITION';
   const tuningInputLabel = tuningPhase === 'searching' ? 'INPUT BUFFERED'
@@ -191,6 +196,7 @@ function App() {
     : tuningPhase === 'surging' ? 'LOCK CONFIRMED'
     : tuningPhase === 'slipping' ? 'CARRIER DRIFT DETECTED'
     : tuningPhase === 'locked' && tuningScore === 100 ? 'LOCK CONFIRMED'
+    : tuningPhase === 'locked' && (tuningScore ?? 0) >= 85 ? 'NEAR-PERFECT LOCK'
     : tuningPhase === 'locked' && (tuningScore ?? 0) >= 60 ? 'PARTIAL LOCK'
     : tuningPhase === 'locked' ? 'WEAK LOCK'
     : 'SCAN FAILED';
@@ -200,6 +206,7 @@ function App() {
     : tuningPhase === 'surging' ? 'LOCKED'
     : tuningPhase === 'slipping' ? 'SLIPPING'
     : tuningPhase === 'locked' && tuningScore === 100 ? 'LOCKED'
+    : tuningPhase === 'locked' && (tuningScore ?? 0) >= 85 ? 'NEAR LOCK'
     : tuningPhase === 'locked' && (tuningScore ?? 0) >= 60 ? 'PARTIAL LOCK'
     : tuningPhase === 'locked' ? 'WEAK LOCK'
     : 'NO CARRIER';
@@ -631,7 +638,7 @@ function App() {
                           <i className="acquisition-ray ray-7" />
                           <i className="acquisition-ray ray-8" />
                         </div>
-                        <span className="signal-screen-label">RF / 104.7 MHZ</span>
+                        <span className="signal-screen-label">RF / {receiverFrequency(tuningSignalSeed)} MHZ</span>
                         <span className="signal-screen-state">{tuningScreenState}</span>
                       </div>
                       <div className="signal-lock-steps" data-phase={tuningPhase} aria-hidden="true">
@@ -743,7 +750,7 @@ function App() {
                         <i className="acquisition-core" />
                       </div>
                     )}
-                    <span className="signal-screen-label">RF / 104.7 MHZ</span>
+                    <span className="signal-screen-label">RF / {receiverFrequency(currentEntry.signalSeed ?? 1)} MHZ</span>
                     <span className="signal-screen-state">{currentEntry.score === 100 ? 'LOCKED' : currentEntry.score >= 85 ? 'NEAR LOCK' : currentEntry.score > 0 ? 'PARTIAL LOCK' : 'NO CARRIER'}</span>
                   </div>
                   <div className="signal-lock-steps" data-phase={currentEntry.score > 0 ? 'locked' : 'failed'} aria-hidden="true">
