@@ -1215,7 +1215,7 @@ button:focus-visible,input:focus-visible {
 }
 @keyframes signal-wave-lock {
   0%,18% {opacity:.02;stroke-dashoffset:1500;}
-  65% {opacity:calc(var(--wave-final) * .42);stroke-dashoffset:420;}
+  65% {opacity:var(--wave-mid);stroke-dashoffset:420;}
   100% {opacity:var(--wave-final);stroke-dashoffset:0;}
 }
 @keyframes signal-scan-pass {
