@@ -2833,3 +2833,121 @@ button:focus-visible,input:focus-visible {
     transform:none !important;
   }
 }
+
+
+/* Make points the visual anchor of the receiver readout. */
+.play-view.tuning-view .signal-capture-readout {
+  gap:18px;
+  align-items:stretch;
+  padding:15px 0 13px;
+}
+.play-view.tuning-view .signal-answer-readout {
+  display:flex;
+  min-width:0;
+  flex-direction:column;
+  justify-content:center;
+  padding:2px 0;
+}
+.play-view.tuning-view .signal-answer-readout strong,
+.signal-result-readout .signal-answer-readout strong {
+  word-spacing:.34em;
+  line-height:1.45;
+}
+.play-view.tuning-view .signal-score-readout {
+  min-width:128px;
+  padding:9px 13px 8px;
+  border:1px solid rgba(105,216,221,.28);
+  border-radius:6px;
+  background:linear-gradient(145deg,rgba(29,91,99,.28),rgba(5,24,32,.72));
+  box-shadow:inset 0 1px 0 rgba(218,255,255,.05),0 5px 18px rgba(0,0,0,.16);
+  text-align:center;
+}
+.play-view.tuning-view .signal-score-readout span {
+  margin-bottom:7px;
+  color:#94c6ca;
+  font-size:8px;
+  letter-spacing:.19em;
+}
+.play-view.tuning-view .signal-score-readout strong {
+  display:block;
+  color:#e5ffff;
+  font:700 clamp(34px,4.3vw,42px)/.95 var(--display);
+  letter-spacing:-.045em;
+  font-variant-numeric:tabular-nums;
+  text-shadow:0 0 14px rgba(107,222,220,.32);
+}
+.play-view.tuning-view .signal-score-readout small {
+  margin-left:4px;
+  color:#8eb8bd;
+  font:10px var(--mono);
+  letter-spacing:0;
+}
+.play-view.tuning-view .signal-quality-row {
+  grid-template-columns:auto minmax(40px,1fr) 50px;
+  gap:12px;
+  padding-top:13px;
+  font-size:8px;
+}
+.play-view.tuning-view .signal-quality-track { height:6px; }
+.play-view.tuning-view .signal-quality-row > strong {
+  color:#d9f6f4;
+  font-size:12px;
+  font-weight:700;
+  font-variant-numeric:tabular-nums;
+}
+
+/* Give the final points their own clear visual block, separate from the tier label. */
+.signal-result-score {
+  min-width:136px;
+  padding:10px 12px 9px;
+  border:1px solid rgba(105,216,221,.25);
+  border-radius:6px;
+  background:linear-gradient(145deg,rgba(29,91,99,.24),rgba(5,24,32,.7));
+  box-shadow:inset 0 1px 0 rgba(218,255,255,.05),0 5px 18px rgba(0,0,0,.16);
+  text-align:center;
+}
+.signal-result-score > span {
+  color:#94c6ca;
+  font-size:8px;
+  letter-spacing:.18em;
+}
+.signal-result-score > strong {
+  font-size:clamp(56px,8vw,76px);
+  line-height:.9;
+  font-variant-numeric:tabular-nums;
+  text-shadow:0 0 20px rgba(116,229,219,.26);
+}
+.signal-result-score > small {
+  display:inline-block;
+  margin-left:5px;
+  font-size:12px;
+}
+.signal-result-tier { margin-top:9px; }
+.signal-result-scan-total strong {
+  font-size:24px;
+  font-variant-numeric:tabular-nums;
+}
+
+/* Word gaps stay visibly wider than letter gaps, both on the carrier and readout. */
+.signal-carrier-word {
+  word-spacing:.58em;
+  letter-spacing:.075em;
+}
+.signal-result-readout .signal-answer-readout strong {
+  word-spacing:.34em;
+  line-height:1.5;
+}
+@media (max-width:680px) {
+  .play-view.tuning-view .signal-capture-readout { gap:9px;padding:11px 0 10px; }
+  .play-view.tuning-view .signal-score-readout { min-width:105px;padding:8px 9px; }
+  .play-view.tuning-view .signal-score-readout span { font-size:7px; }
+  .play-view.tuning-view .signal-score-readout strong { font-size:34px; }
+  .play-view.tuning-view .signal-score-readout small { font-size:9px; }
+  .play-view.tuning-view .signal-quality-row { grid-template-columns:auto minmax(24px,1fr) 42px;gap:7px;font-size:7px; }
+  .play-view.tuning-view .signal-quality-row > strong { font-size:11px; }
+  .signal-result-score { min-width:112px;padding:8px 8px 7px; }
+  .signal-result-score > strong { font-size:52px !important; }
+  .signal-result-score > span { font-size:7px; }
+  .signal-result-score > small { font-size:9px; }
+  .signal-result-tier { margin-top:7px; }
+}
