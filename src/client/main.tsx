@@ -135,7 +135,7 @@ function App() {
   const [tuningScore, setTuningScore] = useState<number | null>(null);
   const [tuningDuration, setTuningDuration] = useState(900);
   const [tuningStatus, setTuningStatus] = useState('CAPTURING INPUT // SCANNING NOISE');
-  const [tuningPhase, setTuningPhase] = useState<'searching' | 'tracking' | 'locking' | 'locked' | 'failed'>('searching');
+  const [tuningPhase, setTuningPhase] = useState<'searching' | 'tracking' | 'locking' | 'surging' | 'locked' | 'failed'>('searching');
 
   const currentPrompt: Prompt = prompts[Math.min(game.index, prompts.length - 1)];
   const total = game.entries.reduce((sum, entry) => sum + entry.score, 0);
@@ -149,12 +149,14 @@ function App() {
     : tuningPhase === 'searching' || tuningScore === null ? 'READING THE STATIC'
     : tuningPhase === 'tracking' ? 'CARRIER DETECTED'
     : tuningPhase === 'locking' ? 'LOCKING SIGNAL'
-    : tuningScore >= 100 ? 'SIGNAL LOCKED'
+    : tuningPhase === 'surging' ? 'CARRIER OVERLOAD'
+    : tuningScore >= 100 ? 'SIGNAL FOUND'
     : tuningScore >= 60 ? 'PARTIAL LOCK'
     : 'WEAK ACQUISITION';
   const tuningInputLabel = tuningPhase === 'searching' ? 'INPUT BUFFERED'
     : tuningPhase === 'tracking' ? 'CARRIER TRACKING'
     : tuningPhase === 'locking' ? 'ACQUIRING LOCK'
+    : tuningPhase === 'surging' ? 'CARRIER SPIKE'
     : tuningPhase === 'locked' && tuningScore === 100 ? 'LOCK CONFIRMED'
     : tuningPhase === 'locked' && (tuningScore ?? 0) >= 60 ? 'PARTIAL LOCK'
     : tuningPhase === 'locked' ? 'WEAK LOCK'
@@ -162,10 +164,16 @@ function App() {
   const tuningScreenState = tuningPhase === 'searching' ? 'SEARCHING'
     : tuningPhase === 'tracking' ? 'TRACKING'
     : tuningPhase === 'locking' ? 'ACQUIRING'
+    : tuningPhase === 'surging' ? 'BREAKTHROUGH'
     : tuningPhase === 'locked' && tuningScore === 100 ? 'LOCKED'
     : tuningPhase === 'locked' && (tuningScore ?? 0) >= 60 ? 'PARTIAL LOCK'
     : tuningPhase === 'locked' ? 'WEAK LOCK'
     : 'NO CARRIER';
+  const tuningCaption = tuningPhase === 'surging' && tuningScore === 100
+    ? 'Carrier strength is breaking clean through the noise floor.'
+    : tuningPhase === 'locked' && tuningScore === 100
+      ? 'Perfect acquisition. No interference detected.'
+      : 'Separating the carrier from the noise floor.';
   const tuningNoiseFinal = tuningScore === null ? 1 : Math.max(.025, 1 - tuningScore / 100 * .975);
   const tuningWaveFinal = tuningScore === null ? .02 : Math.max(.08, tuningScore / 100);
   const tuningChaosFinal = tuningScore === null ? .95 : Math.max(.03, .95 - tuningScore / 100 * .92);
@@ -282,9 +290,10 @@ function App() {
       setTuningScore(score);
       setTuningDuration(duration);
 
+      const perfect = score === 100;
       setTuningPhase('tracking');
       setTuningStatus('CARRIER DETECTED // TRACKING FREQUENCY');
-      await wait(duration * .54);
+      await wait(duration * (perfect ? .48 : .54));
 
       setTuningPhase('locking');
       setTuningStatus(score >= 100
@@ -292,15 +301,21 @@ function App() {
         : score >= 60
           ? 'ALIGNING CARRIER // REDUCING INTERFERENCE'
           : 'WEAK CARRIER // ATTEMPTING ACQUISITION');
-      await wait(duration * .26);
+      await wait(duration * (perfect ? .24 : .26));
+
+      if (perfect) {
+        setTuningPhase('surging');
+        setTuningStatus('CARRIER SPIKE // BREAKTHROUGH IMMINENT');
+        await wait(duration * .12);
+      }
 
       setTuningPhase('locked');
       setTuningStatus(score >= 100
-        ? 'LOCK CONFIRMED // SIGNAL FOUND'
+        ? '100% CARRIER // SIGNAL FULLY ACQUIRED'
         : score >= 60
           ? 'PARTIAL LOCK // RESIDUAL NOISE'
           : 'WEAK LOCK // INTERFERENCE REMAINS');
-      await wait(duration * .20);
+      await wait(duration * (perfect ? .16 : .20));
     };
 
     try {
@@ -488,7 +503,7 @@ function App() {
             {game.phase === 'playing' && (
               <div className="play-view">
                 {isTuning && (
-                  <div className="signal-capture-overlay" role="status" aria-live="polite">
+                  <div className={'signal-capture-overlay ' + (tuningScore === 100 ? 'perfect-capture' : '')} role="status" aria-live="polite">
                     <div
                       className="signal-capture"
                       key={tuningScore === null ? 'searching' : 'score-' + tuningScore}
@@ -503,7 +518,7 @@ function App() {
                       <div className="signal-capture-copy">
                         <div className="signal-capture-kicker">TRANSMISSION ANALYSIS</div>
                         <h2>{tuningHeading}</h2>
-                        <p>Separating the carrier from the noise floor.</p>
+                        <p>{tuningCaption}</p>
                       </div>
                       <div className="signal-screen" aria-label="Live receiver waveform resolving from static">
                         <div className="signal-screen-grid" />
@@ -523,6 +538,22 @@ function App() {
                           <b className="reticle-center" />
                           <span className="reticle-axis horizontal" />
                           <span className="reticle-axis vertical" />
+                        </div>
+                        <div className="perfect-acquisition" data-phase={tuningPhase} aria-hidden="true">
+                          <i className="acquisition-ring ring-one" />
+                          <i className="acquisition-ring ring-two" />
+                          <i className="acquisition-ring ring-three" />
+                          <i className="acquisition-axis horizontal" />
+                          <i className="acquisition-axis vertical" />
+                          <i className="acquisition-core" />
+                          <i className="acquisition-ray ray-1" />
+                          <i className="acquisition-ray ray-2" />
+                          <i className="acquisition-ray ray-3" />
+                          <i className="acquisition-ray ray-4" />
+                          <i className="acquisition-ray ray-5" />
+                          <i className="acquisition-ray ray-6" />
+                          <i className="acquisition-ray ray-7" />
+                          <i className="acquisition-ray ray-8" />
                         </div>
                         <span className="signal-screen-label">RF / 104.7 MHZ</span>
                         <span className="signal-screen-state">{tuningScreenState}</span>
@@ -549,6 +580,7 @@ function App() {
                       </div>
                       <div className="signal-capture-status"><i /><span>{tuningStatus}</span></div>
                     </div>
+                    {tuningScore === 100 && <div className="signal-perfect-flash" aria-hidden="true" />}
                   </div>
                 )}
                 <div className="question-meta">
