@@ -130,6 +130,8 @@ function App() {
   const [copied, setCopied] = useState(false);
   const [canTest, setCanTest] = useState(DEMO_MODE);
   const [testPanelOpen, setTestPanelOpen] = useState(DEMO_MODE);
+  const [isTuning, setIsTuning] = useState(false);
+  const [tuningAnswer, setTuningAnswer] = useState('');
 
   const currentPrompt: Prompt = prompts[Math.min(game.index, prompts.length - 1)];
   const total = game.entries.reduce((sum, entry) => sum + entry.score, 0);
@@ -162,7 +164,7 @@ function App() {
   }, [dayKey]);
 
   useEffect(() => {
-    if (game.phase !== 'playing') return;
+    if (game.phase !== 'playing' || isTuning) return;
     const timer = window.setInterval(() => {
       const stamp = Date.now();
       setNow(stamp);
@@ -177,7 +179,7 @@ function App() {
       }
     }, 200);
     return () => window.clearInterval(timer);
-  }, [game.phase, game.index, game.deadline, prompts]);
+  }, [game.phase, game.index, game.deadline, prompts, isTuning]);
 
   useEffect(() => {
     if (game.phase !== 'complete' || game.isTest || DEMO_MODE || !serverReady) return;
@@ -208,7 +210,22 @@ function App() {
   const validateAnswer = async (prompt: Prompt, raw: string) => {
     const clean = raw.trim();
     if (!clean) { setMessage('Enter an answer before transmitting.'); return; }
-    setMessage('Checking the transmission…');
+    if (isTuning) return;
+
+    const tuningStartedAt = Date.now();
+    const minimumTune = new Promise<void>((resolve) => window.setTimeout(resolve, 1550));
+    setTuningAnswer(clean);
+    setIsTuning(true);
+    setMessage('');
+
+    const resumeClock = () => {
+      const elapsed = Date.now() - tuningStartedAt;
+      setNow(Date.now());
+      setGame((previous) => previous.phase === 'playing' && previous.deadline !== null
+        ? { ...previous, deadline: previous.deadline + elapsed }
+        : previous);
+    };
+
     try {
       let result: { score: number; tier: string; note: string } | null = null;
       if (DEMO_MODE) {
@@ -224,7 +241,13 @@ function App() {
         const data = await response.json();
         result = data.valid ? data.result : null;
       }
-      if (!result) { setMessage('No match in today’s field catalog. Try another answer while the window is open.'); return; }
+
+      await minimumTune;
+      if (!result) {
+        resumeClock();
+        setMessage('No match in today’s field catalog. Try another answer while the window is open.');
+        return;
+      }
       const entry: Entry = { promptId: prompt.id, answer: clean, score: result.score, tier: result.tier, note: result.note };
       setGame((previous) => previous.phase === 'playing'
         ? { ...previous, phase: 'reveal', deadline: null, entries: [...previous.entries, entry] }
@@ -232,12 +255,16 @@ function App() {
       setAnswer('');
       setMessage('');
     } catch {
+      await minimumTune;
+      resumeClock();
       setMessage('Could not reach the signal receiver. Check the connection and try again.');
+    } finally {
+      setIsTuning(false);
     }
   };
 
   const triggerTestAnswer = async (score: number) => {
-    if (!game.isTest || game.phase !== 'playing') return;
+    if (!game.isTest || game.phase !== 'playing' || isTuning) return;
     try {
       let candidate: string | null = null;
       if (DEMO_MODE) {
@@ -264,7 +291,7 @@ function App() {
   };
 
   const forceTimeout = () => {
-    if (!game.isTest || game.phase !== 'playing') return;
+    if (!game.isTest || game.phase !== 'playing' || isTuning) return;
     const entry: Entry = {
       promptId: currentPrompt.id,
       answer: '',
@@ -278,7 +305,7 @@ function App() {
   };
 
   const skipPrompt = () => {
-    if (game.phase !== 'playing') return;
+    if (game.phase !== 'playing' || isTuning) return;
     const entry: Entry = { promptId: currentPrompt.id, answer: '', score: 0, tier: 'NO SIGNAL', note: 'You moved on without transmitting an answer.' };
     setGame((previous) => ({ ...previous, phase: 'reveal', deadline: null, entries: [...previous.entries, entry] }));
     setAnswer('');
@@ -380,6 +407,40 @@ function App() {
 
             {game.phase === 'playing' && (
               <div className="play-view">
+                {isTuning && (
+                  <div className="tuning-overlay" role="status" aria-live="polite">
+                    <div className="tuning-console">
+                      <div className="tuning-console-head">
+                        <span><i /> INPUT CAPTURED</span>
+                        <span>STATION A-17 / CH 07</span>
+                      </div>
+                      <div className="tuning-heading">TUNING THE SIGNAL</div>
+                      <p className="tuning-subheading">SCANNING THE FREQUENCY BAND</p>
+                      <div className="tuning-frequency">
+                        <span>FREQUENCY LOCK</span>
+                        <strong>104.7 <small>MHz</small></strong>
+                      </div>
+                      <div className="tuning-dial" aria-hidden="true">
+                        <div className="tuning-dial-ticks" />
+                        <div className="tuning-dial-inner" />
+                        <div className="tuning-needle" />
+                        <div className="tuning-dial-hub"><SignalIcon size={27} /></div>
+                      </div>
+                      <svg className="tuning-waveform" viewBox="0 0 440 58" preserveAspectRatio="none" aria-hidden="true">
+                        <path className="tuning-wave-back" d="M0 29h25l8-4 8 8 9-19 9 31 10-41 11 46 10-27 10 7h22l9-6 8 12 10-25 10 34 10-41 10 36 10-18h24l9-5 9 11 10-22 10 30 10-23 10 10h26l9-4 9 8 10-19 10 27 10-16h31" />
+                        <path className="tuning-wave-front" d="M0 29h25l8-4 8 8 9-19 9 31 10-41 11 46 10-27 10 7h22l9-6 8 12 10-25 10 34 10-41 10 36 10-18h24l9-5 9 11 10-22 10 30 10-23 10 10h26l9-4 9 8 10-19 10 27 10-16h31" />
+                      </svg>
+                      <div className="tuning-band">
+                        <span>88.0</span><div><i /></div><span>108.0</span>
+                      </div>
+                      <div className="tuning-target">
+                        <span>LOCKING ONTO</span>
+                        <strong>{tuningAnswer}</strong>
+                      </div>
+                      <div className="tuning-status"><i /> ANALYZING TRANSMISSION <b>...</b></div>
+                    </div>
+                  </div>
+                )}
                 <div className="question-meta">
                   <span className="channel-label">{currentPrompt.channel}</span>
                   <div className={'timer-pill ' + (secondsLeft <= 7 ? 'urgent' : '')}><span className="timer-ring"><span /></span><strong>{String(secondsLeft).padStart(2, '0')}</strong><span>SEC</span></div>
@@ -391,11 +452,11 @@ function App() {
                 <form className="answer-form" onSubmit={(event) => { event.preventDefault(); void validateAnswer(currentPrompt, answer); }}>
                   <label htmlFor="signal-answer">YOUR RESPONSE</label>
                   <div className="answer-control">
-                    <input id="signal-answer" value={answer} onChange={(event) => setAnswer(event.target.value)} maxLength={80} autoComplete="off" spellCheck={false} placeholder="Type one answer..." autoFocus />
-                    <button type="submit" className="primary-button submit-button">TRANSMIT <span className="button-arrow">↗</span></button>
+                    <input id="signal-answer" value={answer} onChange={(event) => setAnswer(event.target.value)} maxLength={80} autoComplete="off" spellCheck={false} placeholder="Type one answer..." autoFocus disabled={isTuning} />
+                    <button type="submit" className="primary-button submit-button" disabled={isTuning}>TRANSMIT <span className="button-arrow">↗</span></button>
                   </div>
                 </form>
-                <div className="play-footer"><span><span className="tiny-pulse" /> RECEIVER OPEN</span><button className="text-button" onClick={skipPrompt}>SKIP THIS FREQUENCY</button></div>
+                <div className="play-footer"><span><span className="tiny-pulse" /> RECEIVER OPEN</span><button className="text-button" onClick={skipPrompt} disabled={isTuning}>SKIP THIS FREQUENCY</button></div>
                 {message && <div className="inline-message" role="status">{message}</div>}
               </div>
             )}
@@ -456,18 +517,18 @@ function App() {
                     <span>{game.isTest ? 'Test run active. Pick a score tier to submit a catalog answer.' : 'Start a test run to trigger answers without recording a daily result.'}</span>
                   </div>
                   <div className="test-bench-controls">
-                    <button className="test-start" onClick={() => startGame(true)}>{game.isTest && game.phase === 'playing' ? 'RESTART TEST RUN' : 'START TEST RUN'} <b>↗</b></button>
+                    <button className="test-start" onClick={() => startGame(true)} disabled={isTuning}>{game.isTest && game.phase === 'playing' ? 'RESTART TEST RUN' : 'START TEST RUN'} <b>↗</b></button>
                     <div className="test-tier-grid">
                       {TEST_TIERS.map((tier) => (
-                        <button key={tier.score} disabled={!game.isTest || game.phase !== 'playing'} onClick={() => void triggerTestAnswer(tier.score)}>
+                        <button key={tier.score} disabled={!game.isTest || game.phase !== 'playing' || isTuning} onClick={() => void triggerTestAnswer(tier.score)}>
                           <strong>{tier.score}</strong><span>{tier.label}</span>
                         </button>
                       ))}
                     </div>
                     <div className="test-utility-row">
-                      <button disabled={!game.isTest || game.phase !== 'playing'} onClick={skipPrompt}>FORCE NO SIGNAL</button>
-                      <button disabled={!game.isTest || game.phase !== 'playing'} onClick={forceTimeout}>FORCE TIMEOUT</button>
-                      <button onClick={() => { setGame(blankRun(dayKey)); setMessage(''); setAnswer(''); }}>RESET GAME</button>
+                      <button disabled={!game.isTest || game.phase !== 'playing' || isTuning} onClick={skipPrompt}>FORCE NO SIGNAL</button>
+                      <button disabled={!game.isTest || game.phase !== 'playing' || isTuning} onClick={forceTimeout}>FORCE TIMEOUT</button>
+                      <button disabled={isTuning} onClick={() => { setGame(blankRun(dayKey)); setMessage(''); setAnswer(''); }}>RESET GAME</button>
                     </div>
                   </div>
                 </div>
