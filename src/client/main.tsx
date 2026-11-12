@@ -604,15 +604,92 @@ function App() {
             )}
 
             {game.phase === 'reveal' && currentEntry && (
-              <div className={'reveal-view phase-in ' + (currentEntry.score >= 85 ? 'rare-reveal' : '')}>
-                <div className="reveal-particles" aria-hidden="true">{Array.from({ length: 18 }, (_, index) => <i key={index} />)}</div>
-                <div className={'reveal-orb ' + (currentEntry.score >= 60 ? 'strong' : '')}><SignalIcon size={44} /></div>
-                <div className="reveal-label">{currentEntry.score > 0 ? 'SIGNAL DETECTED' : 'NO SIGNAL DETECTED'}</div>
-                <div className="reveal-answer">{currentEntry.answer || 'No answer transmitted'}</div>
-                <div className="score-award"><strong>+{currentEntry.score}</strong><span>POINTS</span></div>
-                <div className="tier-pill">{currentEntry.tier}</div>
-                <p className="reveal-note">{currentEntry.note}</p>
-                <div className="reveal-total"><span>SCAN TOTAL</span><strong>{total} <small>/ 700</small></strong></div>
+              <div className={'signal-result-view phase-in ' + (currentEntry.score >= 85 ? 'rare-reveal' : '')}>
+                <div
+                  className="signal-capture signal-result-card"
+                  data-grade={currentEntry.score >= 100 ? 'perfect' : currentEntry.score >= 85 ? 'deep' : currentEntry.score >= 60 ? 'clear' : currentEntry.score >= 30 ? 'faint' : 'background'}
+                  data-phase="locked"
+                  style={{
+                    '--noise-final': String(Math.max(.025, 1 - currentEntry.score / 100 * .975)),
+                    '--wave-final': String(Math.max(.08, currentEntry.score / 100)),
+                    '--wave-mid': String(Math.max(.01, currentEntry.score / 100 * .42)),
+                    '--chaos-final': String(Math.max(.03, .95 - currentEntry.score / 100 * .92)),
+                    '--tune-duration': '0ms',
+                    '--score-width': currentEntry.score + '%',
+                    '--reticle-scale': String(.78 + (1 - currentEntry.score / 100) * .65),
+                    '--reticle-opacity': String(.4 + currentEntry.score / 100 * .6)
+                  } as React.CSSProperties}
+                >
+                  <div className="signal-capture-head">
+                    <span className="signal-station"><i /> MT. AURORA / RECEIVER 07</span>
+                    <span className="signal-input-state">{currentEntry.score === 100 ? 'PERFECT ACQUISITION' : currentEntry.score > 0 ? 'CARRIER ACQUIRED' : 'NO CARRIER'}</span>
+                  </div>
+                  <div className="signal-result-hero">
+                    <div className="signal-capture-copy">
+                      <div className="signal-capture-kicker">TRANSMISSION {String(game.index + 1).padStart(2, '0')} / ACQUISITION REPORT</div>
+                      <h2>{currentEntry.score > 0 ? 'SIGNAL LOCKED' : 'NO SIGNAL'}</h2>
+                      <p>{currentEntry.score === 100 ? 'Perfect carrier. The noise floor has been eliminated.' : currentEntry.score >= 60 ? 'A stable carrier recovered from the interference.' : currentEntry.score > 0 ? 'A weak carrier recovered. Interference remains.' : 'No stable carrier could be recovered.'}</p>
+                    </div>
+                    <div className="signal-result-score">
+                      <span>POINTS RECOVERED</span>
+                      <strong>+{currentEntry.score}</strong>
+                      <small>/ 100</small>
+                      <div className="signal-result-tier">{currentEntry.tier}</div>
+                    </div>
+                  </div>
+                  <div className="signal-screen signal-result-screen" aria-label={'Receiver signal quality: ' + currentEntry.score + ' out of 100'}>
+                    <div className="signal-screen-grid" />
+                    <div className="signal-static" />
+                    <svg className="signal-traces" viewBox="0 0 720 180" preserveAspectRatio="none" aria-hidden="true">
+                      <path className="signal-centerline" d="M0 90H720" />
+                      <path className="signal-chaos-trace" d="M0 90 12 78 19 115 27 42 34 128 43 63 52 100 61 35 68 117 78 77 87 96 96 25 105 145 114 57 123 106 132 68 141 125 151 45 160 99 169 73 180 90 190 52 199 132 208 69 218 101 227 29 238 148 247 73 258 117 268 48 277 103 288 71 298 94 307 35 317 142 327 64 336 119 346 55 356 102 366 78 376 90 388 41 398 133 408 67 418 111 428 31 438 148 448 70 458 112 468 48 478 100 488 76 498 91 508 37 518 145 528 61 538 116 548 57 558 101 568 72 578 90 589 44 599 134 609 68 619 109 629 34 639 147 649 72 659 115 669 49 679 98 689 76 700 91 720 90" />
+                      <path className="signal-clean-trace" d="M0 90 C30 90 30 35 60 35 S90 145 120 145 S150 90 180 90 C210 90 210 35 240 35 S270 145 300 145 S330 90 360 90 C390 90 390 35 420 35 S450 145 480 145 S510 90 540 90 C570 90 570 35 600 35 S630 145 660 145 S690 90 720 90" />
+                    </svg>
+                    <div className="signal-lock-reticle" aria-hidden="true">
+                      <i className="reticle-corner top-left" />
+                      <i className="reticle-corner top-right" />
+                      <i className="reticle-corner bottom-left" />
+                      <i className="reticle-corner bottom-right" />
+                      <b className="reticle-center" />
+                      <span className="reticle-axis horizontal" />
+                      <span className="reticle-axis vertical" />
+                    </div>
+                    {currentEntry.score === 100 && (
+                      <div className="perfect-acquisition result-acquisition" aria-hidden="true">
+                        <i className="acquisition-ring ring-one" />
+                        <i className="acquisition-ring ring-two" />
+                        <i className="acquisition-ring ring-three" />
+                        <i className="acquisition-axis horizontal" />
+                        <i className="acquisition-axis vertical" />
+                        <i className="acquisition-core" />
+                      </div>
+                    )}
+                    <span className="signal-screen-label">RF / 104.7 MHZ</span>
+                    <span className="signal-screen-state">{currentEntry.score > 0 ? 'LOCKED' : 'NO CARRIER'}</span>
+                  </div>
+                  <div className="signal-lock-steps" data-phase={currentEntry.score > 0 ? 'locked' : 'failed'} aria-hidden="true">
+                    <span><i />01 / SCAN</span>
+                    <span><i />02 / TRACK</span>
+                    <span><i />03 / LOCK</span>
+                  </div>
+                  <div className="signal-result-readout">
+                    <div className="signal-answer-readout">
+                      <span>DECODED RESPONSE</span>
+                      <strong>{currentEntry.answer || 'No answer transmitted'}</strong>
+                    </div>
+                    <div className="signal-result-scan-total">
+                      <span>SCAN TOTAL</span>
+                      <strong>{total}<small> / 700</small></strong>
+                    </div>
+                  </div>
+                  <div className="signal-quality-row">
+                    <span>RECOVERED SIGNAL</span>
+                    <div className="signal-quality-track"><i /></div>
+                    <strong>{currentEntry.score}%</strong>
+                  </div>
+                  <div className="signal-capture-status"><i /><span>{currentEntry.score === 100 ? '100% CARRIER // LOCK CONFIRMED' : currentEntry.score > 0 ? 'CARRIER STABLE // RESULT RECORDED' : 'NO CARRIER // TRANSMISSION CLOSED'}</span></div>
+                </div>
+                <p className="signal-result-note">{currentEntry.note}</p>
                 <button className="primary-button next-button" onClick={nextPrompt}>{game.index === 6 ? 'VIEW SCAN REPORT' : 'NEXT TRANSMISSION'} <span className="button-arrow">↗</span></button>
                 {message && <div className="inline-message" role="status">{message}</div>}
               </div>
