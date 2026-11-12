@@ -2622,3 +2622,113 @@ button:focus-visible,input:focus-visible {
     animation:none !important;
   }
 }
+
+
+/* Near-miss v2: false lock, visible phase slip, then a controlled receiver correction.
+   The carrier remains a single path; only its existing trace is disturbed. */
+.perfect-capture .signal-capture[data-phase="slipping"] {
+  border-color:rgba(255,177,105,.74) !important;
+  box-shadow:0 16px 42px rgba(0,0,0,.42),0 0 24px rgba(255,153,82,.15),inset 0 1px 0 rgba(255,229,202,.12) !important;
+  animation:signal-near-miss-frame .82s cubic-bezier(.18,.72,.2,1) both !important;
+}
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-static {
+  opacity:.34 !important; filter:none !important;
+  animation:signal-near-miss-static .92s ease-out both !important;
+}
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-clean-trace {
+  opacity:.96 !important; stroke:#ffe1c4 !important;
+  filter:drop-shadow(0 0 5px rgba(255,174,112,.42)) !important;
+  transform-box:fill-box; transform-origin:center;
+  animation:signal-near-miss-carrier 1.3s cubic-bezier(.22,.65,.24,1) both !important;
+}
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-lock-reticle {
+  opacity:.9 !important; filter:drop-shadow(0 0 7px rgba(255,173,108,.5)) !important;
+  animation:signal-near-miss-reticle-v2 1.15s cubic-bezier(.2,.68,.2,1) both !important;
+}
+.perfect-capture .signal-capture[data-phase="slipping"] .reticle-corner {
+  border-color:#ffd0a4 !important; transition:none !important;
+}
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-capture-copy h2 {
+  color:#ffd2a8 !important; text-shadow:0 0 10px rgba(255,174,106,.3) !important;
+}
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-capture-status,
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-capture-status i,
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-station i {
+  color:#ffd2a8 !important; background-color:#ffb16d !important;
+  box-shadow:0 0 8px rgba(255,164,103,.35) !important;
+}
+.perfect-capture .signal-capture[data-phase="recovering"] {
+  border-color:rgba(255,177,105,.52) !important;
+  box-shadow:0 16px 42px rgba(0,0,0,.4),0 0 17px rgba(255,153,82,.09) !important;
+}
+.perfect-capture .signal-capture[data-phase="recovering"] .signal-static {
+  opacity:.2 !important; filter:none !important;
+  animation:signal-near-miss-static-settle .9s ease-out both !important;
+}
+.perfect-capture .signal-capture[data-phase="recovering"] .signal-clean-trace {
+  opacity:.86 !important; stroke:#f4d9bd !important;
+  filter:drop-shadow(0 0 3px rgba(255,179,126,.32)) !important;
+  transform-box:fill-box; transform-origin:center;
+  animation:signal-near-miss-carrier-settle 1.05s cubic-bezier(.18,.68,.22,1) both !important;
+}
+.perfect-capture .signal-capture[data-phase="recovering"] .signal-lock-reticle {
+  opacity:.88 !important; filter:none !important;
+  animation:signal-near-miss-reticle-settle 1.05s cubic-bezier(.18,.68,.22,1) both !important;
+}
+.perfect-capture .signal-capture[data-phase="recovering"] .reticle-corner {
+  border-color:rgba(255,208,164,.82) !important; transition:none !important;
+}
+.perfect-capture .signal-capture[data-phase="recovering"] .signal-capture-copy h2,
+.perfect-capture .signal-capture[data-phase="recovering"] .signal-capture-status {
+  color:#f2c8a0 !important; text-shadow:0 0 8px rgba(255,174,106,.18);
+}
+.perfect-capture .signal-capture[data-phase="recovering"] .signal-capture-status i,
+.perfect-capture .signal-capture[data-phase="recovering"] .signal-station i {
+  background:#e9a46e !important; box-shadow:0 0 6px rgba(255,164,103,.3) !important;
+}
+@keyframes signal-near-miss-frame {
+  0% {border-color:rgba(174,255,230,.72);box-shadow:0 18px 48px rgba(0,0,0,.42),0 0 25px rgba(104,255,219,.13);}
+  38% {border-color:rgba(255,177,105,.9);box-shadow:0 16px 42px rgba(0,0,0,.42),0 0 28px rgba(255,153,82,.2);}
+  100% {border-color:rgba(255,177,105,.74);box-shadow:0 16px 42px rgba(0,0,0,.42),0 0 24px rgba(255,153,82,.15);}
+}
+@keyframes signal-near-miss-static {
+  0% {opacity:.1;} 24% {opacity:.5;} 52% {opacity:.25;} 76% {opacity:.38;} 100% {opacity:.34;}
+}
+@keyframes signal-near-miss-static-settle {
+  0% {opacity:.34;} 48% {opacity:.25;} 100% {opacity:.2;}
+}
+@keyframes signal-near-miss-carrier {
+  0% {transform:translateY(0) scaleY(1);}
+  18% {transform:translateY(-2px) scaleY(1.04);}
+  43% {transform:translateY(5px) skewX(1.1deg) scaleY(.78);}
+  68% {transform:translateY(-3px) skewX(-.6deg) scaleY(1.07);}
+  100% {transform:translateY(2px) skewX(.25deg) scaleY(.88);}
+}
+@keyframes signal-near-miss-carrier-settle {
+  0% {transform:translateY(2px) skewX(.25deg) scaleY(.88);}
+  58% {transform:translateY(-1px) skewX(-.15deg) scaleY(.96);}
+  100% {transform:translateY(0) skewX(0) scaleY(.93);}
+}
+@keyframes signal-near-miss-reticle-v2 {
+  0% {transform:translate(-50%,-50%) scale(.82);}
+  22% {transform:translate(-50%,-50%) translate(1px,-1px) scale(.82);}
+  58% {transform:translate(-50%,-50%) translate(15px,-4px) scale(1.01);}
+  82% {transform:translate(-50%,-50%) translate(9px,-2px) scale(.94);}
+  100% {transform:translate(-50%,-50%) translate(11px,-2px) scale(.92);}
+}
+@keyframes signal-near-miss-reticle-settle {
+  0% {transform:translate(-50%,-50%) translate(11px,-2px) scale(.92);}
+  62% {transform:translate(-50%,-50%) translate(4px,-1px) scale(.86);}
+  100% {transform:translate(-50%,-50%) translate(6px,-1px) scale(.88);}
+}
+@media (prefers-reduced-motion:reduce) {
+  .perfect-capture .signal-capture[data-phase="slipping"],
+  .perfect-capture .signal-capture[data-phase="slipping"] .signal-static,
+  .perfect-capture .signal-capture[data-phase="slipping"] .signal-clean-trace,
+  .perfect-capture .signal-capture[data-phase="slipping"] .signal-lock-reticle,
+  .perfect-capture .signal-capture[data-phase="recovering"] .signal-static,
+  .perfect-capture .signal-capture[data-phase="recovering"] .signal-clean-trace,
+  .perfect-capture .signal-capture[data-phase="recovering"] .signal-lock-reticle {
+    animation:none !important; transition:none !important;
+  }
+}
