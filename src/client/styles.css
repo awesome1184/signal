@@ -1977,3 +1977,147 @@ button:focus-visible,input:focus-visible {
     filter:none !important;
   }
 }
+
+
+/* The receiver replaces the prompt during acquisition; it is not a modal popup. */
+.play-view.tuning-view {
+  min-height:560px;
+  padding:12px 1% 10px;
+  justify-content:center;
+}
+.play-view.tuning-view .signal-capture-overlay {
+  position:relative;
+  inset:auto;
+  z-index:2;
+  display:grid;
+  width:100%;
+  min-height:520px;
+  place-items:center;
+  padding:clamp(8px,1.5vw,16px);
+  overflow:visible;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  -webkit-backdrop-filter:none;
+  backdrop-filter:none;
+  animation:none;
+}
+.play-view.tuning-view .signal-capture-overlay::before { display:none; }
+.play-view.tuning-view .signal-capture {
+  width:min(880px,100%);
+  padding:clamp(15px,2.6vw,26px);
+  box-shadow:0 18px 52px rgba(0,0,0,.42),inset 0 1px 0 rgba(226,248,250,.08);
+}
+.play-view.tuning-view .signal-capture-copy { padding:18px 0 15px; }
+.play-view.tuning-view .signal-screen { height:clamp(170px,25vw,230px); }
+.play-view.tuning-view .signal-capture-status { min-height:22px; }
+.play-view.tuning-view .signal-quality-track i {
+  width:var(--score-width);
+  animation:none;
+  transition:width .075s linear;
+}
+.play-view.tuning-view .signal-screen-grid {
+  background-size:30px 26px;
+  animation:signal-grid-drift 5s linear infinite;
+}
+.play-view.tuning-view .signal-screen::after {
+  content:"";
+  position:absolute;
+  z-index:5;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(110deg,transparent 0 36%,rgba(129,235,236,.035) 47%,rgba(165,255,246,.12) 50%,rgba(129,235,236,.035) 53%,transparent 64%);
+  transform:translateX(-100%);
+  animation:signal-spectral-sweep 2.8s ease-in-out infinite;
+}
+.play-view.tuning-view .signal-motion-trace {
+  fill:none;
+  stroke:#c5ffff;
+  stroke-width:1.2;
+  stroke-dasharray:7 19;
+  stroke-dashoffset:0;
+  opacity:.08;
+  filter:drop-shadow(0 0 5px rgba(120,255,245,.75));
+  animation:signal-motion-travel 1.15s linear infinite;
+}
+.play-view.tuning-view .signal-capture[data-phase="tracking"] .signal-motion-trace { opacity:.36; }
+.play-view.tuning-view .signal-capture[data-phase="locking"] .signal-motion-trace { opacity:.58; }
+.play-view.tuning-view .signal-capture[data-phase="surging"] .signal-motion-trace,
+.play-view.tuning-view .signal-capture[data-phase="locked"] .signal-motion-trace { opacity:.88; }
+.play-view.tuning-view .signal-lock-reticle {
+  animation:signal-reticle-search 3.6s ease-in-out infinite alternate;
+}
+.play-view.tuning-view .signal-capture[data-phase="locking"] .signal-lock-reticle {
+  animation:signal-reticle-converge .62s cubic-bezier(.16,.8,.2,1) both;
+}
+.play-view.tuning-view .signal-capture[data-phase="locked"] .signal-lock-reticle {
+  animation:signal-reticle-settle .7s cubic-bezier(.16,.8,.2,1) both;
+}
+.play-view.tuning-view .signal-capture[data-phase="tracking"] .signal-screen-grid,
+.play-view.tuning-view .signal-capture[data-phase="locking"] .signal-screen-grid {
+  opacity:.58;
+}
+.play-view.tuning-view .signal-capture[data-phase="locked"] .signal-screen-grid {
+  opacity:.72;
+}
+.signal-result-card .signal-motion-trace {
+  fill:none;
+  stroke:#c5ffff;
+  stroke-width:1.1;
+  stroke-dasharray:7 19;
+  opacity:.36;
+  filter:drop-shadow(0 0 5px rgba(120,255,245,.65));
+  animation:signal-motion-travel 1.8s linear infinite;
+}
+.signal-result-card[data-grade="perfect"] .signal-motion-trace {
+  opacity:.82;
+  stroke:#e7fff7;
+  filter:drop-shadow(0 0 8px rgba(130,255,226,.9));
+}
+@keyframes signal-grid-drift {
+  from {background-position:0 0,0 0;}
+  to {background-position:30px 26px,30px 26px;}
+}
+@keyframes signal-spectral-sweep {
+  0%,12% {transform:translateX(-100%);opacity:0;}
+  28% {opacity:1;}
+  70% {opacity:.8;}
+  100% {transform:translateX(100%);opacity:0;}
+}
+@keyframes signal-motion-travel {
+  to {stroke-dashoffset:-156;}
+}
+@keyframes signal-reticle-search {
+  0% {transform:translate(-50%,-50%) translate(-10px,5px) scale(1.2);}
+  50% {transform:translate(-50%,-50%) translate(9px,-7px) scale(1.12);}
+  100% {transform:translate(-50%,-50%) translate(-3px,10px) scale(1.08);}
+}
+@keyframes signal-reticle-converge {
+  0% {transform:translate(-50%,-50%) scale(1.2);filter:drop-shadow(0 0 8px rgba(121,240,230,.55));}
+  70% {transform:translate(-50%,-50%) scale(.82);filter:drop-shadow(0 0 14px rgba(121,240,230,.85));}
+  100% {transform:translate(-50%,-50%) scale(.98);filter:drop-shadow(0 0 9px rgba(121,240,230,.65));}
+}
+@keyframes signal-reticle-settle {
+  0% {transform:translate(-50%,-50%) scale(1.12);}
+  60% {transform:translate(-50%,-50%) scale(.82);}
+  100% {transform:translate(-50%,-50%) scale(var(--reticle-scale));}
+}
+@media (max-width:680px) {
+  .play-view.tuning-view { min-height:510px;padding:8px 0; }
+  .play-view.tuning-view .signal-capture-overlay { min-height:490px;padding:4px; }
+  .play-view.tuning-view .signal-capture { padding:13px 11px 11px; }
+  .play-view.tuning-view .signal-capture-copy { padding:12px 0 10px; }
+  .play-view.tuning-view .signal-screen { height:155px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .play-view.tuning-view .signal-screen-grid,
+  .play-view.tuning-view .signal-screen::after,
+  .play-view.tuning-view .signal-motion-trace,
+  .play-view.tuning-view .signal-lock-reticle,
+  .signal-result-card .signal-motion-trace {
+    animation:none !important;
+  }
+  .play-view.tuning-view .signal-motion-trace,
+  .signal-result-card .signal-motion-trace { opacity:.45; }
+  .play-view.tuning-view .signal-quality-track i { transition:none; }
+}
