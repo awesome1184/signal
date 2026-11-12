@@ -2137,3 +2137,96 @@ button:focus-visible,input:focus-visible {
   .signal-result-view { min-height:0; }
   .signal-result-card { width:100%; }
 }
+
+
+/* Near-miss: let the receiver look flawless for a beat, then expose the tiny drift. */
+.perfect-capture .signal-capture[data-phase="slipping"] {
+  border-color:rgba(255,177,105,.78);
+  box-shadow:0 20px 55px rgba(0,0,0,.55),0 0 30px rgba(255,153,82,.2),inset 0 1px 0 rgba(255,229,202,.15);
+  animation:signal-near-miss-jolt .42s cubic-bezier(.18,.75,.24,1) both;
+}
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-static {
+  opacity:.42 !important;
+  filter:contrast(1.8) brightness(1.35);
+  animation:signal-near-miss-static .16s steps(2,end) 3 both;
+}
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-chaos-trace {
+  opacity:.78 !important;
+  stroke:#ffc18e;
+  filter:drop-shadow(0 0 5px rgba(255,164,103,.65));
+}
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-clean-trace {
+  opacity:.7;
+  stroke:#ffe1c4;
+  filter:drop-shadow(0 0 7px rgba(255,174,112,.8));
+}
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-lock-reticle {
+  opacity:.9;
+  transform:translate(-50%,-50%) translate(17px,-6px) scale(1.08);
+  filter:drop-shadow(0 0 12px rgba(255,173,108,.82));
+  animation:signal-near-miss-reticle .48s ease-out both;
+}
+.perfect-capture .signal-capture[data-phase="slipping"] .reticle-corner {
+  border-color:#ffd0a4;
+}
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-capture-copy h2 {
+  color:#ffd2a8;
+  text-shadow:0 0 12px rgba(255,174,106,.62),0 0 26px rgba(255,134,78,.32);
+}
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-capture-status {
+  color:#ffd2a8;
+}
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-capture-status i,
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-station i {
+  background:#ffb16d;
+  box-shadow:0 0 12px rgba(255,164,103,.85);
+}
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-quality-track i {
+  background:linear-gradient(90deg,#bd7a55,#ffbd82,#fff0dc);
+  box-shadow:0 0 10px rgba(255,173,112,.7);
+}
+.signal-result-card[data-grade="deep"] .signal-capture-copy h2,
+.signal-result-card[data-grade="deep"] .signal-result-score > strong {
+  color:#ffd0a4;
+  text-shadow:0 0 12px rgba(255,174,106,.4);
+}
+.signal-result-card[data-grade="deep"] .signal-screen {
+  border-color:rgba(255,184,130,.42);
+  box-shadow:inset 0 0 30px rgba(164,94,58,.12),0 0 18px rgba(255,153,93,.1);
+}
+.signal-result-card[data-grade="deep"] .signal-clean-trace {
+  stroke:#f9d6b7;
+  filter:drop-shadow(0 0 6px rgba(255,179,126,.55));
+}
+.signal-result-card[data-grade="deep"] .signal-quality-track i {
+  background:linear-gradient(90deg,#a76b50,#e9b17f,#ffe3c3);
+}
+@keyframes signal-near-miss-jolt {
+  0% {transform:translateX(0);}
+  18% {transform:translateX(-5px);}
+  35% {transform:translateX(4px);}
+  52% {transform:translateX(-2px);}
+  100% {transform:translateX(0);}
+}
+@keyframes signal-near-miss-static {
+  0%,100% {opacity:.12;}
+  35% {opacity:.7;}
+  65% {opacity:.3;}
+}
+@keyframes signal-near-miss-reticle {
+  0% {transform:translate(-50%,-50%) scale(.72);}
+  35% {transform:translate(-50%,-50%) translate(23px,-9px) scale(1.18);}
+  100% {transform:translate(-50%,-50%) translate(17px,-6px) scale(1.08);}
+}
+@media (prefers-reduced-motion:reduce) {
+  .perfect-capture .signal-capture[data-phase="slipping"] {
+    animation:none !important;
+  }
+  .perfect-capture .signal-capture[data-phase="slipping"] .signal-static {
+    animation:none !important;
+    opacity:.42 !important;
+  }
+  .perfect-capture .signal-capture[data-phase="slipping"] .signal-lock-reticle {
+    animation:none !important;
+  }
+}
