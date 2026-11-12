@@ -133,6 +133,7 @@ function App() {
   const [isTuning, setIsTuning] = useState(false);
   const [tuningAnswer, setTuningAnswer] = useState('');
   const [tuningScore, setTuningScore] = useState<number | null>(null);
+  const [tuningDisplayScore, setTuningDisplayScore] = useState(0);
   const [tuningDuration, setTuningDuration] = useState(900);
   const [tuningStatus, setTuningStatus] = useState('CAPTURING INPUT // SCANNING NOISE');
   const [tuningPhase, setTuningPhase] = useState<'searching' | 'tracking' | 'locking' | 'surging' | 'locked' | 'failed'>('searching');
@@ -183,7 +184,7 @@ function App() {
     '--wave-mid': String(Math.max(.01, tuningWaveFinal * .42)),
     '--chaos-final': String(tuningChaosFinal),
     '--tune-duration': tuningDuration + 'ms',
-    '--score-width': (tuningScore ?? 0) + '%',
+    '--score-width': tuningDisplayScore + '%',
     '--reticle-scale': String(.78 + (1 - (tuningScore ?? 0) / 100) * .65),
     '--reticle-opacity': String(.4 + (tuningScore ?? 0) / 100 * .6)
   } as React.CSSProperties;
@@ -263,6 +264,7 @@ function App() {
     const tuningStartedAt = Date.now();
     setTuningAnswer(clean);
     setTuningScore(null);
+    setTuningDisplayScore(0);
     setTuningDuration(900);
     setTuningPhase('searching');
     setTuningStatus('CAPTURING INPUT // SCANNING NOISE');
@@ -288,12 +290,24 @@ function App() {
     const animateCapture = async (score: number) => {
       const duration = 900 + Math.round(Math.max(0, Math.min(100, score)) * 36);
       setTuningScore(score);
+      setTuningDisplayScore(0);
       setTuningDuration(duration);
 
       const perfect = score === 100;
+      const animateScore = async (from: number, to: number, segmentMs: number) => {
+        const steps = Math.max(1, Math.ceil(segmentMs / 52));
+        for (let step = 1; step <= steps; step++) {
+          await wait(segmentMs / steps);
+          setTuningDisplayScore(Math.round(from + (to - from) * (step / steps)));
+        }
+      };
+
+      const trackingTarget = Math.round(score * (perfect ? .34 : .38));
+      const lockingTarget = Math.round(score * (perfect ? .86 : .88));
+
       setTuningPhase('tracking');
       setTuningStatus('CARRIER DETECTED // TRACKING FREQUENCY');
-      await wait(duration * (perfect ? .48 : .54));
+      await animateScore(0, trackingTarget, duration * (perfect ? .44 : .48));
 
       setTuningPhase('locking');
       setTuningStatus(score >= 100
@@ -301,21 +315,25 @@ function App() {
         : score >= 60
           ? 'ALIGNING CARRIER // REDUCING INTERFERENCE'
           : 'WEAK CARRIER // ATTEMPTING ACQUISITION');
-      await wait(duration * (perfect ? .24 : .26));
+      await animateScore(trackingTarget, lockingTarget, duration * (perfect ? .24 : .32));
 
       if (perfect) {
         setTuningPhase('surging');
         setTuningStatus('CARRIER SPIKE // BREAKTHROUGH IMMINENT');
-        await wait(duration * .12);
-      }
-
-      setTuningPhase('locked');
-      setTuningStatus(score >= 100
-        ? '100% CARRIER // SIGNAL FULLY ACQUIRED'
-        : score >= 60
+        await animateScore(lockingTarget, score, duration * .14);
+        setTuningPhase('locked');
+        setTuningStatus('100% CARRIER // SIGNAL FULLY ACQUIRED');
+        await wait(duration * .18);
+      } else {
+        setTuningPhase(score > 0 ? 'locked' : 'failed');
+        setTuningStatus(score >= 60
           ? 'PARTIAL LOCK // RESIDUAL NOISE'
-          : 'WEAK LOCK // INTERFERENCE REMAINS');
-      await wait(duration * (perfect ? .16 : .20));
+          : score > 0
+            ? 'WEAK LOCK // INTERFERENCE REMAINS'
+            : 'NO CARRIER // SIGNAL NOT RECOVERED');
+        await animateScore(lockingTarget, score, duration * .20);
+      }
+      setTuningDisplayScore(score);
     };
 
     try {
@@ -501,7 +519,7 @@ function App() {
             )}
 
             {game.phase === 'playing' && (
-              <div className="play-view">
+              <div className={'play-view ' + (isTuning ? 'tuning-view' : '')}>
                 {isTuning && (
                   <div className={'signal-capture-overlay ' + (tuningScore === 100 ? 'perfect-capture' : '')} role="status" aria-live="polite">
                     <div
@@ -527,6 +545,7 @@ function App() {
                           <path className="signal-centerline" d="M0 90H720" />
                           <path className="signal-chaos-trace" d="M0 90 12 78 19 115 27 42 34 128 43 63 52 100 61 35 68 117 78 77 87 96 96 25 105 145 114 57 123 106 132 68 141 125 151 45 160 99 169 73 180 90 190 52 199 132 208 69 218 101 227 29 238 148 247 73 258 117 268 48 277 103 288 71 298 94 307 35 317 142 327 64 336 119 346 55 356 102 366 78 376 90 388 41 398 133 408 67 418 111 428 31 438 148 448 70 458 112 468 48 478 100 488 76 498 91 508 37 518 145 528 61 538 116 548 57 558 101 568 72 578 90 589 44 599 134 609 68 619 109 629 34 639 147 649 72 659 115 669 49 679 98 689 76 700 91 720 90" />
                           <path className="signal-clean-trace" d="M0 90 C30 90 30 35 60 35 S90 145 120 145 S150 90 180 90 C210 90 210 35 240 35 S270 145 300 145 S330 90 360 90 C390 90 390 35 420 35 S450 145 480 145 S510 90 540 90 C570 90 570 35 600 35 S630 145 660 145 S690 90 720 90" />
+                          <path className="signal-motion-trace" d="M0 90 C30 90 30 35 60 35 S90 145 120 145 S150 90 180 90 C210 90 210 35 240 35 S270 145 300 145 S330 90 360 90 C390 90 390 35 420 35 S450 145 480 145 S510 90 540 90 C570 90 570 35 600 35 S630 145 660 145 S690 90 720 90" />
                         </svg>
                         <div className="signal-scanbeam" />
                         <div className="signal-lock-flare" />
@@ -569,20 +588,21 @@ function App() {
                           <strong>{tuningAnswer}</strong>
                         </div>
                         <div className="signal-score-readout">
-                          <span>RESONANCE</span>
-                          <strong>{tuningScore === null ? '···' : tuningScore}<small>/100</small></strong>
+                          <span>LOCK STRENGTH</span>
+                          <strong>{tuningScore === null ? '···' : tuningDisplayScore}<small>/100</small></strong>
                         </div>
                       </div>
                       <div className="signal-quality-row">
                         <span>RECOVERED SIGNAL</span>
                         <div className="signal-quality-track"><i /></div>
-                        <strong>{tuningScore === null ? '—' : tuningScore + '%'}</strong>
+                        <strong>{tuningScore === null ? '—' : tuningDisplayScore + '%'}</strong>
                       </div>
                       <div className="signal-capture-status"><i /><span>{tuningStatus}</span></div>
                     </div>
                     {tuningScore === 100 && <div className="signal-perfect-flash" aria-hidden="true" />}
                   </div>
                 )}
+                {!isTuning && <>
                 <div className="question-meta">
                   <span className="channel-label">{currentPrompt.channel}</span>
                   <div className={'timer-pill ' + (secondsLeft <= 7 ? 'urgent' : '')}><span className="timer-ring"><span /></span><strong>{String(secondsLeft).padStart(2, '0')}</strong><span>SEC</span></div>
@@ -600,6 +620,7 @@ function App() {
                 </form>
                 <div className="play-footer"><span><span className="tiny-pulse" /> RECEIVER OPEN</span><button className="text-button" onClick={skipPrompt} disabled={isTuning}>SKIP THIS FREQUENCY</button></div>
                 {message && <div className="inline-message" role="status">{message}</div>}
+                </>}
               </div>
             )}
 
@@ -644,6 +665,7 @@ function App() {
                       <path className="signal-centerline" d="M0 90H720" />
                       <path className="signal-chaos-trace" d="M0 90 12 78 19 115 27 42 34 128 43 63 52 100 61 35 68 117 78 77 87 96 96 25 105 145 114 57 123 106 132 68 141 125 151 45 160 99 169 73 180 90 190 52 199 132 208 69 218 101 227 29 238 148 247 73 258 117 268 48 277 103 288 71 298 94 307 35 317 142 327 64 336 119 346 55 356 102 366 78 376 90 388 41 398 133 408 67 418 111 428 31 438 148 448 70 458 112 468 48 478 100 488 76 498 91 508 37 518 145 528 61 538 116 548 57 558 101 568 72 578 90 589 44 599 134 609 68 619 109 629 34 639 147 649 72 659 115 669 49 679 98 689 76 700 91 720 90" />
                       <path className="signal-clean-trace" d="M0 90 C30 90 30 35 60 35 S90 145 120 145 S150 90 180 90 C210 90 210 35 240 35 S270 145 300 145 S330 90 360 90 C390 90 390 35 420 35 S450 145 480 145 S510 90 540 90 C570 90 570 35 600 35 S630 145 660 145 S690 90 720 90" />
+                      <path className="signal-motion-trace" d="M0 90 C30 90 30 35 60 35 S90 145 120 145 S150 90 180 90 C210 90 210 35 240 35 S270 145 300 145 S330 90 360 90 C390 90 390 35 420 35 S450 145 480 145 S510 90 540 90 C570 90 570 35 600 35 S630 145 660 145 S690 90 720 90" />
                     </svg>
                     <div className="signal-lock-reticle" aria-hidden="true">
                       <i className="reticle-corner top-left" />
