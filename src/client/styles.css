@@ -1260,3 +1260,177 @@ button:focus-visible,input:focus-visible {
   .signal-lock-flare { opacity:.5;transform:translate(-50%,-50%) scale(1); }
   .signal-quality-track i { width:var(--score-width); }
 }
+
+
+/* Carrier acquisition: brackets converge, then confirm the lock. */
+.signal-lock-reticle {
+  position:absolute;
+  z-index:7;
+  left:50%;
+  top:50%;
+  width:clamp(112px,30%,206px);
+  aspect-ratio:1;
+  opacity:0;
+  pointer-events:none;
+  transform:translate(-50%,-50%) scale(1.75);
+  transition:
+    transform .56s cubic-bezier(.18,.72,.22,1),
+    opacity .35s ease,
+    filter .35s ease;
+  filter:drop-shadow(0 0 5px rgba(111,230,226,.25));
+}
+.reticle-corner {
+  position:absolute;
+  width:22px;
+  height:22px;
+  border-color:rgba(143,230,231,.85);
+  border-style:solid;
+  transition:border-color .28s ease;
+}
+.reticle-corner.top-left { top:0;left:0;border-width:2px 0 0 2px; }
+.reticle-corner.top-right { top:0;right:0;border-width:2px 2px 0 0; }
+.reticle-corner.bottom-left { bottom:0;left:0;border-width:0 0 2px 2px; }
+.reticle-corner.bottom-right { right:0;bottom:0;border-width:0 2px 2px 0; }
+.reticle-center {
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:12px;
+  height:12px;
+  border:1px solid rgba(188,255,247,.9);
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  box-shadow:0 0 12px rgba(108,245,224,.4);
+}
+.reticle-center::before,.reticle-center::after {
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  background:rgba(188,255,247,.8);
+  transform:translate(-50%,-50%);
+}
+.reticle-center::before { width:22px;height:1px; }
+.reticle-center::after { width:1px;height:22px; }
+.reticle-axis {
+  position:absolute;
+  background:linear-gradient(90deg,transparent,rgba(128,227,226,.38),transparent);
+}
+.reticle-axis.horizontal { left:50%;top:50%;width:145%;height:1px;transform:translate(-50%,-50%); }
+.reticle-axis.vertical { left:50%;top:50%;width:1px;height:145%;background:linear-gradient(180deg,transparent,rgba(128,227,226,.28),transparent);transform:translate(-50%,-50%); }
+.signal-capture[data-phase="tracking"] .signal-lock-reticle {
+  opacity:.62;
+  transform:translate(-50%,-50%) scale(1.2);
+}
+.signal-capture[data-phase="locking"] .signal-lock-reticle {
+  opacity:.92;
+  transform:translate(-50%,-50%) scale(.98);
+  filter:drop-shadow(0 0 9px rgba(121,240,230,.55));
+}
+.signal-capture[data-phase="locked"] .signal-lock-reticle {
+  opacity:var(--reticle-opacity);
+  transform:translate(-50%,-50%) scale(var(--reticle-scale));
+  filter:drop-shadow(0 0 11px rgba(121,240,230,.7));
+}
+.signal-capture[data-phase="locked"] .reticle-corner {
+  border-color:rgba(181,255,241,.96);
+}
+.signal-capture[data-grade="perfect"][data-phase="locking"] .reticle-corner {
+  border-color:#d5fff1;
+  filter:drop-shadow(0 0 5px rgba(161,255,224,.85));
+}
+.signal-capture[data-grade="perfect"] .signal-lock-flare { animation:none; }
+.signal-capture[data-grade="perfect"][data-phase="locked"] .signal-lock-flare {
+  animation:signal-lock-arrive .48s ease-out both;
+}
+.signal-capture[data-grade="perfect"][data-phase="locked"] .signal-lock-reticle {
+  animation:signal-perfect-lock .42s cubic-bezier(.16,.8,.22,1) both;
+}
+.signal-capture[data-phase="locking"] .signal-screen {
+  box-shadow:inset 0 0 34px rgba(64,180,172,.12),0 0 17px rgba(103,221,217,.12);
+}
+.signal-capture[data-phase="locked"] .signal-screen-state {
+  color:#baf9e8;
+  text-shadow:0 0 9px rgba(107,255,215,.45);
+}
+.signal-capture[data-phase="locked"]:not([data-grade="perfect"]) .signal-lock-flare {
+  opacity:.12;
+  transform:translate(-50%,-50%) scale(1.15);
+}
+.signal-lock-steps {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  margin:9px 1px 0;
+}
+.signal-lock-steps span {
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding-top:6px;
+  border-top:2px solid rgba(112,169,177,.18);
+  color:#526f78;
+  font:7px var(--mono);
+  letter-spacing:.13em;
+  transition:color .25s ease,border-color .25s ease,text-shadow .25s ease;
+}
+.signal-lock-steps i {
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  background:rgba(110,174,182,.32);
+  box-shadow:none;
+  transition:background .25s ease,box-shadow .25s ease;
+}
+.signal-lock-steps span:first-child,
+.signal-lock-steps[data-phase="tracking"] span:nth-child(2),
+.signal-lock-steps[data-phase="locking"] span:nth-child(-n+2),
+.signal-lock-steps[data-phase="locked"] span {
+  border-color:rgba(103,211,210,.72);
+  color:#a5d5d7;
+}
+.signal-lock-steps span:first-child i,
+.signal-lock-steps[data-phase="tracking"] span:nth-child(2) i,
+.signal-lock-steps[data-phase="locking"] span:nth-child(-n+2) i,
+.signal-lock-steps[data-phase="locked"] span i {
+  background:#83e4df;
+  box-shadow:0 0 8px rgba(111,231,222,.55);
+}
+.signal-lock-steps[data-phase="locking"] span:last-child,
+.signal-lock-steps[data-phase="locked"] span:last-child {
+  border-color:rgba(160,243,220,.9);
+  color:#c5f7e9;
+  text-shadow:0 0 9px rgba(120,244,211,.2);
+}
+.signal-lock-steps[data-phase="locking"] span:last-child i,
+.signal-lock-steps[data-phase="locked"] span:last-child i {
+  background:#b8ffdf;
+  box-shadow:0 0 10px rgba(130,255,218,.75);
+}
+.signal-capture[data-phase="locked"][data-grade="perfect"] .signal-capture-copy h2 {
+  animation:signal-lock-title .45s ease-out both;
+}
+@keyframes signal-perfect-lock {
+  0% { transform:translate(-50%,-50%) scale(1.13);filter:brightness(1.6) drop-shadow(0 0 18px rgba(130,255,225,.95)); }
+  62% { transform:translate(-50%,-50%) scale(.75); }
+  100% { transform:translate(-50%,-50%) scale(var(--reticle-scale));filter:drop-shadow(0 0 12px rgba(121,240,230,.8)); }
+}
+@keyframes signal-lock-title {
+  0% { letter-spacing:.22em;opacity:.5;filter:blur(2px); }
+  100% { letter-spacing:.09em;opacity:1;filter:blur(0); }
+}
+@media (max-width:520px) {
+  .signal-lock-steps { gap:5px;margin-top:7px; }
+  .signal-lock-steps span { gap:4px;font-size:6px;letter-spacing:.07em; }
+  .reticle-corner { width:17px;height:17px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .signal-lock-reticle,.reticle-corner,.reticle-center,.signal-lock-steps span,.signal-lock-steps i {
+    transition:none !important;
+    animation:none !important;
+  }
+  .signal-capture[data-phase="locked"] .signal-lock-reticle {
+    opacity:var(--reticle-opacity);
+    transform:translate(-50%,-50%) scale(var(--reticle-scale));
+  }
+}
