@@ -869,3 +869,350 @@ button:focus-visible,input:focus-visible {
   .rule-strip strong { font-size:19px; }
   .complete-view { padding-left:0; padding-right:0; }
 }
+
+
+/* Answer submission: the receiver visibly hunts for a frequency lock. */
+.play-view { isolation:isolate; }
+.tuning-overlay {
+  position:absolute;
+  inset:-24px -14px -12px;
+  z-index:20;
+  display:grid;
+  place-items:center;
+  padding:15px;
+  overflow:hidden;
+  border:1px solid rgba(108,218,231,.28);
+  border-radius:10px;
+  background:
+    radial-gradient(ellipse at 50% 42%,rgba(28,103,124,.34),transparent 54%),
+    radial-gradient(ellipse at 50% 100%,rgba(4,12,20,.92),transparent 65%),
+    rgba(3,13,22,.94);
+  -webkit-backdrop-filter:blur(9px) saturate(125%);
+  backdrop-filter:blur(9px) saturate(125%);
+  animation:tuning-screen-in .32s cubic-bezier(.2,.8,.2,1) both;
+}
+.tuning-overlay::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:.28;
+  background:
+    repeating-linear-gradient(180deg,transparent 0 4px,rgba(125,222,232,.08) 5px,transparent 6px),
+    linear-gradient(90deg,transparent 0%,rgba(91,216,232,.045) 50%,transparent 100%);
+  animation:tuning-scanlines 5s linear infinite;
+}
+.tuning-overlay::after {
+  content:"";
+  position:absolute;
+  width:130%;
+  height:1px;
+  top:-5%;
+  left:-15%;
+  pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(119,232,241,.65),transparent);
+  box-shadow:0 0 18px rgba(91,216,232,.38);
+  animation:tuning-sweep 2.2s ease-in-out infinite;
+}
+.tuning-console {
+  position:relative;
+  width:min(520px,100%);
+  padding:15px clamp(13px,3vw,25px) 13px;
+  border:1px solid rgba(113,212,226,.32);
+  border-radius:8px;
+  background:
+    radial-gradient(ellipse at 50% 0%,rgba(91,216,232,.095),transparent 62%),
+    linear-gradient(145deg,rgba(8,28,42,.94),rgba(4,15,25,.96));
+  box-shadow:
+    0 0 0 4px rgba(91,216,232,.025),
+    0 18px 48px rgba(0,0,0,.45),
+    inset 0 1px 0 rgba(224,250,255,.08),
+    inset 0 0 34px rgba(91,216,232,.045);
+  text-align:center;
+}
+.tuning-console::before,.tuning-console::after {
+  content:"";
+  position:absolute;
+  width:18px;
+  height:18px;
+  pointer-events:none;
+  border-color:rgba(132,226,235,.65);
+  border-style:solid;
+}
+.tuning-console::before {
+  top:5px;left:5px;
+  border-width:1px 0 0 1px;
+}
+.tuning-console::after {
+  right:5px;bottom:5px;
+  border-width:0 1px 1px 0;
+}
+.tuning-console-head {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  padding-bottom:9px;
+  border-bottom:1px solid rgba(91,216,232,.14);
+  color:#7199a8;
+  font:8px var(--mono);
+  letter-spacing:.13em;
+}
+.tuning-console-head span:first-child {
+  display:flex;
+  align-items:center;
+  gap:7px;
+  color:#a9e6e9;
+}
+.tuning-console-head i,.tuning-status i {
+  width:6px;height:6px;
+  display:inline-block;
+  border-radius:50%;
+  background:var(--orange);
+  box-shadow:0 0 10px var(--orange);
+  animation:tuning-led  .65s ease-in-out infinite alternate;
+}
+.tuning-heading {
+  margin-top:11px;
+  color:#effbfc;
+  font:700 clamp(24px,4vw,34px)/1 var(--display);
+  letter-spacing:.12em;
+  text-shadow:0 0 22px rgba(91,216,232,.2);
+  animation:tuning-title-flicker 2.8s steps(1,end) infinite;
+}
+.tuning-subheading {
+  margin:5px 0 0;
+  color:#7daebb;
+  font:8px var(--mono);
+  letter-spacing:.19em;
+}
+.tuning-frequency {
+  display:flex;
+  justify-content:center;
+  align-items:baseline;
+  gap:11px;
+  margin:7px 0 -2px;
+}
+.tuning-frequency > span {
+  color:#648894;
+  font:8px var(--mono);
+  letter-spacing:.15em;
+}
+.tuning-frequency strong {
+  color:var(--cyan-soft);
+  font:700 23px var(--display);
+  letter-spacing:.06em;
+  text-shadow:0 0 15px rgba(91,216,232,.38);
+  animation:frequency-jitter .18s steps(2,end) infinite;
+}
+.tuning-frequency small {
+  color:#78a8b4;
+  font:9px var(--mono);
+}
+.tuning-dial {
+  position:relative;
+  width:116px;
+  height:116px;
+  margin:1px auto 3px;
+  border:1px solid rgba(91,216,232,.2);
+  border-radius:50%;
+  background:
+    radial-gradient(circle,rgba(91,216,232,.08) 0 42%,transparent 43%),
+    conic-gradient(from -55deg,rgba(91,216,232,.02),rgba(91,216,232,.19),rgba(245,163,75,.2),rgba(91,216,232,.03));
+  box-shadow:0 0 25px rgba(91,216,232,.09),inset 0 0 18px rgba(0,0,0,.35);
+}
+.tuning-dial::before,.tuning-dial::after {
+  content:"";
+  position:absolute;
+  border-radius:50%;
+  pointer-events:none;
+}
+.tuning-dial::before {
+  inset:7px;
+  border:1px dashed rgba(130,213,225,.35);
+  animation:tuning-rotate 14s linear infinite;
+}
+.tuning-dial::after {
+  inset:17px;
+  border:1px solid rgba(91,216,232,.15);
+  box-shadow:inset 0 0 14px rgba(91,216,232,.055);
+}
+.tuning-dial-ticks {
+  position:absolute;
+  inset:1px;
+  border-radius:50%;
+  background:repeating-conic-gradient(from -132deg,rgba(166,229,235,.8) 0deg 1deg,transparent 1deg 10deg);
+  -webkit-mask:radial-gradient(circle,transparent 0 72%,#000 73% 80%,transparent 81%);
+  mask:radial-gradient(circle,transparent 0 72%,#000 73% 80%,transparent 81%);
+  opacity:.6;
+}
+.tuning-dial-inner {
+  position:absolute;
+  inset:27px;
+  border:1px solid rgba(91,216,232,.13);
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(91,216,232,.13),rgba(5,19,29,.7) 72%);
+}
+.tuning-needle {
+  position:absolute;
+  z-index:2;
+  left:calc(50% - 1px);
+  top:13px;
+  width:2px;
+  height:47px;
+  border-radius:3px;
+  background:linear-gradient(180deg,#ffd19a 0%,var(--orange) 50%,rgba(245,163,75,.08) 100%);
+  transform-origin:50% 45px;
+  box-shadow:0 0 9px rgba(245,163,75,.8);
+  animation:tuning-needle-hunt .22s cubic-bezier(.45,0,.55,1) infinite alternate;
+}
+.tuning-dial-hub {
+  position:absolute;
+  z-index:3;
+  inset:0;
+  display:grid;
+  place-items:center;
+  color:#a1e9ed;
+  filter:drop-shadow(0 0 8px rgba(91,216,232,.65));
+  animation:tuning-hub-pulse 1.1s ease-in-out infinite alternate;
+}
+.tuning-waveform {
+  display:block;
+  width:min(440px,100%);
+  height:40px;
+  margin:0 auto 1px;
+  overflow:visible;
+}
+.tuning-waveform path {
+  fill:none;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.tuning-wave-back {
+  stroke:rgba(91,216,232,.22);
+  stroke-width:2;
+}
+.tuning-wave-front {
+  stroke:#87edf0;
+  stroke-width:1.5;
+  stroke-dasharray:30 12 8 8;
+  filter:drop-shadow(0 0 5px rgba(91,216,232,.9));
+  animation:tuning-wave-move .55s linear infinite;
+}
+.tuning-band {
+  display:flex;
+  align-items:center;
+  gap:9px;
+  width:min(310px,90%);
+  margin:0 auto 7px;
+  color:#638c9a;
+  font:8px var(--mono);
+}
+.tuning-band > div {
+  position:relative;
+  flex:1;
+  height:4px;
+  overflow:hidden;
+  border-radius:4px;
+  background:linear-gradient(90deg,rgba(91,216,232,.14),rgba(91,216,232,.4),rgba(245,163,75,.25),rgba(91,216,232,.12));
+}
+.tuning-band i {
+  position:absolute;
+  top:-1px;
+  left:-12%;
+  width:18%;
+  height:6px;
+  border-radius:5px;
+  background:#d5ffff;
+  box-shadow:0 0 12px 3px rgba(91,216,232,.8);
+  animation:tuning-band-sweep .8s ease-in-out infinite alternate;
+}
+.tuning-target {
+  display:flex;
+  justify-content:center;
+  align-items:baseline;
+  flex-wrap:wrap;
+  gap:8px;
+  padding:8px 5px;
+  border-top:1px solid rgba(91,216,232,.12);
+  border-bottom:1px solid rgba(91,216,232,.12);
+  background:linear-gradient(90deg,transparent,rgba(91,216,232,.035),transparent);
+}
+.tuning-target span {
+  color:#668b98;
+  font:8px var(--mono);
+  letter-spacing:.15em;
+}
+.tuning-target strong {
+  max-width:75%;
+  overflow:hidden;
+  color:#f1f9fb;
+  font:600 15px var(--display);
+  letter-spacing:.045em;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  text-shadow:0 0 12px rgba(91,216,232,.22);
+  animation:tuning-answer-flicker 2.5s ease-in-out infinite;
+}
+.tuning-status {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:8px;
+  margin-top:9px;
+  color:#9ac4cd;
+  font:8px var(--mono);
+  letter-spacing:.17em;
+}
+.tuning-status i {
+  width:5px;height:5px;
+  background:var(--cyan);
+  box-shadow:0 0 9px var(--cyan);
+}
+.tuning-status b {
+  color:var(--orange);
+  letter-spacing:.18em;
+  animation:tuning-dots .7s steps(4,end) infinite;
+}
+.answer-control input:disabled { opacity:.45; }
+.submit-button:disabled,.text-button:disabled,.test-bench button:disabled {
+  cursor:wait;
+  filter:saturate(.45);
+  opacity:.55;
+}
+.test-bench button:disabled { cursor:not-allowed; }
+
+@keyframes tuning-screen-in {
+  from {opacity:0;transform:scale(1.018);filter:blur(4px);}
+  to {opacity:1;transform:scale(1);filter:blur(0);}
+}
+@keyframes tuning-scanlines { from {transform:translateY(-8px);} to {transform:translateY(8px);} }
+@keyframes tuning-sweep { 0%,100% {top:-5%;opacity:0;} 15%,80% {opacity:.85;} 55% {top:105%;opacity:.55;} }
+@keyframes tuning-led { from {opacity:.45;filter:brightness(.75);} to {opacity:1;filter:brightness(1.5);} }
+@keyframes tuning-title-flicker { 0%,94%,97%,100% {opacity:1;} 95%,96% {opacity:.7;} }
+@keyframes frequency-jitter { 0%,100% {transform:translateX(0);filter:brightness(1);} 50% {transform:translateX(1px);filter:brightness(1.35);} }
+@keyframes tuning-rotate { to {transform:rotate(360deg);} }
+@keyframes tuning-needle-hunt { from {transform:rotate(-72deg);} 35% {transform:rotate(52deg);} 68% {transform:rotate(-28deg);} to {transform:rotate(76deg);} }
+@keyframes tuning-hub-pulse { from {opacity:.72;transform:scale(.92);} to {opacity:1;transform:scale(1.06);} }
+@keyframes tuning-wave-move { to {stroke-dashoffset:-96;} }
+@keyframes tuning-band-sweep { from {left:-12%;} to {left:94%;} }
+@keyframes tuning-answer-flicker { 0%,100% {opacity:1;} 48% {opacity:.82;} 50% {opacity:1;text-shadow:0 0 18px rgba(91,216,232,.65);} }
+@keyframes tuning-dots { 0% {opacity:.25;} 75%,100% {opacity:1;} }
+
+@media (max-width:520px) {
+  .tuning-overlay { inset:-22px -8px -10px; padding:9px; }
+  .tuning-console { padding:12px 10px 10px; }
+  .tuning-console-head { font-size:7px; letter-spacing:.08em; }
+  .tuning-heading { font-size:24px; }
+  .tuning-dial { width:98px;height:98px; }
+  .tuning-needle { top:11px;height:40px;transform-origin:50% 38px; }
+  .tuning-waveform { height:32px; }
+  .tuning-target strong { font-size:13px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .tuning-overlay,.tuning-overlay::before,.tuning-overlay::after,.tuning-console-head i,
+  .tuning-heading,.tuning-frequency strong,.tuning-dial::before,.tuning-needle,
+  .tuning-dial-hub,.tuning-wave-front,.tuning-band i,.tuning-target strong,.tuning-status i,
+  .tuning-status b { animation:none !important; }
+  .tuning-needle { transform:rotate(12deg); }
+}
