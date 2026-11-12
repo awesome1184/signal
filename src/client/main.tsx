@@ -1,5 +1,5 @@
 import './styles.css';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { getDailyPrompts, getNewYorkDateKey, formatDay, ROUND_SECONDS, MAX_SCORE, type Prompt } from '../shared/game';
 
@@ -75,10 +75,31 @@ function loadRun(dateKey: string): RunState {
   try {
     const raw = localStorage.getItem('signal:run:' + dateKey);
     if (!raw) return blankRun(dateKey);
-    const saved = JSON.parse(raw) as RunState;
+    const saved = JSON.parse(raw) as Partial<RunState>;
     if (saved.dateKey !== dateKey || !Array.isArray(saved.entries)) return blankRun(dateKey);
-    if (!['ready', 'playing', 'reveal', 'complete'].includes(saved.phase)) return blankRun(dateKey);
-    return saved;
+    if (!['ready', 'playing', 'reveal', 'complete'].includes(String(saved.phase))) return blankRun(dateKey);
+    const entries = saved.entries.slice(0, 7).filter((entry): entry is Entry => Boolean(
+      entry && typeof entry === 'object'
+      && typeof entry.promptId === 'string'
+      && typeof entry.answer === 'string'
+      && Number.isFinite(entry.score)
+      && typeof entry.tier === 'string'
+      && typeof entry.note === 'string'
+    )).map((entry) => ({
+      promptId: entry.promptId.slice(0, 80),
+      answer: entry.answer.slice(0, 80),
+      score: Math.max(0, Math.min(100, Math.floor(entry.score))),
+      tier: entry.tier.slice(0, 32),
+      note: entry.note.slice(0, 240),
+      ...(Number.isFinite(entry.signalSeed) ? { signalSeed: entry.signalSeed } : {})
+    }));
+    const phase = saved.phase as RunState['phase'];
+    const index = Number.isInteger(saved.index) ? Math.max(0, Math.min(6, saved.index as number)) : 0;
+    const deadline = typeof saved.deadline === 'number' && Number.isFinite(saved.deadline) ? saved.deadline : null;
+    if (phase === 'playing' && deadline === null) return blankRun(dateKey);
+    if (phase === 'complete' && entries.length !== 7) return blankRun(dateKey);
+    if (phase === 'reveal' && entries.length !== index + 1) return blankRun(dateKey);
+    return { dateKey, phase, index, entries, deadline, isTest: Boolean(saved.isTest) };
   } catch {
     return blankRun(dateKey);
   }
@@ -429,8 +450,9 @@ function scoreLabel(score: number): string {
 }
 
 function App() {
-  const dayKey = getNewYorkDateKey();
+  const [dayKey, setDayKey] = useState(() => getNewYorkDateKey());
   const prompts = useMemo(() => getDailyPrompts(dayKey), [dayKey]);
+  const answerInputRef = useRef<HTMLInputElement>(null);
   const [game, setGame] = useState<RunState>(() => loadRun(dayKey));
   const [answer, setAnswer] = useState('');
   const [message, setMessage] = useState('');
@@ -458,6 +480,8 @@ function App() {
   const [tuningPhase, setTuningPhase] = useState<TuningPhase>('searching');
 
   const currentPrompt: Prompt = prompts[Math.min(game.index, prompts.length - 1)];
+  const answerCharacters = answer.length;
+  const answerRemaining = Math.max(0, 80 - answerCharacters);
   const total = game.entries.reduce((sum, entry) => sum + entry.score, 0);
   const currentEntry = game.entries[game.entries.length - 1];
   const tuningSignalPaths = useMemo(() => buildReceiverPaths(tuningSignalSeed, tuningScore ?? 0), [tuningSignalSeed, tuningScore]);
@@ -532,6 +556,25 @@ function App() {
   }, [game, dayKey]);
 
   useEffect(() => {
+    const checkNewDay = () => {
+      const nextDay = getNewYorkDateKey();
+      if (nextDay === dayKey) return;
+      setDayKey(nextDay);
+      setGame(blankRun(nextDay));
+      setAnswer('');
+      setMessage('A new daily transmission has arrived.');
+      setNow(Date.now());
+      setCopied(false);
+    };
+    const interval = window.setInterval(checkNewDay, 15000);
+    return () => window.clearInterval(interval);
+  }, [dayKey]);
+
+  useEffect(() => {
+    if (game.phase === 'playing' && !isTuning) answerInputRef.current?.focus({ preventScroll: true });
+  }, [game.phase, game.index, isTuning]);
+
+  useEffect(() => {
     let active = true;
     fetch('/api/bootstrap')
       .then((response) => { if (!response.ok) throw new Error('No Devvit server'); return response.json(); })
@@ -564,7 +607,7 @@ function App() {
         });
         setMessage('The window closed. That round is logged as silence.');
       }
-    }, 200);
+    }, 1000);
     return () => window.clearInterval(timer);
   }, [game.phase, game.index, game.deadline, prompts, isTuning]);
 
@@ -822,22 +865,54 @@ function App() {
   };
 
   const copyResult = async () => {
-    const marks = game.entries.map((entry, index) => String(index + 1).padStart(2, '0') + (entry.score >= 85 ? ' ◆' : entry.score >= 30 ? ' ◇' : ' ·'));
-    const text = 'SIGNAL // ' + total + '/700\n' + scoreLabel(total) + '\n' + marks.join('  ') + '\nFind the signal in the noise.';
+    const rows = prompts.map((prompt, index) => {
+      const entry = game.entries[index];
+      return String(index + 1).padStart(2, '0') + '. '
+        + (entry?.answer || 'No answer')
+        + '  |  ' + (entry?.score ?? 0) + '/100'
+        + '  |  ' + (entry?.tier ?? 'NO SIGNAL');
+    });
+    const shareText = [
+      'SIGNAL // ' + formatDay(game.dateKey),
+      total + '/700  ·  ' + scoreLabel(total),
+      '',
+      ...rows,
+      '',
+      'Find the signal in the noise.'
+    ].join('\\n');
     try {
-      await navigator.clipboard.writeText(text);
+      if (!navigator.clipboard?.writeText) throw new Error('Clipboard API unavailable');
+      await navigator.clipboard.writeText(shareText);
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 1800);
-    } catch { setMessage('Clipboard access is unavailable in this browser.'); }
+      window.setTimeout(() => setCopied(false), 2200);
+    } catch {
+      const field = document.createElement('textarea');
+      field.value = shareText;
+      field.setAttribute('readonly', '');
+      field.style.position = 'fixed';
+      field.style.opacity = '0';
+      document.body.appendChild(field);
+      field.select();
+      let success = false;
+      try { success = document.execCommand('copy'); } catch { success = false; }
+      field.remove();
+      if (success) {
+        setCopied(true);
+        window.setTimeout(() => setCopied(false), 2200);
+      } else {
+        setMessage('Clipboard access is unavailable in this browser.');
+      }
+    }
   };
 
   const resetPreview = () => {
     if (!DEMO_MODE) return;
-    localStorage.removeItem('signal:run:' + dayKey);
+    try { localStorage.removeItem('signal:run:' + dayKey); } catch { /* storage may be disabled */ }
     setGame(blankRun(dayKey));
     setAnswer('');
     setMessage('');
     setNow(Date.now());
+    setCopied(false);
   };
 
   const dateLabel = formatDay(dayKey);
