@@ -39,10 +39,13 @@ function buildReceiverPaths(seed: number, score: number): ReceiverPaths {
     `${index ? 'L' : 'M'}${point.x.toFixed(1)} ${point.y.toFixed(1)}`
   ).join(' ');
 
-  // Let the reticle follow the carrier where it crosses the screen's center.
-  // Dampen the movement so it clearly tracks the signal without reaching the screen edge.
-  const centerY = carrierPoints[36].y;
-  const reticleY = Math.max(37, Math.min(63, 50 + ((centerY - 90) / 180) * 100 * .52));
+  // Lock to the strongest nearby crest or trough, not the exact midpoint.
+  // The midpoint can sit on the centerline even while the carrier grows around it.
+  const lockWindow = carrierPoints.slice(31, 42);
+  const lockPoint = lockWindow.reduce((strongest, point) =>
+    Math.abs(point.y - 90) > Math.abs(strongest.y - 90) ? point : strongest
+  , lockWindow[0]);
+  const reticleY = Math.max(23, Math.min(77, 50 + ((lockPoint.y - 90) / 180) * 100 * .82));
 
   return { carrier, reticleY };
 }
