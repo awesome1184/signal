@@ -600,9 +600,9 @@ function App() {
                         <div className="signal-static" />
                         <svg className="signal-traces" viewBox="0 0 720 180" preserveAspectRatio="none" aria-hidden="true">
                           <path className="signal-centerline" d="M0 90H720" />
-                          <path className="signal-chaos-trace" d="{resultSignalPaths?.noise ?? ''}" />
-                          <path className="signal-clean-trace" d="{resultSignalPaths?.carrier ?? ''}" />
-                          <path className="signal-motion-trace" d="M0 90 C30 90 30 35 60 35 S90 145 120 145 S150 90 180 90 C210 90 210 35 240 35 S270 145 300 145 S330 90 360 90 C390 90 390 35 420 35 S450 145 480 145 S510 90 540 90 C570 90 570 35 600 35 S630 145 660 145 S690 90 720 90" />
+                          <path className="signal-chaos-trace" d={tuningSignalPaths.noise} />
+                          <path className="signal-clean-trace" d={tuningSignalPaths.carrier} />
+                          <path className="signal-motion-trace" d={tuningSignalPaths.carrier} />
                         </svg>
                         <div className="signal-scanbeam" />
                         <div className="signal-lock-flare" />
@@ -720,9 +720,9 @@ function App() {
                     <div className="signal-static" />
                     <svg className="signal-traces" viewBox="0 0 720 180" preserveAspectRatio="none" aria-hidden="true">
                       <path className="signal-centerline" d="M0 90H720" />
-                      <path className="signal-chaos-trace" d="M0 90 12 78 19 115 27 42 34 128 43 63 52 100 61 35 68 117 78 77 87 96 96 25 105 145 114 57 123 106 132 68 141 125 151 45 160 99 169 73 180 90 190 52 199 132 208 69 218 101 227 29 238 148 247 73 258 117 268 48 277 103 288 71 298 94 307 35 317 142 327 64 336 119 346 55 356 102 366 78 376 90 388 41 398 133 408 67 418 111 428 31 438 148 448 70 458 112 468 48 478 100 488 76 498 91 508 37 518 145 528 61 538 116 548 57 558 101 568 72 578 90 589 44 599 134 609 68 619 109 629 34 639 147 649 72 659 115 669 49 679 98 689 76 700 91 720 90" />
-                      <path className="signal-clean-trace" d="M0 90 C30 90 30 35 60 35 S90 145 120 145 S150 90 180 90 C210 90 210 35 240 35 S270 145 300 145 S330 90 360 90 C390 90 390 35 420 35 S450 145 480 145 S510 90 540 90 C570 90 570 35 600 35 S630 145 660 145 S690 90 720 90" />
-                      <path className="signal-motion-trace" d="M0 90 C30 90 30 35 60 35 S90 145 120 145 S150 90 180 90 C210 90 210 35 240 35 S270 145 300 145 S330 90 360 90 C390 90 390 35 420 35 S450 145 480 145 S510 90 540 90 C570 90 570 35 600 35 S630 145 660 145 S690 90 720 90" />
+                      <path className="signal-chaos-trace" d={resultSignalPaths?.noise ?? ''} />
+                      <path className="signal-clean-trace" d={resultSignalPaths?.carrier ?? ''} />
+                      <path className="signal-motion-trace" d={resultSignalPaths?.carrier ?? ''} />
                     </svg>
                     <div className="signal-lock-reticle" aria-hidden="true">
                       <i className="reticle-corner top-left" />
