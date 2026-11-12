@@ -676,7 +676,7 @@ function App() {
     '--cancel-width': (48 - tuningLockProgress * 42) + '%',
     '--cancel-opacity': String(.82 - tuningLockProgress * .68),
     '--cancel-front': (8 + tuningLockProgress * 84) + '%',
-    '--frequency-needle-x': (8 + (tuningSignalPaths.reticleX - 8) * tuningLockProgress) + '%',
+    '--frequency-needle-x': (8 + tuningLockProgress * 42) + '%',
     '--phase-rotation': ((1 - tuningLockProgress) * 165) + 'deg',
     '--phase-counter-rotation': -((1 - tuningLockProgress) * 165) + 'deg'
   } as React.CSSProperties;
@@ -1284,7 +1284,7 @@ function App() {
                     '--cancel-width': (48 - currentEntry.score / 100 * 42) + '%',
                     '--cancel-opacity': String(.82 - currentEntry.score / 100 * .68),
                     '--cancel-front': (8 + currentEntry.score / 100 * 84) + '%',
-                    '--frequency-needle-x': (8 + ((resultSignalPaths?.reticleX ?? 50) - 8) * currentEntry.score / 100) + '%',
+                    '--frequency-needle-x': (8 + currentEntry.score / 100 * 42) + '%',
                     '--phase-rotation': ((1 - currentEntry.score / 100) * 165) + 'deg',
                     '--phase-counter-rotation': -((1 - currentEntry.score / 100) * 165) + 'deg'
                   } as React.CSSProperties}
