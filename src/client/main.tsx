@@ -554,6 +554,8 @@ function App() {
     '--lock-progress-pct': (tuningLockProgress * 100).toFixed(1) + '%',
     '--reticle-scale': String(1.48 - tuningLockProgress * .66),
     '--reticle-opacity': String(.22 + tuningLockProgress * .74),
+    '--reticle-shadow-alpha': String(.16 + tuningLockProgress * .42),
+    '--reticle-ring-opacity': String(.24 + tuningLockProgress * .68),
     '--reticle-corner-size': (12 + tuningLockProgress * 8) + 'px',
     '--reticle-dot-size': (4 + tuningLockProgress * 4) + 'px',
     '--carrier-stroke-width': (1.45 + tuningLockProgress * .95) + 'px'
