@@ -156,13 +156,15 @@ function App() {
     : tuningPhase === 'tracking' ? 'CARRIER TRACKING'
     : tuningPhase === 'locking' ? 'ACQUIRING LOCK'
     : tuningPhase === 'locked' && tuningScore === 100 ? 'LOCK CONFIRMED'
-    : tuningPhase === 'locked' ? 'PARTIAL LOCK'
+    : tuningPhase === 'locked' && (tuningScore ?? 0) >= 60 ? 'PARTIAL LOCK'
+    : tuningPhase === 'locked' ? 'WEAK LOCK'
     : 'SCAN FAILED';
   const tuningScreenState = tuningPhase === 'searching' ? 'SEARCHING'
     : tuningPhase === 'tracking' ? 'TRACKING'
     : tuningPhase === 'locking' ? 'ACQUIRING'
     : tuningPhase === 'locked' && tuningScore === 100 ? 'LOCKED'
-    : tuningPhase === 'locked' ? 'PARTIAL LOCK'
+    : tuningPhase === 'locked' && (tuningScore ?? 0) >= 60 ? 'PARTIAL LOCK'
+    : tuningPhase === 'locked' ? 'WEAK LOCK'
     : 'NO CARRIER';
   const tuningNoiseFinal = tuningScore === null ? 1 : Math.max(.025, 1 - tuningScore / 100 * .975);
   const tuningWaveFinal = tuningScore === null ? .02 : Math.max(.08, tuningScore / 100);
