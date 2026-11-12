@@ -4,7 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { getDailyPrompts, getNewYorkDateKey, formatDay, ROUND_SECONDS, MAX_SCORE, type Prompt } from '../shared/game';
 
 type Entry = { promptId: string; answer: string; score: number; tier: string; note: string; signalSeed?: number };
-type ReceiverPaths = { carrier: string; noise: string };
+type ReceiverPaths = { carrier: string };
 
 function receiverFrequency(seed: number): string {
   return (88 + ((Math.floor(seed) >>> 0) % 2000) / 100).toFixed(1);
@@ -38,14 +38,7 @@ function buildReceiverPaths(seed: number, score: number): ReceiverPaths {
     `${index ? 'L' : 'M'}${point.x.toFixed(1)} ${point.y.toFixed(1)}`
   ).join(' ');
 
-  const noisePoints = Array.from({ length: 37 }, (_, index) => ({
-    x: index * 20,
-    y: 52 + random() * 76
-  }));
-  const noise = noisePoints.map((point, index) =>
-    `${index ? 'L' : 'M'}${point.x.toFixed(1)} ${point.y.toFixed(1)}`
-  ).join(' ');
-  return { carrier, noise };
+  return { carrier };
 }
 type RunState = {
   dateKey: string;
@@ -929,7 +922,6 @@ function App() {
                         <div className="signal-static" />
                         <svg className="signal-traces" viewBox="0 0 720 180" preserveAspectRatio="none" aria-hidden="true">
                           <path className="signal-centerline" d="M0 90H720" />
-                          <path className="signal-chaos-trace" d={tuningSignalPaths.noise} />
                           <path className="signal-clean-trace" d={tuningSignalPaths.carrier} />
                         </svg>
                         <div className="signal-lock-reticle" aria-hidden="true">
@@ -1027,7 +1019,6 @@ function App() {
                     <div className="signal-static" />
                     <svg className="signal-traces" viewBox="0 0 720 180" preserveAspectRatio="none" aria-hidden="true">
                       <path className="signal-centerline" d="M0 90H720" />
-                      <path className="signal-chaos-trace" d={resultSignalPaths?.noise ?? ''} />
                       <path className="signal-clean-trace" d={resultSignalPaths?.carrier ?? ''} />
                     </svg>
                     <div className="signal-lock-reticle" aria-hidden="true">
