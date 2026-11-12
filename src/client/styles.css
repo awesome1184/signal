@@ -3459,410 +3459,44 @@ button { user-select:none; }
 }
 
 
-/* Five selectable receiver visualizers. Each uses the same acquisition score,
-   but presents the signal through a distinctly different instrument. */
-.receiver-visualizer-picker {
-  display:grid;
-  grid-template-columns:auto minmax(0,1fr);
-  align-items:center;
-  gap:10px;
-  margin:0 0 17px;
-  padding:8px 9px;
-  border:1px solid rgba(91,216,232,.16);
-  border-radius:7px;
-  background:rgba(5,20,29,.48);
-}
-.visualizer-picker-label {
-  color:#7297a3;
-  font:7px var(--mono);
-  letter-spacing:.14em;
-  white-space:nowrap;
-}
-.visualizer-picker-options {
-  display:grid;
-  grid-template-columns:repeat(5,minmax(0,1fr));
-  gap:5px;
-  min-width:0;
-}
-.visualizer-option {
-  display:flex;
-  min-width:0;
-  min-height:31px;
-  align-items:center;
-  justify-content:center;
-  gap:5px;
-  padding:4px 5px;
-  border:1px solid rgba(104,164,174,.2);
-  border-radius:4px;
-  background:rgba(9,29,39,.74);
-  color:#7898a4;
-  cursor:pointer;
-  transition:background .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease;
-}
-.visualizer-option > span {
-  color:#80c6cc;
-  font:14px/1 var(--mono);
-}
-.visualizer-option small {
-  overflow:hidden;
-  color:inherit;
-  font:6px var(--mono);
-  letter-spacing:.08em;
-  text-overflow:ellipsis;
-}
-.visualizer-option:hover {
-  border-color:rgba(107,214,220,.5);
-  color:#c4e6e8;
-}
-.visualizer-option.selected {
-  border-color:rgba(126,237,226,.76);
-  background:linear-gradient(180deg,rgba(28,88,91,.5),rgba(10,43,51,.8));
-  box-shadow:inset 0 0 12px rgba(87,225,214,.1),0 0 9px rgba(87,225,214,.1);
-  color:#d8fff4;
-}
-.visualizer-option.selected > span {
-  color:#caffef;
-  text-shadow:0 0 9px rgba(138,255,229,.55);
-}
-.visualizer-option:focus-visible {
-  outline:2px solid #8be8ed;
-  outline-offset:2px;
-}
-@media (max-width:520px) {
-  .receiver-visualizer-picker {
-    grid-template-columns:1fr;
-    gap:6px;
-    margin-bottom:14px;
-    padding:7px;
-  }
-  .visualizer-picker-label { font-size:6px; }
-  .visualizer-picker-options { gap:4px; }
-  .visualizer-option { min-height:29px; flex-direction:column; gap:2px; padding:3px 2px; }
-  .visualizer-option > span { font-size:12px; }
-  .visualizer-option small { font-size:5.5px;letter-spacing:.04em; }
-}
 
-/* 01 / LOCK-ON: the original carrier trace and vertically tracking brackets. */
-.signal-screen[data-visualizer="lock"] .signal-static { z-index:2; }
-.signal-screen[data-visualizer="lock"] .signal-traces { z-index:3; }
 
-/* 02 / RADAR: a rotating azimuth sweep reveals echoes on a circular scope. */
-.signal-screen[data-visualizer="radar"] {
-  background:
-    radial-gradient(circle at 50% 48%,rgba(13,73,67,.3),transparent 62%),
-    #020b0d;
+/* Focus the receiver on one carrier crest: a horizontal tracking frame that
+   moves in both axes and tightens as the signal is acquired. */
+.signal-screen .signal-lock-reticle {
+  left:var(--reticle-x,50%);
+  top:var(--reticle-y,50%);
+  width:clamp(112px,23%,164px);
+  aspect-ratio:1.45;
+  transform-origin:center;
 }
-.visual-radar {
-  position:absolute;
-  z-index:3;
-  inset:0;
-  display:grid;
-  place-items:center;
-  overflow:hidden;
+.play-view.tuning-view .signal-screen .signal-lock-reticle {
+  transition:
+    left .36s cubic-bezier(.2,.72,.2,1),
+    top .36s cubic-bezier(.2,.72,.2,1),
+    transform .3s cubic-bezier(.2,.72,.2,1),
+    opacity .22s ease,
+    filter .22s ease !important;
+  will-change:left,top,transform;
 }
-.radar-disk {
-  position:relative;
-  width:min(48%,178px);
-  aspect-ratio:1;
-  overflow:hidden;
-  border:1px solid rgba(105,231,199,.62);
-  border-radius:50%;
-  background:
-    linear-gradient(90deg,transparent 49.7%,rgba(102,224,193,.23) 49.9%,rgba(102,224,193,.23) 50.1%,transparent 50.3%),
-    linear-gradient(0deg,transparent 49.7%,rgba(102,224,193,.23) 49.9%,rgba(102,224,193,.23) 50.1%,transparent 50.3%),
-    radial-gradient(circle,rgba(24,114,89,.15),rgba(2,28,27,.42) 72%);
-  box-shadow:0 0 24px rgba(70,220,179,.12),inset 0 0 25px rgba(65,205,167,.12);
+.signal-result-screen .signal-lock-reticle {
+  left:var(--reticle-x,50%);
+  top:var(--reticle-y,50%);
 }
-.radar-disk::before {
-  content:"";
-  position:absolute;
-  inset:0;
-  border-radius:50%;
-  background:repeating-radial-gradient(circle,transparent 0 23%,rgba(112,231,198,.23) 23.5% 24%,transparent 24.5% 49%);
-}
-.radar-disk::after {
-  content:"";
-  position:absolute;
-  inset:8%;
-  border:1px dashed rgba(112,231,198,.16);
-  border-radius:50%;
-}
-.radar-ring {
-  position:absolute;
-  z-index:1;
-  border:1px solid rgba(112,231,198,.17);
-  border-radius:50%;
-  pointer-events:none;
-}
-.radar-ring-inner { inset:25%; }
-.radar-ring-middle { inset:50%; }
-.radar-cross {
-  position:absolute;
-  z-index:2;
-  background:rgba(112,231,198,.15);
-}
-.radar-cross-horizontal { left:0;right:0;top:50%;height:1px; }
-.radar-cross-vertical { top:0;bottom:0;left:50%;width:1px; }
-.radar-sweep {
-  position:absolute;
-  z-index:2;
-  inset:-1px;
-  border-radius:50%;
-  background:conic-gradient(from -20deg,transparent 0deg,transparent 300deg,rgba(90,243,202,.02) 326deg,rgba(90,243,202,.24) 354deg,rgba(90,243,202,.02) 360deg);
-  transform-origin:50% 50%;
-  animation:radar-sweep-rotate 4.2s linear infinite;
-}
-.radar-blip {
-  position:absolute;
-  z-index:4;
-  width:7px;
-  height:7px;
-  border:1px solid rgba(199,255,230,.9);
-  border-radius:50%;
-  background:#8effcf;
-  box-shadow:0 0 8px rgba(104,255,204,.9),0 0 17px rgba(104,255,204,.45);
-  animation:radar-echo 2.2s ease-in-out infinite alternate;
-}
-.radar-blip-one { left:64%;top:29%; }
-.radar-blip-two { left:32%;top:56%;width:5px;height:5px;animation-delay:-.8s; }
-.radar-blip-three { left:55%;top:72%;width:4px;height:4px;animation-delay:-1.4s; }
-.radar-origin {
-  position:absolute;
-  z-index:5;
-  top:50%;
-  left:50%;
-  width:5px;
-  height:5px;
-  border-radius:50%;
-  background:#d5fff1;
-  box-shadow:0 0 9px rgba(181,255,225,.85);
-  transform:translate(-50%,-50%);
-}
-.radar-range {
-  position:absolute;
-  top:12px;
-  color:rgba(137,218,196,.58);
-  font:6px var(--mono);
-  letter-spacing:.13em;
-}
-.radar-range-left { left:12px; }
-.radar-range-right { right:12px; }
-@keyframes radar-sweep-rotate { to { transform:rotate(360deg); } }
-@keyframes radar-echo {
-  from { filter:brightness(.68);box-shadow:0 0 3px rgba(104,255,204,.35); }
-  to { filter:brightness(1.45);box-shadow:0 0 12px rgba(104,255,204,.95),0 0 22px rgba(104,255,204,.5); }
-}
-
-/* 03 / SPECTRUM: a live frequency profile builds into distinct peaks. */
-.signal-screen[data-visualizer="spectrum"] {
-  background:linear-gradient(180deg,#07131b,#031016 72%,#02090d);
-}
-.visual-spectrum {
-  position:absolute;
-  z-index:3;
-  inset:13px 13px 23px;
-}
-.spectrum-grid-lines {
-  position:absolute;
-  inset:0 0 4px;
-  opacity:.58;
-  background:
-    repeating-linear-gradient(0deg,rgba(100,176,185,.14) 0 1px,transparent 1px 24%),
-    repeating-linear-gradient(90deg,rgba(100,176,185,.08) 0 1px,transparent 1px 10%);
-}
-.spectrum-bars {
-  position:absolute;
-  inset:0 0 5px;
-  display:flex;
-  align-items:flex-end;
-  gap:3px;
-  padding:5px 1px 0;
-}
-.spectrum-bar {
-  position:relative;
-  flex:1 1 0;
-  min-width:2px;
-  border:1px solid rgba(114,235,219,.34);
-  border-bottom:0;
-  border-radius:2px 2px 0 0;
-  background:linear-gradient(180deg,#d9ffe9 0%,#80e8d1 22%,#33a8a9 100%);
-  box-shadow:0 0 7px rgba(74,220,198,.24);
-  transform-origin:bottom;
-  animation:spectrum-bar-breathe 1.7s ease-in-out infinite alternate;
-  animation-delay:var(--bar-delay);
-  transition:height .35s ease,filter .35s ease;
-}
-.spectrum-bar:nth-child(3n) { background:linear-gradient(180deg,#f4d69d,#e6a75e 44%,#945d42); }
-.spectrum-frequency-labels {
-  position:absolute;
-  right:0;
-  bottom:-13px;
-  left:0;
-  display:flex;
-  justify-content:space-between;
-  color:rgba(137,178,185,.64);
-  font:6px var(--mono);
-  letter-spacing:.08em;
-}
-@keyframes spectrum-bar-breathe {
-  from { transform:scaleY(.76);filter:brightness(.82); }
-  to { transform:scaleY(1);filter:brightness(1.2); }
-}
-
-/* 04 / WATERFALL: scrolling spectral history reveals a diagonal carrier ridge. */
-.signal-screen[data-visualizer="waterfall"] {
-  background:
-    linear-gradient(180deg,rgba(6,29,37,.96),rgba(2,10,16,.98)),
-    #020a10;
-}
-.visual-waterfall {
-  position:absolute;
-  z-index:3;
-  inset:12px 12px 17px;
-  display:grid;
-  grid-template-columns:22px minmax(0,1fr);
-  gap:8px;
-}
-.waterfall-axis {
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  padding:2px 0 12px;
-  color:rgba(125,174,181,.6);
-  font:6px var(--mono);
-  text-align:center;
-}
-.waterfall-axis span:nth-child(2) { align-self:center;color:#93c7c5; }
-.waterfall-data {
-  min-width:0;
-  display:grid;
-  grid-template-rows:repeat(8,minmax(0,1fr));
-  gap:4px;
-  overflow:hidden;
-  padding:3px 0 13px;
-}
-.waterfall-row {
-  display:grid;
-  grid-template-columns:repeat(38,minmax(1px,1fr));
-  gap:2px;
-  min-height:0;
-  animation:waterfall-row-drift 3.4s ease-in-out infinite alternate;
-  animation-delay:var(--row-delay);
-}
-.waterfall-row i {
-  min-width:0;
-  border-radius:1px;
-  background:linear-gradient(180deg,#d6ffdf,#4dd9c5 62%,#287c9a);
-  box-shadow:0 0 5px rgba(71,227,202,.22);
-  transition:opacity .4s ease;
-}
-.waterfall-row i:nth-child(5n) {
-  background:linear-gradient(180deg,#ffe3ac,#e7a263 65%,#855b49);
-}
-.waterfall-time {
-  position:absolute;
-  right:0;
-  bottom:0;
-  color:rgba(137,178,185,.64);
-  font:6px var(--mono);
-  letter-spacing:.1em;
-}
-@keyframes waterfall-row-drift {
-  from { transform:translateX(-5px); }
-  to { transform:translateX(5px); }
-}
-
-/* 05 / PHASE CONSTELLATION: scattered points gather into a stable geometry. */
-.signal-screen[data-visualizer="constellation"] {
-  background:
-    radial-gradient(ellipse at 50% 50%,rgba(45,91,126,.2),transparent 68%),
-    #030a14;
-}
-.visual-constellation {
-  position:absolute;
-  z-index:3;
-  inset:9px 10px 8px;
-  overflow:hidden;
-  background-image:
-    linear-gradient(rgba(121,167,198,.08) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(121,167,198,.08) 1px,transparent 1px);
-  background-size:28px 28px;
-}
-.visual-constellation::before {
-  content:"";
-  position:absolute;
-  inset:12%;
-  border:1px solid rgba(112,185,213,.1);
-  border-radius:50%;
-}
-.constellation-lines {
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  overflow:visible;
-}
-.constellation-lines path {
-  fill:none;
-  stroke:rgba(153,239,232,.82);
-  stroke-width:.55;
+.play-view.tuning-view .signal-screen .signal-clean-trace {
   stroke-linecap:round;
   stroke-linejoin:round;
-  filter:drop-shadow(0 0 3px rgba(123,236,224,.5));
-  transition:stroke-dashoffset .38s ease;
+  filter:drop-shadow(0 0 var(--carrier-glow-size) rgba(110,239,239,var(--carrier-glow-alpha)));
 }
-.constellation-dot {
-  position:absolute;
-  z-index:2;
-  width:5px;
-  height:5px;
-  margin:-2.5px 0 0 -2.5px;
-  border:1px solid rgba(210,255,244,.88);
-  border-radius:50%;
-  background:#88e9df;
-  box-shadow:0 0 7px rgba(117,235,222,.68);
-  transform:scale(.82);
-  transition:left .48s cubic-bezier(.2,.65,.25,1),top .48s cubic-bezier(.2,.65,.25,1),opacity .3s ease,transform .3s ease;
-  animation:constellation-twinkle 2.8s ease-in-out infinite alternate;
+.play-view.tuning-view .signal-screen .signal-lock-reticle .reticle-corner {
+  border-radius:1px;
 }
-.constellation-dot:nth-of-type(3n) { width:3px;height:3px;margin:-1.5px 0 0 -1.5px; }
-.constellation-core {
-  position:absolute;
-  z-index:3;
-  top:50%;
-  left:50%;
-  width:9px;
-  height:9px;
-  border:1px solid #e1fff5;
-  border-radius:50%;
-  background:rgba(146,255,229,.35);
-  box-shadow:0 0 12px rgba(144,255,230,.76),0 0 28px rgba(84,204,235,.35);
-  transform:translate(-50%,-50%);
+.play-view.tuning-view .signal-screen .reticle-center {
+  background:rgba(155,255,239,.3);
 }
-.constellation-readout {
-  position:absolute;
-  right:0;
-  bottom:0;
-  left:0;
-  color:rgba(159,205,218,.72);
-  font:6px var(--mono);
-  letter-spacing:.17em;
-  text-align:center;
-}
-@keyframes constellation-twinkle {
-  from { filter:brightness(.72); }
-  to { filter:brightness(1.25); }
-}
-
-/* Motion accessibility: preserve each display's final readable state. */
 @media (prefers-reduced-motion:reduce) {
-  .radar-sweep,.radar-blip,.spectrum-bar,.waterfall-row,.constellation-dot {
-    animation:none !important;
-  }
-  .visualizer-option,.spectrum-bar,.waterfall-row,.constellation-dot,.constellation-lines path {
+  .play-view.tuning-view .signal-screen .signal-lock-reticle {
     transition:none !important;
+    will-change:auto;
   }
-  .radar-sweep { transform:rotate(245deg); }
-  .spectrum-bar { transform:scaleY(1); }
-  .waterfall-row { transform:none; }
 }
