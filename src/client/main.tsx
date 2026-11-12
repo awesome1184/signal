@@ -484,7 +484,7 @@ function App() {
   const answerRemaining = Math.max(0, 80 - answerCharacters);
   const total = game.entries.reduce((sum, entry) => sum + entry.score, 0);
   const currentEntry = game.entries[game.entries.length - 1];
-  const tuningSignalPaths = useMemo(() => buildReceiverPaths(tuningSignalSeed, tuningScore ?? 0), [tuningSignalSeed, tuningScore]);
+  const tuningSignalPaths = useMemo(() => buildReceiverPaths(tuningSignalSeed, tuningDisplayScore), [tuningSignalSeed, tuningDisplayScore]);
   const resultSignalPaths = useMemo(() => currentEntry ? buildReceiverPaths(currentEntry.signalSeed ?? 1, currentEntry.score) : null, [currentEntry]);
   const secondsLeft = game.deadline ? Math.max(0, Math.ceil((game.deadline - now) / 1000)) : ROUND_SECONDS;
   const completedPrompts = game.entries.length;
@@ -540,6 +540,9 @@ function App() {
   const tuningNoiseFinal = tuningScore === null ? 1 : Math.max(.025, 1 - tuningScore / 100 * .975);
   const tuningWaveFinal = tuningScore === null ? .02 : Math.max(.08, tuningScore / 100);
   const tuningChaosFinal = tuningScore === null ? .95 : Math.max(.03, .95 - tuningScore / 100 * .92);
+  const tuningLockProgress = tuningPhase === 'recovering' && tuningScore !== null
+    ? Math.max(0, Math.min(1, (100 - tuningDisplayScore) / Math.max(1, 100 - tuningScore)))
+    : Math.max(0, Math.min(1, tuningDisplayScore / 100));
   const tuningCaptureStyle = {
     '--noise-final': String(tuningNoiseFinal),
     '--wave-final': String(tuningWaveFinal),
@@ -547,8 +550,13 @@ function App() {
     '--chaos-final': String(tuningChaosFinal),
     '--tune-duration': tuningDuration + 'ms',
     '--score-width': tuningDisplayScore + '%',
-    '--reticle-scale': String(.78 + (1 - (tuningScore ?? 0) / 100) * .65),
-    '--reticle-opacity': String(.4 + (tuningScore ?? 0) / 100 * .6)
+    '--lock-progress': String(tuningLockProgress),
+    '--lock-progress-pct': (tuningLockProgress * 100).toFixed(1) + '%',
+    '--reticle-scale': String(1.48 - tuningLockProgress * .66),
+    '--reticle-opacity': String(.22 + tuningLockProgress * .74),
+    '--reticle-corner-size': (12 + tuningLockProgress * 8) + 'px',
+    '--reticle-dot-size': (4 + tuningLockProgress * 4) + 'px',
+    '--carrier-stroke-width': (1.45 + tuningLockProgress * .95) + 'px'
   } as React.CSSProperties;
 
   useEffect(() => {
