@@ -170,10 +170,13 @@ function MountainScene() {
 
 type TuningPhase = 'searching' | 'tracking' | 'locking' | 'surging' | 'slipping' | 'locked' | 'failed';
 
+type ReceiverBed = { gain: GainNode; sources: Array<OscillatorNode | AudioBufferSourceNode> };
+type NoteShape = { attack?: number; overtone?: number; brightness?: number; pan?: number; bendTo?: number };
+
 let signalAudioEnabled = true;
 let signalAudioContext: AudioContext | null = null;
 let signalMasterGain: GainNode | null = null;
-let receiverBed: { gain: GainNode; oscillators: OscillatorNode[] } | null = null;
+let receiverBed: ReceiverBed | null = null;
 
 function getSignalAudioContext(): AudioContext | null {
   if (typeof window === 'undefined' || typeof AudioContext === 'undefined') return null;
@@ -181,34 +184,99 @@ function getSignalAudioContext(): AudioContext | null {
     if (!signalAudioContext) {
       signalAudioContext = new AudioContext();
       signalMasterGain = signalAudioContext.createGain();
-      signalMasterGain.gain.value = signalAudioEnabled ? .62 : .0001;
+      signalMasterGain.gain.value = signalAudioEnabled ? .48 : .0001;
       signalMasterGain.connect(signalAudioContext.destination);
     }
     if (signalAudioContext.state === 'suspended') void signalAudioContext.resume().catch(() => undefined);
     return signalAudioContext;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
-function scheduleSoftTone(context: AudioContext, frequency: number, startAt: number, duration: number, volume: number, endFrequency = frequency): void {
-  if (!signalMasterGain) return;
-  const oscillator = context.createOscillator();
+function scheduleNote(
+  context: AudioContext,
+  frequency: number,
+  startAt: number,
+  duration: number,
+  volume: number,
+  shape: NoteShape = {}
+): void {
+  if (!signalMasterGain || !signalAudioEnabled || frequency <= 0 || duration <= 0) return;
+  const attack = Math.min(shape.attack ?? .12, duration * .42);
+  const voice = context.createGain();
   const filter = context.createBiquadFilter();
-  const envelope = context.createGain();
-  oscillator.type = 'sine';
-  oscillator.frequency.setValueAtTime(frequency, startAt);
-  if (endFrequency !== frequency) oscillator.frequency.exponentialRampToValueAtTime(endFrequency, startAt + duration);
+  const panner = context.createStereoPanner();
+  const fundamental = context.createOscillator();
+  const overtone = context.createOscillator();
+  const overtoneLevel = context.createGain();
+
+  fundamental.type = 'sine';
+  fundamental.frequency.setValueAtTime(frequency, startAt);
+  if (shape.bendTo && shape.bendTo > 0) {
+    fundamental.frequency.exponentialRampToValueAtTime(shape.bendTo, startAt + duration * .82);
+  }
+  overtone.type = 'sine';
+  overtone.frequency.setValueAtTime(frequency * 2.002, startAt);
+  overtoneLevel.gain.setValueAtTime(shape.overtone ?? .12, startAt);
   filter.type = 'lowpass';
-  filter.frequency.setValueAtTime(1450, startAt);
-  filter.Q.setValueAtTime(.45, startAt);
-  envelope.gain.setValueAtTime(.0001, startAt);
-  envelope.gain.linearRampToValueAtTime(volume, startAt + Math.min(.055, duration * .3));
-  envelope.gain.exponentialRampToValueAtTime(Math.max(.0001, volume * .42), startAt + duration * .56);
-  envelope.gain.exponentialRampToValueAtTime(.0001, startAt + duration);
-  oscillator.connect(filter);
-  filter.connect(envelope);
+  filter.frequency.setValueAtTime(shape.brightness ?? 1900, startAt);
+  filter.Q.setValueAtTime(.55, startAt);
+  panner.pan.setValueAtTime(Math.max(-.45, Math.min(.45, shape.pan ?? 0)), startAt);
+
+  voice.gain.setValueAtTime(.0001, startAt);
+  voice.gain.linearRampToValueAtTime(volume, startAt + attack);
+  voice.gain.setValueAtTime(volume * .72, startAt + attack + Math.min(.08, duration * .1));
+  voice.gain.exponentialRampToValueAtTime(.0001, startAt + duration);
+
+  fundamental.connect(voice);
+  overtone.connect(overtoneLevel);
+  overtoneLevel.connect(voice);
+  voice.connect(filter);
+  filter.connect(panner);
+  panner.connect(signalMasterGain);
+  fundamental.start(startAt);
+  overtone.start(startAt);
+  fundamental.stop(startAt + duration + .04);
+  overtone.stop(startAt + duration + .04);
+}
+
+function makeSoftNoiseBuffer(context: AudioContext, seconds: number): AudioBuffer {
+  const frameCount = Math.max(1, Math.floor(context.sampleRate * seconds));
+  const buffer = context.createBuffer(1, frameCount, context.sampleRate);
+  const channel = buffer.getChannelData(0);
+  let last = 0;
+  for (let i = 0; i < frameCount; i++) {
+    const white = Math.random() * 2 - 1;
+    last = last * .78 + white * .22;
+    channel[i] = last * .7;
+  }
+  return buffer;
+}
+
+function scheduleTuningSweep(context: AudioContext): void {
+  if (!signalMasterGain || !signalAudioEnabled) return;
+  const now = context.currentTime;
+  const source = context.createBufferSource();
+  const band = context.createBiquadFilter();
+  const highPass = context.createBiquadFilter();
+  const envelope = context.createGain();
+  source.buffer = makeSoftNoiseBuffer(context, .95);
+  highPass.type = 'highpass';
+  highPass.frequency.setValueAtTime(180, now);
+  band.type = 'bandpass';
+  band.Q.setValueAtTime(.62, now);
+  band.frequency.setValueAtTime(420, now);
+  band.frequency.exponentialRampToValueAtTime(1450, now + .88);
+  envelope.gain.setValueAtTime(.0001, now);
+  envelope.gain.linearRampToValueAtTime(.008, now + .24);
+  envelope.gain.exponentialRampToValueAtTime(.0001, now + .94);
+  source.connect(highPass);
+  highPass.connect(band);
+  band.connect(envelope);
   envelope.connect(signalMasterGain);
-  oscillator.start(startAt);
-  oscillator.stop(startAt + duration + .035);
+  source.start(now);
+  source.stop(now + .98);
 }
 
 function playSoftUiCue(): void {
@@ -216,30 +284,72 @@ function playSoftUiCue(): void {
   const context = getSignalAudioContext();
   if (!context) return;
   const now = context.currentTime;
-  scheduleSoftTone(context, 293.66, now, .105, .008);
-  scheduleSoftTone(context, 440, now + .045, .16, .006);
+  // A small, rounded two-part wooden/plucked tick, not a notification beep.
+  scheduleNote(context, 392, now, .16, .009, { attack: .008, overtone: .22, brightness: 1350, pan: -.08 });
+  scheduleNote(context, 587.33, now + .035, .22, .005, { attack: .012, overtone: .1, brightness: 1700, pan: .08 });
 }
 
 function startReceiverBed(context: AudioContext): void {
-  if (receiverBed || !signalMasterGain) return;
-  const gain = context.createGain();
-  const filter = context.createBiquadFilter();
-  filter.type = 'lowpass';
-  filter.frequency.setValueAtTime(430, context.currentTime);
-  filter.Q.setValueAtTime(.35, context.currentTime);
-  gain.gain.setValueAtTime(.0001, context.currentTime);
-  gain.gain.exponentialRampToValueAtTime(.009, context.currentTime + .8);
-  filter.connect(gain);
-  gain.connect(signalMasterGain);
-  const oscillators = [146.83, 220].map((frequency) => {
+  if (receiverBed || !signalMasterGain || !signalAudioEnabled) return;
+  const now = context.currentTime;
+  const mix = context.createGain();
+  const bedGain = context.createGain();
+  const airFilter = context.createBiquadFilter();
+  const lfo = context.createOscillator();
+  const lfoDepth = context.createGain();
+  const sources: Array<OscillatorNode | AudioBufferSourceNode> = [];
+
+  airFilter.type = 'bandpass';
+  airFilter.frequency.setValueAtTime(720, now);
+  airFilter.Q.setValueAtTime(.48, now);
+  lfo.frequency.setValueAtTime(.075, now);
+  lfoDepth.gain.setValueAtTime(155, now);
+  lfo.connect(lfoDepth);
+  lfoDepth.connect(airFilter.frequency);
+  lfo.start(now);
+  sources.push(lfo);
+
+  const air = context.createBufferSource();
+  const airLevel = context.createGain();
+  air.buffer = makeSoftNoiseBuffer(context, 2);
+  air.loop = true;
+  airLevel.gain.setValueAtTime(.12, now);
+  air.connect(airFilter);
+  airFilter.connect(airLevel);
+  airLevel.connect(mix);
+  air.start(now);
+  sources.push(air);
+
+  // Low, gently beating tones give the station a sense of power without a loud hum.
+  [73.42, 110, 146.83].forEach((frequency, index) => {
     const oscillator = context.createOscillator();
+    const level = context.createGain();
     oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(frequency, context.currentTime);
-    oscillator.connect(filter);
-    oscillator.start();
-    return oscillator;
+    oscillator.frequency.setValueAtTime(frequency, now);
+    level.gain.setValueAtTime([.24, .13, .045][index], now);
+    oscillator.connect(level);
+    level.connect(mix);
+    oscillator.start(now);
+    sources.push(oscillator);
   });
-  receiverBed = { gain, oscillators };
+
+  bedGain.gain.setValueAtTime(.0001, now);
+  bedGain.gain.exponentialRampToValueAtTime(.0075, now + 1.1);
+  mix.connect(bedGain);
+  bedGain.connect(signalMasterGain);
+  receiverBed = { gain: bedGain, sources };
+}
+
+function stopReceiverBed(): void {
+  if (!receiverBed || !signalAudioContext) return;
+  const bed = receiverBed;
+  receiverBed = null;
+  const now = signalAudioContext.currentTime;
+  bed.gain.gain.cancelScheduledValues(now);
+  bed.gain.gain.setTargetAtTime(.0001, now, .18);
+  bed.sources.forEach((source) => {
+    try { source.stop(now + .85); } catch { /* source already stopped */ }
+  });
 }
 
 function setSignalAudioEnabled(enabled: boolean): void {
@@ -250,20 +360,8 @@ function setSignalAudioEnabled(enabled: boolean): void {
   }
   const now = signalAudioContext.currentTime;
   signalMasterGain.gain.cancelScheduledValues(now);
-  signalMasterGain.gain.setTargetAtTime(enabled ? .62 : .0001, now, .035);
+  signalMasterGain.gain.setTargetAtTime(enabled ? .48 : .0001, now, .035);
   if (!enabled) stopReceiverBed();
-}
-
-function stopReceiverBed(): void {
-  if (!receiverBed || !signalAudioContext) return;
-  const bed = receiverBed;
-  receiverBed = null;
-  const now = signalAudioContext.currentTime;
-  bed.gain.gain.cancelScheduledValues(now);
-  bed.gain.gain.setTargetAtTime(.0001, now, .22);
-  bed.oscillators.forEach((oscillator) => {
-    try { oscillator.stop(now + .9); } catch { /* already stopped */ }
-  });
 }
 
 function playReceiverPhaseCue(phase: TuningPhase, score: number): void {
@@ -271,53 +369,71 @@ function playReceiverPhaseCue(phase: TuningPhase, score: number): void {
   const context = getSignalAudioContext();
   if (!context) return;
   const now = context.currentTime;
+
   switch (phase) {
     case 'searching':
       startReceiverBed(context);
-      scheduleSoftTone(context, 146.83, now, .5, .011, 174.61);
+      scheduleTuningSweep(context);
+      scheduleNote(context, 146.83, now + .12, .9, .012, { attack: .28, overtone: .08, brightness: 850, bendTo: 164.81 });
       break;
+
     case 'tracking':
-      scheduleSoftTone(context, 392, now, .34, .012);
-      scheduleSoftTone(context, 493.88, now + .1, .32, .009);
+      // Two warm fifths, slightly offset in the stereo field.
+      scheduleNote(context, 369.99, now, .62, .016, { attack: .16, overtone: .16, pan: -.16, brightness: 1500 });
+      scheduleNote(context, 440, now + .18, .7, .014, { attack: .18, overtone: .12, pan: .16, brightness: 1650 });
       break;
+
     case 'locking':
-      scheduleSoftTone(context, 440, now, .42, .011);
-      scheduleSoftTone(context, 554.37, now + .11, .4, .009);
-      scheduleSoftTone(context, 659.25, now + .22, .44, .008);
+      // A slow D-major arpeggio. Each note overlaps the previous one slightly.
+      scheduleNote(context, 293.66, now, .94, .014, { attack: .18, overtone: .1, pan: -.18 });
+      scheduleNote(context, 369.99, now + .16, .92, .013, { attack: .18, overtone: .12, pan: -.06 });
+      scheduleNote(context, 440, now + .32, .9, .013, { attack: .18, overtone: .1, pan: .08 });
+      scheduleNote(context, 587.33, now + .48, .88, .011, { attack: .2, overtone: .08, pan: .18 });
       break;
+
     case 'surging':
       if (score >= 85) {
-        // Warm G-major voicing, with a gentle attack instead of a sharp victory sting.
-        scheduleSoftTone(context, 196, now, .95, .012);
-        scheduleSoftTone(context, 392, now + .06, .88, .018);
-        scheduleSoftTone(context, 493.88, now + .14, .82, .013);
-        scheduleSoftTone(context, 587.33, now + .22, .78, .011);
-        scheduleSoftTone(context, 783.99, now + .3, .7, .007);
+        // Full, warm D-major voicing. The low notes add weight; the upper notes add air.
+        scheduleNote(context, 146.83, now, 1.65, .013, { attack: .42, overtone: .08, brightness: 1050 });
+        scheduleNote(context, 220, now + .04, 1.55, .009, { attack: .4, overtone: .06, brightness: 1250, pan: -.12 });
+        scheduleNote(context, 293.66, now + .08, 1.48, .012, { attack: .38, overtone: .1, brightness: 1450, pan: .1 });
+        scheduleNote(context, 369.99, now + .14, 1.38, .013, { attack: .36, overtone: .1, brightness: 1650, pan: -.08 });
+        scheduleNote(context, 440, now + .2, 1.3, .013, { attack: .34, overtone: .08, brightness: 1800, pan: .1 });
+        scheduleNote(context, 587.33, now + .26, 1.22, .009, { attack: .32, overtone: .06, brightness: 2050, pan: .18 });
       } else {
-        scheduleSoftTone(context, 293.66, now, .62, .011);
-        scheduleSoftTone(context, 369.99, now + .1, .56, .009);
-        scheduleSoftTone(context, 440, now + .2, .52, .007);
+        scheduleNote(context, 293.66, now, .9, .012, { attack: .24, overtone: .08 });
+        scheduleNote(context, 369.99, now + .16, .86, .01, { attack: .22, overtone: .07 });
+        scheduleNote(context, 440, now + .32, .82, .009, { attack: .22, overtone: .06 });
       }
       break;
+
     case 'slipping':
-      // A small downward bend signals the near miss without an alarm or buzzer.
-      scheduleSoftTone(context, 587.33, now, .82, .013, 554.37);
-      scheduleSoftTone(context, 293.66, now + .08, .72, .007, 277.18);
+      // The chord gently loses its center, like a receiver drifting off frequency.
+      scheduleNote(context, 440, now, .95, .015, { attack: .08, overtone: .1, brightness: 1450, bendTo: 415.3 });
+      scheduleNote(context, 293.66, now + .08, .82, .008, { attack: .12, overtone: .06, brightness: 1100, bendTo: 277.18 });
       break;
+
     case 'locked':
       stopReceiverBed();
-      if (score >= 85) {
-        scheduleSoftTone(context, 392, now, .62, .008);
+      if (score >= 100) {
+        // A quiet, resolved upper octave after the large chord.
+        scheduleNote(context, 587.33, now, 1.35, .012, { attack: .3, overtone: .11, brightness: 2100 });
+        scheduleNote(context, 739.99, now + .12, 1.2, .007, { attack: .32, overtone: .07, brightness: 2300 });
+      } else if (score >= 85) {
+        // Near-perfect: deliberately leave the harmony open rather than falsely resolving it.
+        scheduleNote(context, 293.66, now, .88, .009, { attack: .2, overtone: .06, brightness: 1250 });
+        scheduleNote(context, 369.99, now + .12, .8, .007, { attack: .22, overtone: .05, brightness: 1450 });
       } else if (score >= 60) {
-        scheduleSoftTone(context, 369.99, now, .5, .008);
-        scheduleSoftTone(context, 440, now + .08, .48, .006);
+        scheduleNote(context, 293.66, now, .8, .011, { attack: .22, overtone: .08 });
+        scheduleNote(context, 440, now + .16, .75, .008, { attack: .22, overtone: .06 });
       } else if (score > 0) {
-        scheduleSoftTone(context, 293.66, now, .48, .008);
+        scheduleNote(context, 196, now, .78, .01, { attack: .24, overtone: .05, brightness: 950 });
       }
       break;
+
     case 'failed':
       stopReceiverBed();
-      scheduleSoftTone(context, 261.63, now, .72, .011, 196);
+      scheduleNote(context, 293.66, now, 1.0, .012, { attack: .12, overtone: .06, brightness: 1050, bendTo: 220 });
       break;
   }
 }
