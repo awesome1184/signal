@@ -5,14 +5,12 @@
   "type": "module",
   "engines": { "node": ">=22.0.0" },
   "scripts": {
-    "build": "npm run build:client && npm run build:server",
-    "build:client": "vite build --config vite.client.config.ts --mode devvit",
-    "build:server": "vite build --config vite.server.config.ts",
+    "build": "vite build",
     "build:pages": "vite build --config vite.pages.config.ts --mode pages",
-    "web:dev": "vite --config vite.pages.config.ts --mode pages --host 0.0.0.0",
+    "web:dev": "vite --config vite.pages.config.ts --mode pages --base / --host 0.0.0.0",
     "typecheck": "tsc --noEmit",
     "preflight": "npm run typecheck && npm run build",
-    "upload": "npm run preflight && devvit upload",
+    "upload": "npm run typecheck && devvit upload",
     "playtest": "devvit playtest"
   },
   "dependencies": {
@@ -23,6 +21,7 @@
     "react-dom": "19.0.0"
   },
   "devDependencies": {
+    "@devvit/start": "0.15.0",
     "@types/node": "22.13.4",
     "@types/react": "19.0.8",
     "@types/react-dom": "19.0.3",
