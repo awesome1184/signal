@@ -935,7 +935,20 @@ function App() {
                         <div className="signal-static" />
                         <svg className="signal-traces" viewBox="0 0 720 180" preserveAspectRatio="none" aria-hidden="true">
                           <path className="signal-centerline" d="M0 90H720" />
-                          <path className="signal-clean-trace" d={tuningSignalPaths.carrier} />
+                          <g className="signal-carrier-group">
+                            <path id="signal-live-carrier" className="signal-clean-trace" d={tuningSignalPaths.carrier} />
+                            {tuningAnswer && (
+                              <text className="signal-carrier-word" aria-hidden="true">
+                                <textPath
+                                  href="#signal-live-carrier"
+                                  startOffset="50%"
+                                  textAnchor="middle"
+                                  textLength={Math.min(650, Math.max(44, tuningAnswer.length * 11.5))}
+                                  lengthAdjust="spacingAndGlyphs"
+                                >{tuningAnswer.toUpperCase()}</textPath>
+                              </text>
+                            )}
+                          </g>
                         </svg>
                         <div className="signal-lock-reticle" aria-hidden="true">
                           <i className="reticle-corner top-left" />
@@ -955,14 +968,7 @@ function App() {
                       <div className="signal-capture-readout">
                         <div className="signal-answer-readout">
                           <span>DECODED RESPONSE</span>
-                          <strong aria-label={tuningAnswer}>{Array.from(tuningAnswer).map((character, index) => (
-                            <span
-                              key={index}
-                              className="signal-answer-letter"
-                              aria-hidden="true"
-                              style={{ '--letter-index': index } as React.CSSProperties}
-                            >{character === ' ' ? '\u00a0' : character}</span>
-                          ))}</strong>
+                          <strong>{tuningAnswer}</strong>
                         </div>
                         <div className="signal-score-readout">
                           <span>LOCK STRENGTH</span>
