@@ -132,6 +132,9 @@ function App() {
   const [testPanelOpen, setTestPanelOpen] = useState(DEMO_MODE);
   const [isTuning, setIsTuning] = useState(false);
   const [tuningAnswer, setTuningAnswer] = useState('');
+  const [tuningScore, setTuningScore] = useState<number | null>(null);
+  const [tuningDuration, setTuningDuration] = useState(900);
+  const [tuningStatus, setTuningStatus] = useState('CAPTURING INPUT // SCANNING NOISE');
 
   const currentPrompt: Prompt = prompts[Math.min(game.index, prompts.length - 1)];
   const total = game.entries.reduce((sum, entry) => sum + entry.score, 0);
@@ -139,6 +142,18 @@ function App() {
   const secondsLeft = game.deadline ? Math.max(0, Math.ceil((game.deadline - now) / 1000)) : ROUND_SECONDS;
   const completedPrompts = game.entries.length;
   const shownBoard = DEMO_MODE || !serverReady ? MOCK_BOARD : leaderboard;
+  const tuningGrade = tuningScore === null ? 'searching' : tuningScore >= 100 ? 'perfect' : tuningScore >= 85 ? 'deep' : tuningScore >= 60 ? 'clear' : tuningScore >= 30 ? 'faint' : 'background';
+  const tuningHeading = tuningStatus.startsWith('NO MATCH') ? 'NO CARRIER' : tuningStatus.startsWith('RECEIVER OFFLINE') ? 'RECEIVER OFFLINE' : tuningScore === null ? 'READING THE STATIC' : tuningScore >= 100 ? 'SIGNAL FOUND' : tuningScore >= 85 ? 'CLEAR CARRIER' : tuningScore >= 60 ? 'SIGNAL DETECTED' : tuningScore >= 30 ? 'WEAK SIGNAL' : 'BURIED IN STATIC';
+  const tuningNoiseFinal = tuningScore === null ? 1 : Math.max(.025, 1 - tuningScore / 100 * .975);
+  const tuningWaveFinal = tuningScore === null ? .02 : Math.max(.08, tuningScore / 100);
+  const tuningChaosFinal = tuningScore === null ? .95 : Math.max(.03, .95 - tuningScore / 100 * .92);
+  const tuningCaptureStyle = {
+    '--noise-final': String(tuningNoiseFinal),
+    '--wave-final': String(tuningWaveFinal),
+    '--chaos-final': String(tuningChaosFinal),
+    '--tune-duration': tuningDuration + 'ms',
+    '--score-width': (tuningScore ?? 0) + '%'
+  } as React.CSSProperties;
 
   useEffect(() => {
     try { localStorage.setItem('signal:run:' + dayKey, JSON.stringify(game)); } catch { /* local storage is optional */ }
@@ -213,8 +228,10 @@ function App() {
     if (isTuning) return;
 
     const tuningStartedAt = Date.now();
-    const minimumTune = new Promise<void>((resolve) => window.setTimeout(resolve, 7000));
     setTuningAnswer(clean);
+    setTuningScore(null);
+    setTuningDuration(900);
+    setTuningStatus('CAPTURING INPUT // SCANNING NOISE');
     setIsTuning(true);
     setMessage('');
 
@@ -224,6 +241,14 @@ function App() {
       setGame((previous) => previous.phase === 'playing' && previous.deadline !== null
         ? { ...previous, deadline: previous.deadline + elapsed }
         : previous);
+    };
+
+    const animateCapture = async (score: number, status: string) => {
+      const duration = 900 + Math.round(Math.max(0, Math.min(100, score)) * 36);
+      setTuningScore(score);
+      setTuningDuration(duration);
+      setTuningStatus(status);
+      await new Promise<void>((resolve) => window.setTimeout(resolve, duration));
     };
 
     try {
@@ -242,12 +267,20 @@ function App() {
         result = data.valid ? data.result : null;
       }
 
-      await minimumTune;
       if (!result) {
+        await animateCapture(0, 'NO MATCH // TRY A DIFFERENT FREQUENCY');
         resumeClock();
         setMessage('No match in today’s field catalog. Try another answer while the window is open.');
         return;
       }
+
+      const status = result.score >= 100
+        ? 'CARRIER LOCKED // SIGNAL FOUND'
+        : result.score >= 60
+          ? result.tier + ' // PARTIAL CARRIER LOCK'
+          : result.tier + ' // BURIED IN INTERFERENCE';
+      await animateCapture(result.score, status);
+
       const entry: Entry = { promptId: prompt.id, answer: clean, score: result.score, tier: result.tier, note: result.note };
       setGame((previous) => previous.phase === 'playing'
         ? { ...previous, phase: 'reveal', deadline: null, entries: [...previous.entries, entry] }
@@ -255,7 +288,7 @@ function App() {
       setAnswer('');
       setMessage('');
     } catch {
-      await minimumTune;
+      await animateCapture(0, 'RECEIVER OFFLINE // TRY AGAIN');
       resumeClock();
       setMessage('Could not reach the signal receiver. Check the connection and try again.');
     } finally {
@@ -408,37 +441,51 @@ function App() {
             {game.phase === 'playing' && (
               <div className="play-view">
                 {isTuning && (
-                  <div className="tuning-overlay" role="status" aria-live="polite">
-                    <div className="tuning-console">
-                      <div className="tuning-console-head">
-                        <span><i /> INPUT CAPTURED</span>
-                        <span>STATION A-17 / CH 07</span>
+                  <div className="signal-capture-overlay" role="status" aria-live="polite">
+                    <div
+                      className="signal-capture"
+                      key={tuningScore === null ? 'searching' : 'score-' + tuningScore}
+                      data-grade={tuningGrade}
+                      style={tuningCaptureStyle}
+                    >
+                      <div className="signal-capture-head">
+                        <span className="signal-station"><i /> MT. AURORA / RECEIVER 07</span>
+                        <span className="signal-input-state">INPUT BUFFERED</span>
                       </div>
-                      <div className="tuning-heading">TUNING THE SIGNAL</div>
-                      <p className="tuning-subheading">SCANNING THE FREQUENCY BAND</p>
-                      <div className="tuning-frequency">
-                        <span>FREQUENCY LOCK</span>
-                        <strong>104.7 <small>MHz</small></strong>
+                      <div className="signal-capture-copy">
+                        <div className="signal-capture-kicker">TRANSMISSION ANALYSIS</div>
+                        <h2>{tuningHeading}</h2>
+                        <p>Separating the carrier from the noise floor.</p>
                       </div>
-                      <div className="tuning-dial" aria-hidden="true">
-                        <div className="tuning-dial-ticks" />
-                        <div className="tuning-dial-inner" />
-                        <div className="tuning-needle" />
-                        <div className="tuning-dial-hub"><SignalIcon size={27} /></div>
+                      <div className="signal-screen" aria-label="Live receiver waveform resolving from static">
+                        <div className="signal-screen-grid" />
+                        <div className="signal-static" />
+                        <svg className="signal-traces" viewBox="0 0 720 180" preserveAspectRatio="none" aria-hidden="true">
+                          <path className="signal-centerline" d="M0 90H720" />
+                          <path className="signal-chaos-trace" d="M0 90 12 78 19 115 27 42 34 128 43 63 52 100 61 35 68 117 78 77 87 96 96 25 105 145 114 57 123 106 132 68 141 125 151 45 160 99 169 73 180 90 190 52 199 132 208 69 218 101 227 29 238 148 247 73 258 117 268 48 277 103 288 71 298 94 307 35 317 142 327 64 336 119 346 55 356 102 366 78 376 90 388 41 398 133 408 67 418 111 428 31 438 148 448 70 458 112 468 48 478 100 488 76 498 91 508 37 518 145 528 61 538 116 548 57 558 101 568 72 578 90 589 44 599 134 609 68 619 109 629 34 639 147 649 72 659 115 669 49 679 98 689 76 700 91 720 90" />
+                          <path className="signal-clean-trace" d="M0 90 C30 90 30 35 60 35 S90 145 120 145 S150 90 180 90 C210 90 210 35 240 35 S270 145 300 145 S330 90 360 90 C390 90 390 35 420 35 S450 145 480 145 S510 90 540 90 C570 90 570 35 600 35 S630 145 660 145 S690 90 720 90" />
+                        </svg>
+                        <div className="signal-scanbeam" />
+                        <div className="signal-lock-flare" />
+                        <span className="signal-screen-label">RF / 104.7 MHZ</span>
+                        <span className="signal-screen-state">{tuningScore === 100 ? 'LOCKED' : tuningScore === null ? 'SEARCHING' : tuningScore + '% RECOVERED'}</span>
                       </div>
-                      <svg className="tuning-waveform" viewBox="0 0 440 58" preserveAspectRatio="none" aria-hidden="true">
-                        <path className="tuning-wave-back" d="M0 29h25l8-4 8 8 9-19 9 31 10-41 11 46 10-27 10 7h22l9-6 8 12 10-25 10 34 10-41 10 36 10-18h24l9-5 9 11 10-22 10 30 10-23 10 10h26l9-4 9 8 10-19 10 27 10-16h31" />
-                        <path className="tuning-wave-front" d="M0 29h25l8-4 8 8 9-19 9 31 10-41 11 46 10-27 10 7h22l9-6 8 12 10-25 10 34 10-41 10 36 10-18h24l9-5 9 11 10-22 10 30 10-23 10 10h26l9-4 9 8 10-19 10 27 10-16h31" />
-                      </svg>
-                      <div className="tuning-band">
-                        <span>88.0</span><div><i /></div><span>108.0</span>
+                      <div className="signal-capture-readout">
+                        <div className="signal-answer-readout">
+                          <span>DECODED RESPONSE</span>
+                          <strong>{tuningAnswer}</strong>
+                        </div>
+                        <div className="signal-score-readout">
+                          <span>RESONANCE</span>
+                          <strong>{tuningScore === null ? '···' : tuningScore}<small>/100</small></strong>
+                        </div>
                       </div>
-                      <div className="tuning-lock-track" aria-label="Signal lock progress"><i /></div>
-                      <div className="tuning-target">
-                        <span>LOCKING ONTO</span>
-                        <strong>{tuningAnswer}</strong>
+                      <div className="signal-quality-row">
+                        <span>RECOVERED SIGNAL</span>
+                        <div className="signal-quality-track"><i /></div>
+                        <strong>{tuningScore === null ? '—' : tuningScore + '%'}</strong>
                       </div>
-                      <div className="tuning-status"><i /> HUNTING FOR A CLEAN SIGNAL <b>...</b></div>
+                      <div className="signal-capture-status"><i /><span>{tuningStatus}</span></div>
                     </div>
                   </div>
                 )}
