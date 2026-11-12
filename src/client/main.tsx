@@ -1,0 +1,436 @@
+import './styles.css';
+import React, { useEffect, useMemo, useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import { getDailyPrompts, getNewYorkDateKey, formatDay, ROUND_SECONDS, MAX_SCORE, type Prompt } from '../shared/game';
+
+type Entry = { promptId: string; answer: string; score: number; tier: string; note: string };
+type RunState = {
+  dateKey: string;
+  phase: 'ready' | 'playing' | 'reveal' | 'complete';
+  index: number;
+  entries: Entry[];
+  deadline: number | null;
+};
+type LeaderboardRow = { name: string; score: number };
+
+const MOCK_BOARD: LeaderboardRow[] = [
+  { name: 'northstar', score: 612 },
+  { name: 'echo.static', score: 575 },
+  { name: 'mira_07', score: 540 },
+  { name: 'orbitalmind', score: 488 },
+  { name: 'YOU', score: 0 }
+];
+const DEMO_MODE = import.meta.env.MODE === 'pages';
+
+function blankRun(dateKey: string): RunState {
+  return { dateKey, phase: 'ready', index: 0, entries: [], deadline: null };
+}
+
+function loadRun(dateKey: string): RunState {
+  try {
+    const raw = localStorage.getItem('signal:run:' + dateKey);
+    if (!raw) return blankRun(dateKey);
+    const saved = JSON.parse(raw) as RunState;
+    if (saved.dateKey !== dateKey || !Array.isArray(saved.entries)) return blankRun(dateKey);
+    if (!['ready', 'playing', 'reveal', 'complete'].includes(saved.phase)) return blankRun(dateKey);
+    return saved;
+  } catch {
+    return blankRun(dateKey);
+  }
+}
+
+function SignalIcon({ size = 28 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" aria-hidden="true">
+      <circle cx="24" cy="24" r="3.2" fill="currentColor" />
+      <path d="M15 15a13 13 0 0 0 0 18M33 15a13 13 0 0 1 0 18M9.5 9.5a20.5 20.5 0 0 0 0 29M38.5 9.5a20.5 20.5 0 0 1 0 29" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function MountainScene() {
+  return (
+    <svg className="mountain-scene" viewBox="0 0 1440 640" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#07121f" /><stop offset="55%" stopColor="#172c48" /><stop offset="100%" stopColor="#37516a" />
+        </linearGradient>
+        <linearGradient id="ridge" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#7890a2" /><stop offset="35%" stopColor="#33475c" /><stop offset="100%" stopColor="#0a1724" />
+        </linearGradient>
+        <linearGradient id="dish" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#9cb4c1" /><stop offset="42%" stopColor="#425a6b" /><stop offset="100%" stopColor="#142839" />
+        </linearGradient>
+        <radialGradient id="glow"><stop offset="0%" stopColor="#5bd8e8" stopOpacity=".28" /><stop offset="100%" stopColor="#5bd8e8" stopOpacity="0" /></radialGradient>
+      </defs>
+      <rect width="1440" height="640" fill="url(#sky)" />
+      <circle cx="990" cy="170" r="310" fill="url(#glow)" />
+      <g fill="#d7e8f4" opacity=".75">
+        <circle cx="145" cy="74" r="1.5"/><circle cx="211" cy="128" r="1.2"/><circle cx="310" cy="58" r="1.6"/><circle cx="405" cy="172" r="1.1"/>
+        <circle cx="520" cy="92" r="1.4"/><circle cx="618" cy="48" r="1.1"/><circle cx="723" cy="123" r="1.8"/><circle cx="812" cy="63" r="1.2"/>
+        <circle cx="905" cy="106" r="1.1"/><circle cx="1120" cy="52" r="1.5"/><circle cx="1205" cy="144" r="1.1"/><circle cx="1342" cy="76" r="1.7"/>
+        <circle cx="1040" cy="212" r="1.1"/><circle cx="880" cy="205" r="1.3"/><circle cx="664" cy="220" r="1.2"/><circle cx="343" cy="209" r="1.4"/>
+      </g>
+      <path d="M0 430 115 312 210 392 330 240 450 390 570 270 700 402 820 240 940 386 1080 225 1200 385 1325 290 1440 410V640H0Z" fill="#203449"/>
+      <path d="m270 304 60-64 55 72-31-17-24 18-25-17-18 16zM770 302l50-62 48 71-29-18-23 18-23-13zM1030 290l50-65 57 79-31-18-24 22-25-20z" fill="#cad7dd" opacity=".82"/>
+      <path d="M0 480 130 390 225 458 355 340 500 470 650 352 790 478 945 360 1105 480 1250 375 1440 490V640H0Z" fill="url(#ridge)"/>
+      <path d="M0 520Q180 450 340 508T680 500T1020 498T1440 500V640H0Z" fill="#0b1a27"/>
+      <g fill="#07131d">
+        <path d="M65 540 88 468 112 540zM88 540 112 450 138 540zM180 550 206 470 232 550zM285 565 315 464 345 565zM1180 550 1206 465 1232 550zM1280 555 1310 445 1340 555zM1370 550 1390 480 1410 550z"/>
+      </g>
+      <g transform="translate(1010 185)">
+        <path d="M-10 240 0 80 13 240Z" fill="#293c4d"/>
+        <path d="M-95 112Q-28 -40 95 25Q82 153-95 112Z" fill="url(#dish)" stroke="#9bb6c7" strokeWidth="5"/>
+        <path d="M-95 112Q-28 -40 95 25" fill="none" stroke="#d0e0e8" strokeWidth="3" opacity=".65"/>
+        <path d="M-75 94 78 42M-58 105 58 68M-38 111 32 89M-17 115 12 108M-58 33 29 126M-26 0 52 112M10 2 74 75" stroke="#718da0" strokeWidth="2" opacity=".8"/>
+        <path d="M0 81 30 125 56 172M-4 92-34 140-56 173" stroke="#d17b43" strokeWidth="4"/>
+        <circle cx="0" cy="81" r="5" fill="#f4a453"/>
+        <path d="M0 240h72M-30 240h-35" stroke="#526d81" strokeWidth="8" strokeLinecap="round"/>
+      </g>
+      <g transform="translate(740 470)" opacity=".9">
+        <rect width="220" height="84" rx="8" fill="#102231" stroke="#426176" strokeWidth="3"/>
+        <path d="M18 0v-35h185v35" fill="#182f40" stroke="#526d7c" strokeWidth="3"/>
+        <path d="M30 53h25v-21h28v21h25v-21h28v21h30" fill="none" stroke="#f2a24b" strokeWidth="3"/>
+        <path d="M40 34h10M94 34h10M150 34h10" stroke="#ffbd73" strokeWidth="4"/>
+        <path d="M54 84v18M166 84v18" stroke="#050b12" strokeWidth="7"/>
+      </g>
+    </svg>
+  );
+}
+
+function scoreLabel(score: number): string {
+  if (score >= 700) return 'PERFECT LOCK';
+  if (score >= 600) return 'RARE SIGNAL';
+  if (score >= 450) return 'STRONG SIGNAL';
+  if (score >= 300) return 'CLEAR SIGNAL';
+  if (score >= 150) return 'FAINT SIGNAL';
+  return 'MOSTLY NOISE';
+}
+
+function App() {
+  const dayKey = getNewYorkDateKey();
+  const prompts = useMemo(() => getDailyPrompts(dayKey), [dayKey]);
+  const [game, setGame] = useState<RunState>(() => loadRun(dayKey));
+  const [answer, setAnswer] = useState('');
+  const [message, setMessage] = useState('');
+  const [now, setNow] = useState(Date.now());
+  const [playerName, setPlayerName] = useState(DEMO_MODE ? 'LOCAL EXPLORER' : 'REDDIT EXPLORER');
+  const [playerCount, setPlayerCount] = useState(0);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardRow[]>([]);
+  const [serverReady, setServerReady] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const currentPrompt: Prompt = prompts[Math.min(game.index, prompts.length - 1)];
+  const total = game.entries.reduce((sum, entry) => sum + entry.score, 0);
+  const currentEntry = game.entries[game.entries.length - 1];
+  const secondsLeft = game.deadline ? Math.max(0, Math.ceil((game.deadline - now) / 1000)) : ROUND_SECONDS;
+  const completedPrompts = game.entries.length;
+  const shownBoard = DEMO_MODE || !serverReady ? MOCK_BOARD : leaderboard;
+
+  useEffect(() => {
+    try { localStorage.setItem('signal:run:' + dayKey, JSON.stringify(game)); } catch { /* local storage is optional */ }
+  }, [game, dayKey]);
+
+  useEffect(() => {
+    let active = true;
+    fetch('/api/bootstrap')
+      .then((response) => { if (!response.ok) throw new Error('No Devvit server'); return response.json(); })
+      .then((data) => {
+        if (!active || !data?.ok) return;
+        setServerReady(true);
+        setPlayerName(data.username ? String(data.username).toUpperCase() : 'REDDIT EXPLORER');
+        setPlayerCount(Number(data.playerCount) || 0);
+        if (Array.isArray(data.leaderboard)) setLeaderboard(data.leaderboard);
+        if (data.result && Array.isArray(data.result.entries)) {
+          setGame({ dateKey: data.result.dateKey || dayKey, phase: 'complete', index: 6, entries: data.result.entries, deadline: null });
+        }
+      })
+      .catch(() => { if (active) setServerReady(false); });
+    return () => { active = false; };
+  }, [dayKey]);
+
+  useEffect(() => {
+    if (game.phase !== 'playing') return;
+    const timer = window.setInterval(() => {
+      const stamp = Date.now();
+      setNow(stamp);
+      if (game.deadline !== null && stamp >= game.deadline) {
+        setGame((previous) => {
+          if (previous.phase !== 'playing' || previous.deadline === null || stamp < previous.deadline) return previous;
+          const prompt = prompts[previous.index];
+          const entry: Entry = { promptId: prompt.id, answer: '', score: 0, tier: 'NO SIGNAL', note: 'The transmission window closed before an answer arrived.' };
+          return { ...previous, phase: 'reveal', deadline: null, entries: [...previous.entries, entry] };
+        });
+        setMessage('The window closed. That round is logged as silence.');
+      }
+    }, 200);
+    return () => window.clearInterval(timer);
+  }, [game.phase, game.index, game.deadline, prompts]);
+
+  useEffect(() => {
+    if (game.phase !== 'complete' || DEMO_MODE || !serverReady) return;
+    let active = true;
+    fetch('/api/complete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ entries: game.entries.map((entry) => ({ promptId: entry.promptId, answer: entry.answer })) })
+    })
+      .then((response) => { if (!response.ok) throw new Error('Could not save result'); return response.json(); })
+      .then((data) => {
+        if (!active || !data?.ok) return;
+        setPlayerCount(Number(data.playerCount) || 0);
+        if (Array.isArray(data.leaderboard)) setLeaderboard(data.leaderboard);
+        if (data.result?.entries) setGame((previous) => ({ ...previous, entries: data.result.entries }));
+      })
+      .catch(() => setMessage('Result is visible locally. The community board is temporarily unavailable.'));
+    return () => { active = false; };
+  }, [game.phase, serverReady]);
+
+  const startGame = () => {
+    setMessage('');
+    setAnswer('');
+    setNow(Date.now());
+    setGame({ dateKey: dayKey, phase: 'playing', index: 0, entries: [], deadline: Date.now() + ROUND_SECONDS * 1000 });
+  };
+
+  const validateAnswer = async (prompt: Prompt, raw: string) => {
+    const clean = raw.trim();
+    if (!clean) { setMessage('Enter an answer before transmitting.'); return; }
+    setMessage('Checking the transmission…');
+    try {
+      let result: { score: number; tier: string; note: string } | null = null;
+      if (DEMO_MODE) {
+        const module = await import('../shared/answerBank');
+        result = module.evaluateAnswer(prompt.id, clean);
+      } else {
+        const response = await fetch('/api/check-answer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ promptId: prompt.id, answer: clean })
+        });
+        if (!response.ok) throw new Error('Signal service unavailable');
+        const data = await response.json();
+        result = data.valid ? data.result : null;
+      }
+      if (!result) { setMessage('No match in today’s field catalog. Try another answer while the window is open.'); return; }
+      const entry: Entry = { promptId: prompt.id, answer: clean, score: result.score, tier: result.tier, note: result.note };
+      setGame((previous) => previous.phase === 'playing'
+        ? { ...previous, phase: 'reveal', deadline: null, entries: [...previous.entries, entry] }
+        : previous);
+      setAnswer('');
+      setMessage('');
+    } catch {
+      setMessage('Could not reach the signal receiver. Check the connection and try again.');
+    }
+  };
+
+  const skipPrompt = () => {
+    if (game.phase !== 'playing') return;
+    const entry: Entry = { promptId: currentPrompt.id, answer: '', score: 0, tier: 'NO SIGNAL', note: 'You moved on without transmitting an answer.' };
+    setGame((previous) => ({ ...previous, phase: 'reveal', deadline: null, entries: [...previous.entries, entry] }));
+    setAnswer('');
+    setMessage('');
+  };
+
+  const nextPrompt = () => {
+    if (game.phase !== 'reveal') return;
+    const nextIndex = game.index + 1;
+    setAnswer('');
+    setMessage('');
+    if (nextIndex >= prompts.length) {
+      setGame((previous) => ({ ...previous, phase: 'complete', index: prompts.length - 1, deadline: null }));
+      return;
+    }
+    setNow(Date.now());
+    setGame((previous) => ({ ...previous, phase: 'playing', index: nextIndex, deadline: Date.now() + ROUND_SECONDS * 1000 }));
+  };
+
+  const copyResult = async () => {
+    const marks = game.entries.map((entry, index) => String(index + 1).padStart(2, '0') + (entry.score >= 85 ? ' ◆' : entry.score >= 30 ? ' ◇' : ' ·'));
+    const text = 'SIGNAL // ' + total + '/700\n' + scoreLabel(total) + '\n' + marks.join('  ') + '\nFind the signal in the noise.';
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch { setMessage('Clipboard access is unavailable in this browser.'); }
+  };
+
+  const resetPreview = () => {
+    if (!DEMO_MODE) return;
+    localStorage.removeItem('signal:run:' + dayKey);
+    setGame(blankRun(dayKey));
+    setAnswer('');
+    setMessage('');
+    setNow(Date.now());
+  };
+
+  const dateLabel = formatDay(dayKey);
+
+  return (
+    <div className="app-shell">
+      <MountainScene />
+      <div className="screen-vignette" />
+      <header className="topbar">
+        <div className="brand">
+          <div className="brand-symbol"><SignalIcon size={45} /></div>
+          <div className="brand-copy">
+            <div className="brand-name">SIGNAL</div>
+            <div className="brand-tagline">FIND THE SIGNAL IN THE NOISE.</div>
+          </div>
+        </div>
+        <div className="top-stats">
+          <div className="top-stat date-stat"><span className="eyebrow">TODAY'S TRANSMISSION</span><strong>{dateLabel}</strong></div>
+          <div className="top-stat"><span className="stat-icon flame">✦</span><strong>01</strong><span className="eyebrow">DAILY SCAN</span></div>
+          <div className="top-stat"><span className="stat-icon bars">▮▮▮</span><strong>{serverReady ? playerCount.toLocaleString() : '—'}</strong><span className="eyebrow">ON FREQUENCY</span></div>
+        </div>
+      </header>
+
+      <main className="station-layout">
+        <section className="main-column">
+          <div className="station-kicker">
+            <span className="live-dot" /><span>MT. AURORA LISTENING POST</span><span className="kicker-divider">/</span><span>CHANNEL 07</span>
+            {DEMO_MODE && <span className="preview-chip">LOCAL PREVIEW</span>}
+            {!DEMO_MODE && serverReady && <span className="preview-chip connected">REDDIT LINK ACTIVE</span>}
+          </div>
+
+          <section className="game-panel">
+            <div className="panel-topline">
+              <div><span className="eyebrow">INCOMING TRANSMISSION</span><div className="panel-title">Today's signal scan</div></div>
+              <div className="round-count"><strong>{String(game.phase === 'complete' ? 7 : game.index + 1).padStart(2, '0')}</strong><span>/ 07</span></div>
+            </div>
+            <div className="progress-grid" aria-label={completedPrompts + ' of 7 prompts completed'}>
+              {prompts.map((prompt, index) => (
+                <div key={prompt.id} className={'progress-cell ' + (index < completedPrompts ? 'done' : index === game.index && game.phase !== 'complete' ? 'active' : '')}><span>{String(index + 1).padStart(2, '0')}</span></div>
+              ))}
+            </div>
+
+            {game.phase === 'ready' && (
+              <div className="ready-view">
+                <div className="receiver-graphic">
+                  <div className="receiver-orbit orbit-one" /><div className="receiver-orbit orbit-two" />
+                  <div className="receiver-core"><SignalIcon size={52} /></div><div className="receiver-sweep" />
+                  <span className="receiver-caption">SCANNER STANDBY</span>
+                </div>
+                <div className="ready-copy">
+                  <div className="section-label">A SIGNAL IS WAITING</div>
+                  <h1>Can you hear<br />what others miss?</h1>
+                  <p>Seven open prompts. One answer each. Familiar answers barely register; unusual, valid answers send a stronger signal.</p>
+                  <div className="rule-strip">
+                    <div><strong>07</strong><span>PROMPTS</span></div><div><strong>25s</strong><span>PER ROUND</span></div><div><strong>700</strong><span>MAX POINTS</span></div>
+                  </div>
+                  <button className="primary-button" onClick={startGame}><span>BEGIN DAILY SCAN</span><span className="button-arrow">↗</span></button>
+                  <p className="fine-print">One daily attempt · Resets at midnight Eastern</p>
+                </div>
+              </div>
+            )}
+
+            {game.phase === 'playing' && (
+              <div className="play-view">
+                <div className="question-meta">
+                  <span className="channel-label">{currentPrompt.channel}</span>
+                  <div className={'timer-pill ' + (secondsLeft <= 7 ? 'urgent' : '')}><span className="timer-ring"><span /></span><strong>{String(secondsLeft).padStart(2, '0')}</strong><span>SEC</span></div>
+                </div>
+                <div className="question-index">TRANSMISSION {String(game.index + 1).padStart(2, '0')}</div>
+                <h1 className="question-text">{currentPrompt.prompt}</h1>
+                <p className="question-context">{currentPrompt.context}</p>
+                <form className="answer-form" onSubmit={(event) => { event.preventDefault(); void validateAnswer(currentPrompt, answer); }}>
+                  <label htmlFor="signal-answer">YOUR RESPONSE</label>
+                  <div className="answer-control">
+                    <input id="signal-answer" value={answer} onChange={(event) => setAnswer(event.target.value)} maxLength={80} autoComplete="off" spellCheck={false} placeholder="Type one answer..." autoFocus />
+                    <button type="submit" className="primary-button submit-button">TRANSMIT <span className="button-arrow">↗</span></button>
+                  </div>
+                </form>
+                <div className="play-footer"><span><span className="tiny-pulse" /> RECEIVER OPEN</span><button className="text-button" onClick={skipPrompt}>SKIP THIS FREQUENCY</button></div>
+                {message && <div className="inline-message" role="status">{message}</div>}
+              </div>
+            )}
+
+            {game.phase === 'reveal' && currentEntry && (
+              <div className="reveal-view">
+                <div className={'reveal-orb ' + (currentEntry.score >= 60 ? 'strong' : '')}><SignalIcon size={44} /></div>
+                <div className="reveal-label">{currentEntry.score > 0 ? 'SIGNAL DETECTED' : 'NO SIGNAL DETECTED'}</div>
+                <div className="reveal-answer">{currentEntry.answer || 'No answer transmitted'}</div>
+                <div className="score-award"><strong>+{currentEntry.score}</strong><span>POINTS</span></div>
+                <div className="tier-pill">{currentEntry.tier}</div>
+                <p className="reveal-note">{currentEntry.note}</p>
+                <div className="reveal-total"><span>SCAN TOTAL</span><strong>{total} <small>/ 700</small></strong></div>
+                <button className="primary-button next-button" onClick={nextPrompt}>{game.index === 6 ? 'VIEW SCAN REPORT' : 'NEXT TRANSMISSION'} <span className="button-arrow">↗</span></button>
+                {message && <div className="inline-message" role="status">{message}</div>}
+              </div>
+            )}
+
+            {game.phase === 'complete' && (
+              <div className="complete-view">
+                <div className="complete-overline">DAILY SCAN COMPLETE</div>
+                <h1>{scoreLabel(total)}</h1>
+                <div className="final-score"><strong>{total}</strong><span>/ 700</span></div>
+                <p className="complete-subtitle">{total >= 600 ? 'You found some remarkable signals in the noise.' : total >= 300 ? 'A good scan. You heard more than the obvious.' : 'The airwaves were crowded today. Tune in again tomorrow.'}</p>
+                <div className="result-list">
+                  {prompts.map((prompt, index) => {
+                    const entry = game.entries[index] ?? { score: 0, tier: 'NO SIGNAL', answer: '' };
+                    return <div className="result-row" key={prompt.id}>
+                      <span className="result-number">{String(index + 1).padStart(2, '0')}</span>
+                      <span className="result-prompt">{prompt.prompt}</span>
+                      <span className="result-answer">{entry.answer || '—'}</span>
+                      <strong className={entry.score >= 60 ? 'rare-score' : ''}>{entry.score}</strong>
+                    </div>;
+                  })}
+                </div>
+                <div className="complete-actions">
+                  <button className="primary-button" onClick={() => void copyResult()}>{copied ? 'COPIED' : 'COPY RESULT'} <span className="button-arrow">↗</span></button>
+                  {DEMO_MODE && <button className="secondary-button" onClick={resetPreview}>RESET LOCAL PREVIEW</button>}
+                </div>
+                <p className="fine-print">A new set of transmissions arrives at midnight Eastern.</p>
+                {message && <div className="inline-message" role="status">{message}</div>}
+              </div>
+            )}
+          </section>
+
+          <div className="bottom-note">
+            <div className="bottom-note-icon"><SignalIcon size={24} /></div>
+            <div><strong>A NEW SIGNAL ARRIVES DAILY</strong><span>Same seven transmissions for every listener.</span></div>
+            <div className="bottom-wave" aria-hidden="true">{[8,14,23,12,31,17,9,26,38,13,22,8,17,29,12,7,19].map((height,index) => <i key={index} style={{height: height + 'px'}} />)}</div>
+          </div>
+        </section>
+
+        <aside className="side-column">
+          <section className="instrument-card signal-card">
+            <div className="card-heading"><span className="eyebrow">SIGNAL STRENGTH</span><span className="card-index">01 / 03</span></div>
+            <div className="strength-display">
+              <div className="strength-number">{total}<span> / 700</span></div>
+              <div className="strength-meter">{Array.from({length:14},(_,index) => <i key={index} className={index < Math.ceil((total / MAX_SCORE) * 14) ? (index >= 10 ? 'hot' : 'lit') : ''} />)}</div>
+            </div>
+            <div className="strength-caption"><span>NOISE FLOOR</span><span>STRONG SIGNAL</span></div>
+            <div className="signal-wave" aria-hidden="true"><svg viewBox="0 0 300 48" preserveAspectRatio="none"><path d="M0 24h28l8-4 7 8 9-17 8 26 9-34 10 39 8-21 8 9h18l8-5 7 9 8-18 9 25 8-30 8 24 8-12h26l7-5 8 10 9-20 8 26 9-19 8 10h32" /></svg></div>
+            <p className="instrument-footnote">{game.phase === 'complete' ? scoreLabel(total) : game.phase === 'ready' ? 'SCANNER AWAITING INPUT' : 'LIVE SCAN IN PROGRESS'}</p>
+          </section>
+
+          <section className="instrument-card leaderboard-card">
+            <div className="card-heading"><span className="eyebrow">COMMUNITY FREQUENCY</span><span className="card-index">02 / 03</span></div>
+            <div className="leaderboard-title"><span className="trophy">✦</span> TODAY'S STRONGEST SIGNALS</div>
+            {shownBoard.length ? <div className="leaderboard-list">
+              {shownBoard.slice(0,5).map((row,index) => <div className="leaderboard-row" key={row.name + index}>
+                <span className="rank">{String(index + 1).padStart(2,'0')}</span><span className="listener-name">{row.name}</span><strong>{row.score}</strong>
+              </div>)}
+            </div> : <div className="empty-board">No completed scans yet. Be the first on frequency.</div>}
+            <div className="leaderboard-foot"><span>{DEMO_MODE || !serverReady ? 'PREVIEW SCORES' : playerCount + ' LISTENERS'}</span><span>{DEMO_MODE || !serverReady ? 'SAMPLE DATA' : 'UPDATED LIVE'}</span></div>
+          </section>
+
+          <section className="instrument-card station-log-card">
+            <div className="card-heading"><span className="eyebrow">STATION LOG</span><span className="card-index">03 / 03</span></div>
+            <div className="log-entry"><span className="log-time">00:00 ET</span><div><strong>DAILY TRANSMISSION ROTATED</strong><p>Fresh prompts are now moving across all seven channels.</p></div></div>
+            <div className="log-entry"><span className="log-time">SYSTEM</span><div><strong>FIELD CATALOG ONLINE</strong><p>Valid answers are checked against today's catalog.</p></div></div>
+          </section>
+          <div className="side-footer"><span>LISTENING POST A-17</span><span>EST. 1987 · MT. AURORA</span></div>
+        </aside>
+      </main>
+
+      <footer className="app-footer">
+        <span>SIGNAL <b>·</b> FIND THE SIGNAL IN THE NOISE.</span>
+        <span>{DEMO_MODE ? 'BROWSER BUILD · LOCAL SAVE ONLY' : 'DEVVIT WEB · REDDIT COMMUNITY EDITION'}</span>
+      </footer>
+    </div>
+  );
+}
+
+createRoot(document.getElementById('root')!).render(<React.StrictMode><App /></React.StrictMode>);
