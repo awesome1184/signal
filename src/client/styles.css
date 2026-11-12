@@ -2747,3 +2747,42 @@ button:focus-visible,input:focus-visible {
   50% { opacity:.34; }
   75% { opacity:.2; }
 }
+
+
+/* Let the submitted answer become part of the receiver's interference pattern. */
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-answer-readout .signal-answer-letter {
+  display:inline-block;
+  white-space:pre;
+  color:#ffe0c4;
+  transform-origin:50% 70%;
+  animation:signal-answer-letter-slip 1.05s cubic-bezier(.22,.65,.24,1) infinite;
+  animation-delay:calc(var(--letter-index) * 42ms);
+}
+.perfect-capture .signal-capture[data-phase="recovering"] .signal-answer-readout .signal-answer-letter {
+  display:inline-block;
+  white-space:pre;
+  color:#f2d8c1;
+  transform-origin:50% 70%;
+  animation:signal-answer-letter-recover .92s cubic-bezier(.18,.68,.22,1) both;
+  animation-delay:calc(var(--letter-index) * 24ms);
+}
+@keyframes signal-answer-letter-slip {
+  0%,100% {transform:translateY(0) skewX(0) scaleY(1);text-shadow:none;opacity:1;}
+  24% {transform:translateY(-2px) skewX(-2deg) scaleY(1.05);text-shadow:0 0 7px rgba(255,177,112,.36);opacity:.95;}
+  50% {transform:translateY(2px) skewX(2.4deg) scaleY(.92);text-shadow:0 0 4px rgba(255,177,112,.22);opacity:.82;}
+  76% {transform:translateY(-1px) skewX(-1deg) scaleY(1.02);text-shadow:0 0 6px rgba(255,177,112,.3);opacity:.96;}
+}
+@keyframes signal-answer-letter-recover {
+  0% {transform:translateY(2px) skewX(2.4deg) scaleY(.92);text-shadow:0 0 5px rgba(255,177,112,.25);opacity:.82;}
+  58% {transform:translateY(-1px) skewX(-.7deg) scaleY(1.02);text-shadow:0 0 3px rgba(255,177,112,.12);opacity:.94;}
+  100% {transform:translateY(0) skewX(0) scaleY(1);text-shadow:none;opacity:1;}
+}
+@media (prefers-reduced-motion:reduce) {
+  .perfect-capture .signal-capture[data-phase="slipping"] .signal-answer-readout .signal-answer-letter,
+  .perfect-capture .signal-capture[data-phase="recovering"] .signal-answer-readout .signal-answer-letter {
+    animation:none !important;
+    transform:none !important;
+    text-shadow:none !important;
+    opacity:1 !important;
+  }
+}
