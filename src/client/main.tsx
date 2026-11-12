@@ -143,7 +143,7 @@ function MountainScene() {
   );
 }
 
-type TuningPhase = 'searching' | 'tracking' | 'locking' | 'surging' | 'slipping' | 'locked' | 'failed';
+type TuningPhase = 'searching' | 'tracking' | 'locking' | 'surging' | 'slipping' | 'recovering' | 'locked' | 'failed';
 
 type ReceiverBed = { gain: GainNode; sources: Array<OscillatorNode | AudioBufferSourceNode> };
 type NoteShape = { attack?: number; overtone?: number; brightness?: number; pan?: number; bendTo?: number };
@@ -388,6 +388,12 @@ function playReceiverPhaseCue(phase: TuningPhase, score: number): void {
       scheduleNote(context, 293.66, now + .08, .82, .008, { attack: .12, overtone: .06, brightness: 1100, bendTo: 277.18 });
       break;
 
+    case 'recovering':
+      // A restrained upward interval suggests compensation, not a full resolution.
+      scheduleNote(context, 277.18, now, 1.08, .008, { attack: .34, overtone: .05, brightness: 1120, bendTo: 293.66 });
+      scheduleNote(context, 369.99, now + .22, .86, .006, { attack: .3, overtone: .04, brightness: 1420 });
+      break;
+
     case 'locked':
       stopReceiverBed();
       if (score >= 100) {
@@ -449,7 +455,7 @@ function App() {
   const [tuningSignalSeed, setTuningSignalSeed] = useState(() => Math.floor(Math.random() * 0xffffffff) || 1);
   const [tuningDuration, setTuningDuration] = useState(900);
   const [tuningStatus, setTuningStatus] = useState('CAPTURING INPUT // SCANNING NOISE');
-  const [tuningPhase, setTuningPhase] = useState<'searching' | 'tracking' | 'locking' | 'surging' | 'slipping' | 'locked' | 'failed'>('searching');
+  const [tuningPhase, setTuningPhase] = useState<TuningPhase>('searching');
 
   const currentPrompt: Prompt = prompts[Math.min(game.index, prompts.length - 1)];
   const total = game.entries.reduce((sum, entry) => sum + entry.score, 0);
@@ -467,6 +473,7 @@ function App() {
     : tuningPhase === 'locking' ? 'LOCKING SIGNAL'
     : tuningPhase === 'surging' ? (tuningScore === 100 ? 'CARRIER OVERLOAD' : 'PERFECT LOCK')
     : tuningPhase === 'slipping' ? 'SIGNAL SLIPPED'
+    : tuningPhase === 'recovering' ? 'REACQUIRING CARRIER'
     : tuningScore >= 100 ? 'SIGNAL FOUND'
     : tuningScore >= 85 ? 'NEAR-PERFECT LOCK'
     : tuningScore >= 60 ? 'PARTIAL LOCK'
@@ -476,6 +483,7 @@ function App() {
     : tuningPhase === 'locking' ? 'ACQUIRING LOCK'
     : tuningPhase === 'surging' ? 'LOCK CONFIRMED'
     : tuningPhase === 'slipping' ? 'CARRIER DRIFT DETECTED'
+    : tuningPhase === 'recovering' ? 'PHASE CORRECTION ACTIVE'
     : tuningPhase === 'locked' && tuningScore === 100 ? 'LOCK CONFIRMED'
     : tuningPhase === 'locked' && (tuningScore ?? 0) >= 85 ? 'NEAR-PERFECT LOCK'
     : tuningPhase === 'locked' && (tuningScore ?? 0) >= 60 ? 'PARTIAL LOCK'
@@ -485,7 +493,8 @@ function App() {
     : tuningPhase === 'tracking' ? 'TRACKING'
     : tuningPhase === 'locking' ? 'ACQUIRING'
     : tuningPhase === 'surging' ? 'LOCKED'
-    : tuningPhase === 'slipping' ? 'SLIPPING'
+    : tuningPhase === 'slipping' ? 'PHASE ERROR'
+    : tuningPhase === 'recovering' ? 'REACQUIRING'
     : tuningPhase === 'locked' && tuningScore === 100 ? 'LOCKED'
     : tuningPhase === 'locked' && (tuningScore ?? 0) >= 85 ? 'NEAR LOCK'
     : tuningPhase === 'locked' && (tuningScore ?? 0) >= 60 ? 'PARTIAL LOCK'
@@ -496,7 +505,9 @@ function App() {
     : tuningPhase === 'surging' && (tuningScore ?? 0) >= 85
       ? 'Full-strength carrier. Perfect lock confirmed.'
       : tuningPhase === 'slipping'
-        ? 'A tiny frequency drift breaks the perfect lock. Signal settling.'
+        ? 'A phase offset pulls the carrier outside the receiver window.'
+         : tuningPhase === 'recovering'
+           ? 'The receiver is compensating for the drift. A trace of interference remains.'
         : tuningPhase === 'locked' && tuningScore === 100
           ? 'Perfect acquisition. No interference detected.'
           : tuningPhase === 'locked' && (tuningScore ?? 0) >= 85
@@ -677,16 +688,18 @@ function App() {
         await animateScore(lockingTarget, 100, duration * .12);
 
         if (nearMiss) {
-          // Keep the apparent perfect lock on screen before revealing the tiny drift.
-          await wait(Math.max(1050, duration * .24));
+          // Let the false-perfect reading sit long enough to feel convincing.
+          await wait(Math.max(1250, duration * .28));
           setReceiverPhase('slipping', score);
-          setTuningStatus('CARRIER DRIFT // PERFECT LOCK LOST');
-          await wait(500);
-          // The score, reticle, and interference now move together at a readable pace.
-          await animateScore(100, score, Math.max(1000, duration * .24));
+          setTuningStatus('PHASE ERROR // CARRIER OUT OF ALIGNMENT');
+          // Show the physical drift before the displayed score admits the miss.
+          await wait(720);
+          setReceiverPhase('recovering', score);
+          setTuningStatus('AUTO-CORRECTION // REACQUIRING CARRIER');
+          await animateScore(100, score, Math.max(1400, duration * .3));
           setReceiverPhase('locked', score);
           setTuningStatus('NEAR-PERFECT // RESIDUAL CARRIER DRIFT');
-          await wait(Math.max(750, duration * .16));
+          await wait(Math.max(900, duration * .18));
         } else {
           setReceiverPhase('locked', score);
           setTuningStatus('100% CARRIER // SIGNAL FULLY ACQUIRED');
