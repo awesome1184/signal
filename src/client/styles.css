@@ -2749,40 +2749,87 @@ button:focus-visible,input:focus-visible {
 }
 
 
-/* Let the submitted answer become part of the receiver's interference pattern. */
-.perfect-capture .signal-capture[data-phase="slipping"] .signal-answer-readout .signal-answer-letter {
-  display:inline-block;
-  white-space:pre;
-  color:#ffe0c4;
-  transform-origin:50% 70%;
-  animation:signal-answer-letter-slip 1.05s cubic-bezier(.22,.65,.24,1) infinite;
-  animation-delay:calc(var(--letter-index) * 42ms);
+
+
+/* The answer is carried by the waveform itself: SVG text follows the exact carrier path. */
+.signal-carrier-group {
+  transform-box:fill-box;
+  transform-origin:center;
 }
-.perfect-capture .signal-capture[data-phase="recovering"] .signal-answer-readout .signal-answer-letter {
-  display:inline-block;
-  white-space:pre;
-  color:#f2d8c1;
-  transform-origin:50% 70%;
-  animation:signal-answer-letter-recover .92s cubic-bezier(.18,.68,.22,1) both;
-  animation-delay:calc(var(--letter-index) * 24ms);
+.signal-carrier-word {
+  fill:#d7fff7;
+  stroke:#041014;
+  stroke-width:4px;
+  stroke-linejoin:round;
+  paint-order:stroke fill;
+  font:700 14px var(--mono);
+  letter-spacing:.08em;
+  filter:drop-shadow(0 0 5px rgba(143,255,236,.62));
+  pointer-events:none;
 }
-@keyframes signal-answer-letter-slip {
-  0%,100% {transform:translateY(0) skewX(0) scaleY(1);text-shadow:none;opacity:1;}
-  24% {transform:translateY(-2px) skewX(-2deg) scaleY(1.05);text-shadow:0 0 7px rgba(255,177,112,.36);opacity:.95;}
-  50% {transform:translateY(2px) skewX(2.4deg) scaleY(.92);text-shadow:0 0 4px rgba(255,177,112,.22);opacity:.82;}
-  76% {transform:translateY(-1px) skewX(-1deg) scaleY(1.02);text-shadow:0 0 6px rgba(255,177,112,.3);opacity:.96;}
+.signal-carrier-word textPath {
+  dominant-baseline:middle;
 }
-@keyframes signal-answer-letter-recover {
-  0% {transform:translateY(2px) skewX(2.4deg) scaleY(.92);text-shadow:0 0 5px rgba(255,177,112,.25);opacity:.82;}
-  58% {transform:translateY(-1px) skewX(-.7deg) scaleY(1.02);text-shadow:0 0 3px rgba(255,177,112,.12);opacity:.94;}
-  100% {transform:translateY(0) skewX(0) scaleY(1);text-shadow:none;opacity:1;}
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-carrier-group {
+  transform-box:fill-box;
+  transform-origin:center;
+  animation:signal-carrier-group-slip 1.15s cubic-bezier(.22,.65,.24,1) infinite !important;
+}
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-clean-trace {
+  opacity:1 !important;
+  stroke:#ffe1c4 !important;
+  stroke-dasharray:none !important;
+  stroke-dashoffset:0 !important;
+  animation:none !important;
+  filter:drop-shadow(0 0 5px rgba(255,174,112,.5)) !important;
+}
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-carrier-word {
+  fill:#ffe2c6;
+  filter:drop-shadow(0 0 7px rgba(255,174,112,.7));
+}
+.perfect-capture .signal-capture[data-phase="recovering"] .signal-carrier-group {
+  transform-box:fill-box;
+  transform-origin:center;
+  animation:signal-carrier-group-recover 1.1s cubic-bezier(.18,.68,.22,1) both !important;
+}
+.perfect-capture .signal-capture[data-phase="recovering"] .signal-clean-trace,
+.perfect-capture .signal-capture[data-phase="locked"] .signal-clean-trace {
+  opacity:1 !important;
+  stroke:#f4d9bd !important;
+  stroke-dasharray:none !important;
+  stroke-dashoffset:0 !important;
+  animation:none !important;
+  filter:drop-shadow(0 0 4px rgba(255,179,126,.42)) !important;
+}
+.perfect-capture .signal-capture[data-phase="recovering"] .signal-carrier-word,
+.perfect-capture .signal-capture[data-phase="locked"] .signal-carrier-word {
+  fill:#f4d9bd;
+  filter:drop-shadow(0 0 4px rgba(255,179,126,.42));
+}
+@keyframes signal-carrier-group-slip {
+  0%,100% {transform:translateY(0) scaleY(1) skewX(0);}
+  22% {transform:translateY(-3px) scaleY(1.1) skewX(-1.2deg);}
+  50% {transform:translateY(6px) scaleY(.76) skewX(1.7deg);}
+  76% {transform:translateY(-4px) scaleY(1.12) skewX(-.8deg);}
+}
+@keyframes signal-carrier-group-recover {
+  0% {transform:translateY(-4px) scaleY(1.12) skewX(-.8deg);}
+  48% {transform:translateY(2px) scaleY(.9) skewX(.5deg);}
+  78% {transform:translateY(-1px) scaleY(1.03) skewX(-.15deg);}
+  100% {transform:translateY(0) scaleY(1) skewX(0);}
+}
+/* Keep the carrier drawn after the acquisition animation has finished. */
+.play-view.tuning-view .signal-capture[data-phase="recovering"] .signal-clean-trace,
+.play-view.tuning-view .signal-capture[data-phase="locked"] .signal-clean-trace {
+  opacity:1 !important;
+  stroke-dasharray:none !important;
+  stroke-dashoffset:0 !important;
+  animation:none !important;
 }
 @media (prefers-reduced-motion:reduce) {
-  .perfect-capture .signal-capture[data-phase="slipping"] .signal-answer-readout .signal-answer-letter,
-  .perfect-capture .signal-capture[data-phase="recovering"] .signal-answer-readout .signal-answer-letter {
+  .perfect-capture .signal-capture[data-phase="slipping"] .signal-carrier-group,
+  .perfect-capture .signal-capture[data-phase="recovering"] .signal-carrier-group {
     animation:none !important;
     transform:none !important;
-    text-shadow:none !important;
-    opacity:1 !important;
   }
 }
