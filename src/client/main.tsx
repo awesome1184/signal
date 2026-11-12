@@ -363,10 +363,11 @@ function App() {
       setTuningDuration(900);
       setTuningPhase('failed');
       setTuningStatus(status);
-      await wait(900);
+      await wait(1700);
     };
     const animateCapture = async (score: number) => {
-      const duration = 900 + Math.round(Math.max(0, Math.min(100, score)) * 36);
+      // Each score gets a deliberate sequence, with enough time to read every receiver event.
+      const duration = 1500 + Math.round(Math.max(0, Math.min(100, score)) * 30);
       setTuningScore(score);
       setTuningDisplayScore(0);
       setTuningDuration(duration);
@@ -374,7 +375,7 @@ function App() {
       const perfect = score === 100;
       const nearMiss = score >= 85 && score < 100;
       const animateScore = async (from: number, to: number, segmentMs: number) => {
-        const steps = Math.max(1, Math.ceil(segmentMs / 48));
+        const steps = Math.max(1, Math.ceil(segmentMs / 72));
         for (let step = 1; step <= steps; step++) {
           await wait(segmentMs / steps);
           setTuningDisplayScore(Math.round(from + (to - from) * (step / steps)));
@@ -384,9 +385,12 @@ function App() {
       const trackingTarget = Math.round(score * (perfect ? .34 : nearMiss ? .36 : .38));
       const lockingTarget = Math.round(score * (perfect ? .86 : nearMiss ? .9 : .88));
 
+      // Let the raw static register before the first carrier event appears.
+      await wait(650);
       setTuningPhase('tracking');
       setTuningStatus('CARRIER DETECTED // TRACKING FREQUENCY');
-      await animateScore(0, trackingTarget, duration * (perfect ? .44 : nearMiss ? .42 : .48));
+      await wait(360);
+      await animateScore(0, trackingTarget, duration * .40);
 
       setTuningPhase('locking');
       setTuningStatus(score >= 100
@@ -396,29 +400,32 @@ function App() {
           : score >= 60
             ? 'ALIGNING CARRIER // REDUCING INTERFERENCE'
             : 'WEAK CARRIER // ATTEMPTING ACQUISITION');
-      await animateScore(trackingTarget, lockingTarget, duration * (perfect ? .24 : nearMiss ? .22 : .32));
+      await wait(430);
+      await animateScore(trackingTarget, lockingTarget, duration * .30);
 
       if (perfect || nearMiss) {
         setTuningPhase('surging');
         setTuningStatus(perfect
           ? 'CARRIER SPIKE // BREAKTHROUGH IMMINENT'
           : '100% CARRIER // LOCK CONFIRMED');
-        await animateScore(lockingTarget, 100, duration * (perfect ? .14 : .10));
+        await wait(420);
+        await animateScore(lockingTarget, 100, duration * .12);
 
         if (nearMiss) {
-          // Hold the apparent perfect lock long enough for the player to believe it.
-          await wait(Math.max(720, duration * .18));
+          // Keep the apparent perfect lock on screen before revealing the tiny drift.
+          await wait(Math.max(1050, duration * .24));
           setTuningPhase('slipping');
           setTuningStatus('CARRIER DRIFT // PERFECT LOCK LOST');
-          // Let the counter and reticle drift down together instead of snapping back.
-          await animateScore(100, score, Math.max(900, duration * .22));
+          await wait(500);
+          // The score, reticle, and interference now move together at a readable pace.
+          await animateScore(100, score, Math.max(1000, duration * .24));
           setTuningPhase('locked');
           setTuningStatus('NEAR-PERFECT // RESIDUAL CARRIER DRIFT');
-          await wait(Math.max(420, duration * .10));
+          await wait(Math.max(750, duration * .16));
         } else {
           setTuningPhase('locked');
           setTuningStatus('100% CARRIER // SIGNAL FULLY ACQUIRED');
-          await wait(duration * .18);
+          await wait(Math.max(1100, duration * .24));
         }
       } else {
         setTuningPhase(score > 0 ? 'locked' : 'failed');
@@ -427,7 +434,9 @@ function App() {
           : score > 0
             ? 'WEAK LOCK // INTERFERENCE REMAINS'
             : 'NO CARRIER // SIGNAL NOT RECOVERED');
-        await animateScore(lockingTarget, score, duration * .20);
+        await wait(450);
+        await animateScore(lockingTarget, score, duration * .24);
+        await wait(Math.max(850, duration * .18));
       }
       setTuningDisplayScore(score);
     };
