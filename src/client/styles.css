@@ -3304,7 +3304,7 @@ button { user-select:none; }
 .play-view.tuning-view .signal-capture:not([data-phase="slipping"]) .signal-lock-reticle {
   opacity:var(--reticle-opacity) !important;
   transform:translate(-50%,-50%) scale(var(--reticle-scale)) !important;
-  filter:drop-shadow(0 0 4px rgba(111,230,226,calc(.16 + var(--lock-progress) * .42))) !important;
+  filter:drop-shadow(0 0 4px rgba(111,230,226,var(--reticle-shadow-alpha))) !important;
 }
 .play-view.tuning-view .reticle-corner {
   width:var(--reticle-corner-size);
@@ -3331,7 +3331,7 @@ button { user-select:none; }
   );
   -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 1.5px),#000 calc(100% - .6px));
   mask:radial-gradient(farthest-side,transparent calc(100% - 1.5px),#000 calc(100% - .6px));
-  opacity:calc(.24 + var(--lock-progress) * .68);
+  opacity:var(--reticle-ring-opacity);
   filter:drop-shadow(0 0 4px rgba(115,241,222,.3));
   transition:opacity .14s ease;
   pointer-events:none;
