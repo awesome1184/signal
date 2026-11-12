@@ -10,6 +10,7 @@ type RunState = {
   index: number;
   entries: Entry[];
   deadline: number | null;
+  isTest?: boolean;
 };
 type LeaderboardRow = { name: string; score: number };
 
@@ -21,6 +22,14 @@ const MOCK_BOARD: LeaderboardRow[] = [
   { name: 'YOU', score: 0 }
 ];
 const DEMO_MODE = import.meta.env.MODE === 'pages';
+const TEST_TIERS = [
+  { score: 10, label: 'BACKGROUND' },
+  { score: 15, label: 'FAMILIAR' },
+  { score: 30, label: 'UNCOMMON' },
+  { score: 60, label: 'RARE' },
+  { score: 85, label: 'DEEP CUT' },
+  { score: 100, label: 'SIGNAL FOUND' }
+];
 
 function blankRun(dateKey: string): RunState {
   return { dateKey, phase: 'ready', index: 0, entries: [], deadline: null };
@@ -119,6 +128,8 @@ function App() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardRow[]>([]);
   const [serverReady, setServerReady] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [canTest, setCanTest] = useState(DEMO_MODE);
+  const [testPanelOpen, setTestPanelOpen] = useState(DEMO_MODE);
 
   const currentPrompt: Prompt = prompts[Math.min(game.index, prompts.length - 1)];
   const total = game.entries.reduce((sum, entry) => sum + entry.score, 0);
@@ -138,6 +149,7 @@ function App() {
       .then((data) => {
         if (!active || !data?.ok) return;
         setServerReady(true);
+        setCanTest(Boolean(data.canTest));
         setPlayerName(data.username ? String(data.username).toUpperCase() : 'REDDIT EXPLORER');
         setPlayerCount(Number(data.playerCount) || 0);
         if (Array.isArray(data.leaderboard)) setLeaderboard(data.leaderboard);
@@ -168,7 +180,7 @@ function App() {
   }, [game.phase, game.index, game.deadline, prompts]);
 
   useEffect(() => {
-    if (game.phase !== 'complete' || DEMO_MODE || !serverReady) return;
+    if (game.phase !== 'complete' || game.isTest || DEMO_MODE || !serverReady) return;
     let active = true;
     fetch('/api/complete', {
       method: 'POST',
@@ -184,13 +196,13 @@ function App() {
       })
       .catch(() => setMessage('Result is visible locally. The community board is temporarily unavailable.'));
     return () => { active = false; };
-  }, [game.phase, serverReady]);
+  }, [game.phase, game.isTest, serverReady]);
 
-  const startGame = () => {
+  const startGame = (isTest = false) => {
     setMessage('');
     setAnswer('');
     setNow(Date.now());
-    setGame({ dateKey: dayKey, phase: 'playing', index: 0, entries: [], deadline: Date.now() + ROUND_SECONDS * 1000 });
+    setGame({ dateKey: dayKey, phase: 'playing', index: 0, entries: [], deadline: Date.now() + ROUND_SECONDS * 1000, isTest });
   };
 
   const validateAnswer = async (prompt: Prompt, raw: string) => {
@@ -222,6 +234,47 @@ function App() {
     } catch {
       setMessage('Could not reach the signal receiver. Check the connection and try again.');
     }
+  };
+
+  const triggerTestAnswer = async (score: number) => {
+    if (!game.isTest || game.phase !== 'playing') return;
+    try {
+      let candidate: string | null = null;
+      if (DEMO_MODE) {
+        const module = await import('../shared/answerBank');
+        candidate = module.getTestAnswer(currentPrompt.id, score);
+      } else {
+        const response = await fetch('/api/test-answer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ promptId: currentPrompt.id, score })
+        });
+        if (!response.ok) throw new Error('Test endpoint unavailable');
+        const data = await response.json();
+        candidate = typeof data.answer === 'string' ? data.answer : null;
+      }
+      if (!candidate) {
+        setMessage('This prompt has no catalog answer at ' + score + ' points. Try another tier.');
+        return;
+      }
+      await validateAnswer(currentPrompt, candidate);
+    } catch {
+      setMessage('Could not trigger the test answer. Check the test connection.');
+    }
+  };
+
+  const forceTimeout = () => {
+    if (!game.isTest || game.phase !== 'playing') return;
+    const entry: Entry = {
+      promptId: currentPrompt.id,
+      answer: '',
+      score: 0,
+      tier: 'NO SIGNAL',
+      note: 'Test bench forced the transmission window to close.'
+    };
+    setGame((previous) => ({ ...previous, phase: 'reveal', deadline: null, entries: [...previous.entries, entry] }));
+    setAnswer('');
+    setMessage('');
   };
 
   const skipPrompt = () => {
@@ -293,7 +346,8 @@ function App() {
             {!DEMO_MODE && serverReady && <span className="preview-chip connected">REDDIT LINK ACTIVE</span>}
           </div>
 
-          <section className="game-panel">
+          <section className="game-panel scan-hum">
+            <div className="panel-scanline" aria-hidden="true" />
             <div className="panel-topline">
               <div><span className="eyebrow">INCOMING TRANSMISSION</span><div className="panel-title">Today's signal scan</div></div>
               <div className="round-count"><strong>{String(game.phase === 'complete' ? 7 : game.index + 1).padStart(2, '0')}</strong><span>/ 07</span></div>
@@ -330,6 +384,7 @@ function App() {
                   <span className="channel-label">{currentPrompt.channel}</span>
                   <div className={'timer-pill ' + (secondsLeft <= 7 ? 'urgent' : '')}><span className="timer-ring"><span /></span><strong>{String(secondsLeft).padStart(2, '0')}</strong><span>SEC</span></div>
                 </div>
+                <div className="timer-track"><i style={{ width: (secondsLeft / ROUND_SECONDS * 100) + '%' }} /></div>
                 <div className="question-index">TRANSMISSION {String(game.index + 1).padStart(2, '0')}</div>
                 <h1 className="question-text">{currentPrompt.prompt}</h1>
                 <p className="question-context">{currentPrompt.context}</p>
@@ -346,7 +401,8 @@ function App() {
             )}
 
             {game.phase === 'reveal' && currentEntry && (
-              <div className="reveal-view">
+              <div className={'reveal-view phase-in ' + (currentEntry.score >= 85 ? 'rare-reveal' : '')}>
+                <div className="reveal-particles" aria-hidden="true">{Array.from({ length: 18 }, (_, index) => <i key={index} />)}</div>
                 <div className={'reveal-orb ' + (currentEntry.score >= 60 ? 'strong' : '')}><SignalIcon size={44} /></div>
                 <div className="reveal-label">{currentEntry.score > 0 ? 'SIGNAL DETECTED' : 'NO SIGNAL DETECTED'}</div>
                 <div className="reveal-answer">{currentEntry.answer || 'No answer transmitted'}</div>
@@ -380,11 +436,44 @@ function App() {
                   <button className="primary-button" onClick={() => void copyResult()}>{copied ? 'COPIED' : 'COPY RESULT'} <span className="button-arrow">↗</span></button>
                   {DEMO_MODE && <button className="secondary-button" onClick={resetPreview}>RESET LOCAL PREVIEW</button>}
                 </div>
-                <p className="fine-print">A new set of transmissions arrives at midnight Eastern.</p>
+                <p className="fine-print">{game.isTest ? 'TEST RUN · RESULTS ARE NOT SAVED TO THE COMMUNITY BOARD' : 'A new set of transmissions arrives at midnight Eastern.'}</p>
                 {message && <div className="inline-message" role="status">{message}</div>}
               </div>
             )}
           </section>
+
+          {canTest && (
+            <section className={'test-bench ' + (testPanelOpen ? 'open' : '')}>
+              <button className="test-bench-toggle" onClick={() => setTestPanelOpen((open) => !open)} aria-expanded={testPanelOpen}>
+                <span className="test-led" />
+                <span className="test-bench-heading">TEST BENCH <small>LOCAL CONTROLS · NO COMMUNITY SCORE</small></span>
+                <span className="test-bench-action">{testPanelOpen ? '− CLOSE' : '+ OPEN'}</span>
+              </button>
+              {testPanelOpen && (
+                <div className="test-bench-content">
+                  <div className="test-bench-intro">
+                    <strong>TRIGGER A RESULT</strong>
+                    <span>{game.isTest ? 'Test run active. Pick a score tier to submit a catalog answer.' : 'Start a test run to trigger answers without recording a daily result.'}</span>
+                  </div>
+                  <div className="test-bench-controls">
+                    <button className="test-start" onClick={() => startGame(true)}>{game.isTest && game.phase === 'playing' ? 'RESTART TEST RUN' : 'START TEST RUN'} <b>↗</b></button>
+                    <div className="test-tier-grid">
+                      {TEST_TIERS.map((tier) => (
+                        <button key={tier.score} disabled={!game.isTest || game.phase !== 'playing'} onClick={() => void triggerTestAnswer(tier.score)}>
+                          <strong>{tier.score}</strong><span>{tier.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                    <div className="test-utility-row">
+                      <button disabled={!game.isTest || game.phase !== 'playing'} onClick={skipPrompt}>FORCE NO SIGNAL</button>
+                      <button disabled={!game.isTest || game.phase !== 'playing'} onClick={forceTimeout}>FORCE TIMEOUT</button>
+                      <button onClick={() => { setGame(blankRun(dayKey)); setMessage(''); setAnswer(''); }}>RESET GAME</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </section>
+          )}
 
           <div className="bottom-note">
             <div className="bottom-note-icon"><SignalIcon size={24} /></div>

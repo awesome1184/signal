@@ -191,3 +191,8 @@ export function evaluateAnswer(promptId: string, rawAnswer: string): AnswerResul
   );
   return match ? { score: match.score, tier: match.tier, note: match.note } : null;
 }
+
+export function getTestAnswer(promptId: string, score: number): string | null {
+  const record = (BANK[promptId] ?? []).find((candidate) => candidate.score === score);
+  return record?.aliases[0] ?? null;
+}

@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
 import { createServer, getServerPort, context, redis, reddit } from '@devvit/web/server';
 import { getDailyPrompts, getNewYorkDateKey, MAX_SCORE } from '../shared/game';
-import { evaluateAnswer } from '../shared/answerBank';
+import { evaluateAnswer, getTestAnswer } from '../shared/answerBank';
 
 const app = new Hono();
 const boardKey = (day: string) => 'signal:v1:board:' + day;
@@ -30,7 +30,8 @@ app.get('/api/bootstrap', async (c) => {
   const raw = userId ? await redis.hGet(resultsKey(day), userId) : null;
   const result = raw ? JSON.parse(raw) : null;
   const playerCount = await redis.zCard(boardKey(day));
-  return c.json({ ok: true, dateKey: day, username, playerCount, leaderboard: await leaderboard(day), result });
+  const canTest = username.replace(/^u\//i, '').toLowerCase() === 'shadow_fen';
+  return c.json({ ok: true, dateKey: day, username, playerCount, leaderboard: await leaderboard(day), result, canTest });
 });
 
 app.post('/api/check-answer', async (c) => {
@@ -43,6 +44,20 @@ app.post('/api/check-answer', async (c) => {
   }
   const match = evaluateAnswer(promptId, answer);
   return c.json({ ok: true, valid: Boolean(match), result: match });
+});
+
+app.post('/api/test-answer', async (c) => {
+  const username = (await reddit.getCurrentUsername()) ?? '';
+  if (username.replace(/^u\//i, '').toLowerCase() !== 'shadow_fen') {
+    return c.json({ ok: false, message: 'Test bench access is restricted.' }, 403);
+  }
+  const body = await c.req.json<{ promptId?: string; score?: number }>();
+  const promptId = typeof body.promptId === 'string' ? body.promptId : '';
+  const score = typeof body.score === 'number' ? body.score : 0;
+  const prompts = getDailyPrompts(getNewYorkDateKey());
+  if (!prompts.some((prompt) => prompt.id === promptId)) return c.json({ ok: false }, 400);
+  const answer = getTestAnswer(promptId, score);
+  return c.json({ ok: true, answer });
 });
 
 app.post('/api/complete', async (c) => {
