@@ -23,7 +23,8 @@ function buildReceiverPaths(seed: number, score: number): ReceiverPaths {
   const harmonicPhase = random() * Math.PI * 2;
   const harmonic = .1 + random() * .16;
   const detail = .025 + random() * .055;
-  const amplitude = 10 + Math.max(0, Math.min(100, score)) * .3;
+  const normalizedScore = Math.max(0, Math.min(100, score)) / 100;
+  const amplitude = 10 + Math.pow(normalizedScore, .72) * 42;
 
   const carrierPoints = Array.from({ length: 73 }, (_, index) => {
     const x = index * 10;
@@ -540,9 +541,10 @@ function App() {
   const tuningNoiseFinal = tuningScore === null ? 1 : Math.max(.025, 1 - tuningScore / 100 * .975);
   const tuningWaveFinal = tuningScore === null ? .02 : Math.max(.08, tuningScore / 100);
   const tuningChaosFinal = tuningScore === null ? .95 : Math.max(.03, .95 - tuningScore / 100 * .92);
-  const tuningLockProgress = tuningPhase === 'recovering' && tuningScore !== null
+  const tuningLockProgressRaw = tuningPhase === 'recovering' && tuningScore !== null
     ? Math.max(0, Math.min(1, (100 - tuningDisplayScore) / Math.max(1, 100 - tuningScore)))
     : Math.max(0, Math.min(1, tuningDisplayScore / 100));
+  const tuningLockProgress = Math.pow(tuningLockProgressRaw, .72);
   const tuningCaptureStyle = {
     '--noise-final': String(tuningNoiseFinal),
     '--wave-final': String(tuningWaveFinal),
@@ -552,13 +554,20 @@ function App() {
     '--score-width': tuningDisplayScore + '%',
     '--lock-progress': String(tuningLockProgress),
     '--lock-progress-pct': (tuningLockProgress * 100).toFixed(1) + '%',
-    '--reticle-scale': String(1.48 - tuningLockProgress * .66),
-    '--reticle-opacity': String(.22 + tuningLockProgress * .74),
-    '--reticle-shadow-alpha': String(.16 + tuningLockProgress * .42),
-    '--reticle-ring-opacity': String(.24 + tuningLockProgress * .68),
-    '--reticle-corner-size': (12 + tuningLockProgress * 8) + 'px',
-    '--reticle-dot-size': (4 + tuningLockProgress * 4) + 'px',
-    '--carrier-stroke-width': (1.45 + tuningLockProgress * .95) + 'px'
+    '--reticle-scale': String(1.82 - tuningLockProgress * .98),
+    '--reticle-opacity': String(.42 + tuningLockProgress * .58),
+    '--reticle-shadow-alpha': String(.2 + tuningLockProgress * .65),
+    '--reticle-ring-opacity': String(.55 + tuningLockProgress * .45),
+    '--reticle-corner-size': (17 + tuningLockProgress * 15) + 'px',
+    '--reticle-dot-size': (5 + tuningLockProgress * 5) + 'px',
+    '--reticle-corner-opacity': String(.42 + tuningLockProgress * .56),
+    '--reticle-corner-glow': (2 + tuningLockProgress * 7) + 'px',
+    '--reticle-center-glow': (5 + tuningLockProgress * 10) + 'px',
+    '--reticle-center-alpha': String(.3 + tuningLockProgress * .6),
+    '--lock-ring-thickness': (2.5 + tuningLockProgress * 2) + 'px',
+    '--carrier-stroke-width': (1.85 + tuningLockProgress * 1.55) + 'px',
+    '--carrier-glow-size': (3 + tuningLockProgress * 8) + 'px',
+    '--carrier-glow-alpha': String(.45 + tuningLockProgress * .5)
   } as React.CSSProperties;
 
   useEffect(() => {
