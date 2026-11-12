@@ -3500,3 +3500,328 @@ button { user-select:none; }
     will-change:auto;
   }
 }
+
+
+/* Selectable treatments for the same receiver animation.
+   The waveform, acquisition timing, score progression, and lock tracking stay shared. */
+.wave-style-picker {
+  display:grid;
+  gap:6px;
+  margin:0 0 13px;
+  padding:0 0 11px;
+  border-bottom:1px solid rgba(91,216,232,.13);
+}
+.wave-style-heading {
+  color:#7095a2;
+  font:7px var(--mono);
+  letter-spacing:.17em;
+}
+.wave-style-options {
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:6px;
+}
+.wave-style-option {
+  display:flex;
+  min-width:0;
+  min-height:42px;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:3px;
+  padding:4px 5px;
+  border:1px solid rgba(104,164,174,.18);
+  border-radius:5px;
+  background:rgba(5,20,30,.56);
+  color:#7897a2;
+  cursor:pointer;
+  transition:background .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease;
+}
+.wave-style-option svg {
+  display:block;
+  width:min(58px,100%);
+  height:15px;
+  overflow:visible;
+}
+.wave-style-option svg path {
+  fill:none;
+  stroke:#8cecf0;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  filter:drop-shadow(0 0 2px rgba(140,236,240,.45));
+}
+.wave-style-option small {
+  color:inherit;
+  font:6px var(--mono);
+  letter-spacing:.09em;
+  white-space:nowrap;
+}
+.wave-style-option:hover {
+  border-color:rgba(122,207,211,.5);
+  color:#c8e4e7;
+}
+.wave-style-option.selected {
+  border-color:rgba(126,237,226,.75);
+  background:linear-gradient(180deg,rgba(28,81,89,.46),rgba(6,30,41,.86));
+  box-shadow:inset 0 0 12px rgba(87,225,214,.08),0 0 9px rgba(87,225,214,.1);
+  color:#e3fff8;
+}
+.wave-style-option.selected svg path {
+  stroke:#c5fff0;
+  filter:drop-shadow(0 0 4px rgba(138,255,229,.72));
+}
+.wave-style-option:focus-visible {
+  outline:2px solid #8be8ed;
+  outline-offset:2px;
+}
+.wave-style-option[data-wave-style="phosphor"] svg path { stroke:#baff88; }
+.wave-style-option[data-wave-style="amber"] svg path { stroke:#ffc36a; }
+.wave-style-option[data-wave-style="blueprint"] svg path { stroke:#b9e4ff; }
+.wave-style-option[data-wave-style="vector"] svg path { stroke:#dcadff; }
+@media (max-width:520px) {
+  .wave-style-picker { gap:6px; margin-bottom:11px; padding-bottom:9px; }
+  .wave-style-options { gap:4px; }
+  .wave-style-option { min-height:39px; padding:4px 2px; }
+  .wave-style-option svg { width:42px;height:13px; }
+  .wave-style-option small { font-size:5.5px;letter-spacing:.045em; }
+}
+
+/* The five skins change the receiver's visual language, never the signal itself. */
+.signal-capture[data-wave-style="classic"] {
+  --display-ink:#8cecf0;
+  --display-rgb:140,236,240;
+  --display-edge:rgba(106,191,201,.42);
+  --display-screen-bg:radial-gradient(ellipse at 50% 50%,rgba(22,78,82,.2),transparent 68%),#020a0e;
+  --display-grid:
+    linear-gradient(rgba(95,167,177,.14) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(95,167,177,.14) 1px,transparent 1px);
+  --display-grid-size:36px 30px;
+  --display-grid-opacity:.42;
+  --display-centerline:rgba(111,193,198,.3);
+  --display-glow:7px;
+  --display-text:#d7fff7;
+  --display-static-filter:none;
+  --display-overlay:transparent;
+  --display-overlay-opacity:0;
+  --display-reticle:rgba(181,255,241,.98);
+}
+.signal-capture[data-wave-style="phosphor"] {
+  --display-ink:#baff88;
+  --display-rgb:175,255,126;
+  --display-edge:rgba(133,205,98,.46);
+  --display-screen-bg:radial-gradient(ellipse at 50% 48%,rgba(48,104,29,.25),transparent 68%),#030c05;
+  --display-grid:
+    linear-gradient(rgba(137,204,99,.16) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(137,204,99,.16) 1px,transparent 1px);
+  --display-grid-size:32px 26px;
+  --display-grid-opacity:.48;
+  --display-centerline:rgba(157,222,117,.38);
+  --display-glow:9px;
+  --display-text:#e3ffd1;
+  --display-static-filter:sepia(.62) saturate(1.45) hue-rotate(35deg);
+  --display-overlay:repeating-linear-gradient(0deg,rgba(190,255,146,.075) 0 1px,transparent 1px 4px);
+  --display-overlay-opacity:.8;
+  --display-reticle:rgba(205,255,166,.98);
+}
+.signal-capture[data-wave-style="amber"] {
+  --display-ink:#ffc36a;
+  --display-rgb:255,188,102;
+  --display-edge:rgba(214,147,73,.48);
+  --display-screen-bg:radial-gradient(ellipse at 50% 48%,rgba(114,59,21,.25),transparent 67%),#100a05;
+  --display-grid:
+    linear-gradient(rgba(220,157,85,.16) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(220,157,85,.13) 1px,transparent 1px);
+  --display-grid-size:30px 22px;
+  --display-grid-opacity:.48;
+  --display-centerline:rgba(255,187,112,.35);
+  --display-glow:8px;
+  --display-text:#ffdfad;
+  --display-static-filter:sepia(.75) saturate(1.55) hue-rotate(345deg);
+  --display-overlay:linear-gradient(90deg,transparent 0 24.8%,rgba(255,190,120,.14) 25%,transparent 25.2% 49.8%,rgba(255,190,120,.14) 50%,transparent 50.2% 74.8%,rgba(255,190,120,.14) 75%,transparent 75.2%);
+  --display-overlay-opacity:.72;
+  --display-reticle:rgba(255,214,158,.98);
+}
+.signal-capture[data-wave-style="blueprint"] {
+  --display-ink:#b9e4ff;
+  --display-rgb:151,211,255;
+  --display-edge:rgba(95,164,219,.55);
+  --display-screen-bg:radial-gradient(ellipse at 50% 50%,rgba(31,91,148,.25),transparent 68%),#041222;
+  --display-grid:
+    linear-gradient(rgba(124,190,242,.17) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(124,190,242,.17) 1px,transparent 1px),
+    linear-gradient(rgba(124,190,242,.07) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(124,190,242,.07) 1px,transparent 1px);
+  --display-grid-size:90px 90px,90px 90px,18px 18px,18px 18px;
+  --display-grid-opacity:.68;
+  --display-centerline:rgba(148,207,255,.42);
+  --display-glow:4px;
+  --display-text:#edf8ff;
+  --display-static-filter:hue-rotate(145deg) saturate(.72);
+  --display-overlay:repeating-linear-gradient(90deg,transparent 0 17px,rgba(170,218,255,.13) 17px 18px);
+  --display-overlay-opacity:.42;
+  --display-reticle:rgba(218,241,255,.98);
+}
+.signal-capture[data-wave-style="vector"] {
+  --display-ink:#dcadff;
+  --display-rgb:204,153,255;
+  --display-edge:rgba(174,119,220,.52);
+  --display-screen-bg:radial-gradient(ellipse at 50% 49%,rgba(93,47,135,.28),transparent 69%),#0b0716;
+  --display-grid:
+    linear-gradient(45deg,rgba(177,130,220,.1) 1px,transparent 1px),
+    linear-gradient(-45deg,rgba(177,130,220,.1) 1px,transparent 1px);
+  --display-grid-size:32px 32px;
+  --display-grid-opacity:.55;
+  --display-centerline:rgba(207,167,246,.3);
+  --display-glow:11px;
+  --display-text:#f5e1ff;
+  --display-static-filter:hue-rotate(205deg) saturate(1.18);
+  --display-overlay:radial-gradient(ellipse at 50% 50%,transparent 28%,rgba(0,0,0,.26) 100%);
+  --display-overlay-opacity:.92;
+  --display-reticle:rgba(232,199,255,.98);
+}
+
+/* Shared signal layers inherit the selected treatment. */
+.signal-capture[data-wave-style] .signal-screen {
+  border-color:var(--display-edge);
+  background:var(--display-screen-bg);
+  box-shadow:inset 0 0 34px rgba(0,0,0,.68),0 0 18px rgba(var(--display-rgb),.09);
+}
+.signal-capture[data-wave-style] .signal-screen-grid {
+  opacity:var(--display-grid-opacity);
+  background-image:var(--display-grid);
+  background-size:var(--display-grid-size);
+  animation-duration:9s;
+}
+.signal-capture[data-wave-style] .signal-screen-grid::after {
+  background:linear-gradient(90deg,transparent 49.8%,var(--display-centerline) 50%,transparent 50.2%);
+}
+.signal-capture[data-wave-style] .signal-screen::before {
+  content:"";
+  position:absolute;
+  z-index:5;
+  inset:0;
+  pointer-events:none;
+  background:var(--display-overlay);
+  opacity:var(--display-overlay-opacity);
+}
+.signal-capture[data-wave-style] .signal-static {
+  filter:var(--display-static-filter);
+}
+.signal-capture[data-wave-style] .signal-centerline {
+  stroke:var(--display-centerline);
+}
+.signal-capture[data-wave-style] .signal-clean-trace {
+  stroke:var(--display-ink);
+  filter:drop-shadow(0 0 var(--display-glow) rgba(var(--display-rgb),.88));
+}
+.signal-capture[data-wave-style] .signal-carrier-word {
+  fill:var(--display-text);
+  filter:drop-shadow(0 0 6px rgba(var(--display-rgb),.75));
+}
+.signal-capture[data-wave-style] .signal-lock-reticle {
+  filter:drop-shadow(0 0 8px rgba(var(--display-rgb),.42));
+}
+.signal-capture[data-wave-style] .reticle-corner {
+  border-color:var(--display-reticle);
+}
+.signal-capture[data-wave-style] .reticle-center {
+  border-color:var(--display-reticle);
+  background:rgba(var(--display-rgb),.2);
+  box-shadow:0 0 12px rgba(var(--display-rgb),.66);
+}
+.signal-capture[data-wave-style] .signal-screen-label,
+.signal-capture[data-wave-style] .signal-screen-state {
+  color:rgba(var(--display-rgb),.78);
+}
+.signal-capture[data-wave-style] .signal-lock-steps span:first-child,
+.signal-capture[data-wave-style] .signal-lock-steps[data-phase="tracking"] span:nth-child(2),
+.signal-capture[data-wave-style] .signal-lock-steps[data-phase="locking"] span:nth-child(-n+2),
+.signal-capture[data-wave-style] .signal-lock-steps[data-phase="locked"] span {
+  border-color:rgba(var(--display-rgb),.62);
+  color:var(--display-text);
+}
+.signal-capture[data-wave-style] .signal-lock-steps span:first-child i,
+.signal-capture[data-wave-style] .signal-lock-steps[data-phase="tracking"] span:nth-child(2) i,
+.signal-capture[data-wave-style] .signal-lock-steps[data-phase="locking"] span:nth-child(-n+2) i,
+.signal-capture[data-wave-style] .signal-lock-steps[data-phase="locked"] span i {
+  background:var(--display-ink);
+  box-shadow:0 0 8px rgba(var(--display-rgb),.65);
+}
+.signal-capture[data-wave-style] .signal-lock-steps[data-phase="locking"] span:last-child,
+.signal-capture[data-wave-style] .signal-lock-steps[data-phase="locked"] span:last-child {
+  border-color:var(--display-reticle);
+  color:var(--display-text);
+}
+.signal-capture[data-wave-style] .signal-capture-status i {
+  background:var(--display-ink);
+  box-shadow:0 0 8px rgba(var(--display-rgb),.72);
+}
+.signal-capture[data-wave-style] .signal-capture-copy h2 {
+  text-shadow:0 0 14px rgba(var(--display-rgb),.2);
+}
+
+/* Material details make the five choices read as different receiver hardware. */
+.signal-capture[data-wave-style="phosphor"] .signal-screen {
+  border-radius:9px;
+  box-shadow:inset 0 0 48px rgba(0,0,0,.86),inset 0 0 20px rgba(127,222,91,.1),0 0 20px rgba(113,218,87,.1);
+}
+.signal-capture[data-wave-style="phosphor"] .signal-clean-trace {
+  stroke-width:2.5;
+}
+.signal-capture[data-wave-style="phosphor"] .signal-lock-reticle {
+  mix-blend-mode:screen;
+}
+.signal-capture[data-wave-style="amber"] .signal-screen {
+  border-radius:2px;
+  box-shadow:inset 0 0 38px rgba(0,0,0,.82),inset 0 0 18px rgba(255,159,69,.08),0 0 16px rgba(223,148,76,.1);
+}
+.signal-capture[data-wave-style="amber"] .signal-clean-trace {
+  stroke-width:2.8;
+}
+.signal-capture[data-wave-style="amber"] .reticle-corner {
+  width:15px;
+  height:15px;
+  border-width:3px 0 0 3px;
+}
+.signal-capture[data-wave-style="blueprint"] .signal-screen {
+  border-radius:1px;
+  box-shadow:inset 0 0 28px rgba(0,0,0,.55),0 0 17px rgba(94,173,241,.12);
+}
+.signal-capture[data-wave-style="blueprint"] .signal-clean-trace {
+  stroke-width:1.8;
+  filter:drop-shadow(0 0 3px rgba(151,211,255,.72));
+}
+.signal-capture[data-wave-style="blueprint"] .reticle-corner {
+  width:24px;
+  height:24px;
+  border-width:1px;
+}
+.signal-capture[data-wave-style="vector"] .signal-screen {
+  border-radius:8px;
+  box-shadow:inset 0 0 38px rgba(0,0,0,.76),0 0 25px rgba(174,119,220,.14);
+}
+.signal-capture[data-wave-style="vector"] .signal-clean-trace {
+  stroke-width:2.6;
+  filter:drop-shadow(0 0 3px rgba(204,153,255,.95)) drop-shadow(0 0 10px rgba(145,83,215,.72));
+}
+.signal-capture[data-wave-style="vector"] .signal-lock-reticle::before {
+  filter:drop-shadow(0 0 9px rgba(204,153,255,.72));
+}
+
+/* Keep the chosen palette coherent on a perfect lock and on the result card. */
+.signal-capture[data-wave-style][data-grade="perfect"] .signal-screen {
+  border-color:rgba(var(--display-rgb),.8);
+  box-shadow:inset 0 0 38px rgba(var(--display-rgb),.12),0 0 27px rgba(var(--display-rgb),.15);
+}
+.signal-capture[data-wave-style][data-grade="perfect"] .signal-clean-trace {
+  stroke:var(--display-text);
+  filter:drop-shadow(0 0 9px rgba(var(--display-rgb),.95));
+}
+@media (max-width:520px) {
+  .wave-style-options { gap:3px; }
+  .wave-style-option { min-height:37px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .wave-style-option { transition:none !important; }
+}
