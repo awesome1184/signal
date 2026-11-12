@@ -150,6 +150,7 @@ function App() {
   const tuningCaptureStyle = {
     '--noise-final': String(tuningNoiseFinal),
     '--wave-final': String(tuningWaveFinal),
+    '--wave-mid': String(Math.max(.01, tuningWaveFinal * .42)),
     '--chaos-final': String(tuningChaosFinal),
     '--tune-duration': tuningDuration + 'ms',
     '--score-width': (tuningScore ?? 0) + '%'
