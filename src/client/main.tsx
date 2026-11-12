@@ -4,7 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { getDailyPrompts, getNewYorkDateKey, formatDay, ROUND_SECONDS, MAX_SCORE, type Prompt } from '../shared/game';
 
 type Entry = { promptId: string; answer: string; score: number; tier: string; note: string; signalSeed?: number };
-type ReceiverPaths = { carrier: string };
+type ReceiverPaths = { carrier: string; reticleY: number };
 
 function receiverFrequency(seed: number): string {
   return (88 + ((Math.floor(seed) >>> 0) % 2000) / 100).toFixed(1);
@@ -39,7 +39,12 @@ function buildReceiverPaths(seed: number, score: number): ReceiverPaths {
     `${index ? 'L' : 'M'}${point.x.toFixed(1)} ${point.y.toFixed(1)}`
   ).join(' ');
 
-  return { carrier };
+  // Let the reticle follow the carrier where it crosses the screen's center.
+  // Dampen the movement so it clearly tracks the signal without reaching the screen edge.
+  const centerY = carrierPoints[36].y;
+  const reticleY = Math.max(37, Math.min(63, 50 + ((centerY - 90) / 180) * 100 * .52));
+
+  return { carrier, reticleY };
 }
 type RunState = {
   dateKey: string;
@@ -1032,7 +1037,7 @@ function App() {
                         <h2>{tuningHeading}</h2>
                         <p>{tuningCaption}</p>
                       </div>
-                      <div className="signal-screen" aria-label="Live receiver waveform resolving from static">
+                      <div className="signal-screen" style={{ '--reticle-y': tuningSignalPaths.reticleY + '%' } as React.CSSProperties} aria-label="Live receiver waveform resolving from static">
                         <div className="signal-screen-grid" />
                         <div className="signal-static" />
                         <svg className="signal-traces" viewBox="0 0 720 180" preserveAspectRatio="none" aria-hidden="true">
@@ -1174,7 +1179,7 @@ function App() {
                       <div className="signal-result-tier">{currentEntry.tier}</div>
                     </div>
                   </div>
-                  <div className="signal-screen signal-result-screen" aria-label={'Receiver signal quality: ' + currentEntry.score + ' out of 100'}>
+                  <div className="signal-screen signal-result-screen" style={{ '--reticle-y': (resultSignalPaths?.reticleY ?? 50) + '%' } as React.CSSProperties} aria-label={'Receiver signal quality: ' + currentEntry.score + ' out of 100'}>
                     <div className="signal-screen-grid" />
                     <div className="signal-static" />
                     <svg className="signal-traces" viewBox="0 0 720 180" preserveAspectRatio="none" aria-hidden="true">
