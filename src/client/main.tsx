@@ -135,6 +135,7 @@ function App() {
   const [tuningScore, setTuningScore] = useState<number | null>(null);
   const [tuningDuration, setTuningDuration] = useState(900);
   const [tuningStatus, setTuningStatus] = useState('CAPTURING INPUT // SCANNING NOISE');
+  const [tuningPhase, setTuningPhase] = useState<'searching' | 'tracking' | 'locking' | 'locked' | 'failed'>('searching');
 
   const currentPrompt: Prompt = prompts[Math.min(game.index, prompts.length - 1)];
   const total = game.entries.reduce((sum, entry) => sum + entry.score, 0);
@@ -143,7 +144,26 @@ function App() {
   const completedPrompts = game.entries.length;
   const shownBoard = DEMO_MODE || !serverReady ? MOCK_BOARD : leaderboard;
   const tuningGrade = tuningScore === null ? 'searching' : tuningScore >= 100 ? 'perfect' : tuningScore >= 85 ? 'deep' : tuningScore >= 60 ? 'clear' : tuningScore >= 30 ? 'faint' : 'background';
-  const tuningHeading = tuningStatus.startsWith('NO MATCH') ? 'NO CARRIER' : tuningStatus.startsWith('RECEIVER OFFLINE') ? 'RECEIVER OFFLINE' : tuningScore === null ? 'READING THE STATIC' : tuningScore >= 100 ? 'SIGNAL FOUND' : tuningScore >= 85 ? 'CLEAR CARRIER' : tuningScore >= 60 ? 'SIGNAL DETECTED' : tuningScore >= 30 ? 'WEAK SIGNAL' : 'BURIED IN STATIC';
+  const tuningHeading = tuningStatus.startsWith('NO MATCH') ? 'NO CARRIER'
+    : tuningStatus.startsWith('RECEIVER OFFLINE') ? 'RECEIVER OFFLINE'
+    : tuningPhase === 'searching' || tuningScore === null ? 'READING THE STATIC'
+    : tuningPhase === 'tracking' ? 'CARRIER DETECTED'
+    : tuningPhase === 'locking' ? 'LOCKING SIGNAL'
+    : tuningScore >= 100 ? 'SIGNAL LOCKED'
+    : tuningScore >= 60 ? 'PARTIAL LOCK'
+    : 'WEAK ACQUISITION';
+  const tuningInputLabel = tuningPhase === 'searching' ? 'INPUT BUFFERED'
+    : tuningPhase === 'tracking' ? 'CARRIER TRACKING'
+    : tuningPhase === 'locking' ? 'ACQUIRING LOCK'
+    : tuningPhase === 'locked' && tuningScore === 100 ? 'LOCK CONFIRMED'
+    : tuningPhase === 'locked' ? 'PARTIAL LOCK'
+    : 'SCAN FAILED';
+  const tuningScreenState = tuningPhase === 'searching' ? 'SEARCHING'
+    : tuningPhase === 'tracking' ? 'TRACKING'
+    : tuningPhase === 'locking' ? 'ACQUIRING'
+    : tuningPhase === 'locked' && tuningScore === 100 ? 'LOCKED'
+    : tuningPhase === 'locked' ? 'PARTIAL LOCK'
+    : 'NO CARRIER';
   const tuningNoiseFinal = tuningScore === null ? 1 : Math.max(.025, 1 - tuningScore / 100 * .975);
   const tuningWaveFinal = tuningScore === null ? .02 : Math.max(.08, tuningScore / 100);
   const tuningChaosFinal = tuningScore === null ? .95 : Math.max(.03, .95 - tuningScore / 100 * .92);
@@ -153,7 +173,9 @@ function App() {
     '--wave-mid': String(Math.max(.01, tuningWaveFinal * .42)),
     '--chaos-final': String(tuningChaosFinal),
     '--tune-duration': tuningDuration + 'ms',
-    '--score-width': (tuningScore ?? 0) + '%'
+    '--score-width': (tuningScore ?? 0) + '%',
+    '--reticle-scale': String(.78 + (1 - (tuningScore ?? 0) / 100) * .65),
+    '--reticle-opacity': String(.4 + (tuningScore ?? 0) / 100 * .6)
   } as React.CSSProperties;
 
   useEffect(() => {
@@ -232,6 +254,7 @@ function App() {
     setTuningAnswer(clean);
     setTuningScore(null);
     setTuningDuration(900);
+    setTuningPhase('searching');
     setTuningStatus('CAPTURING INPUT // SCANNING NOISE');
     setIsTuning(true);
     setMessage('');
@@ -244,12 +267,38 @@ function App() {
         : previous);
     };
 
-    const animateCapture = async (score: number, status: string) => {
+    const wait = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
+    const animateFailure = async (status: string) => {
+      setTuningScore(0);
+      setTuningDuration(900);
+      setTuningPhase('failed');
+      setTuningStatus(status);
+      await wait(900);
+    };
+    const animateCapture = async (score: number) => {
       const duration = 900 + Math.round(Math.max(0, Math.min(100, score)) * 36);
       setTuningScore(score);
       setTuningDuration(duration);
-      setTuningStatus(status);
-      await new Promise<void>((resolve) => window.setTimeout(resolve, duration));
+
+      setTuningPhase('tracking');
+      setTuningStatus('CARRIER DETECTED // TRACKING FREQUENCY');
+      await wait(duration * .54);
+
+      setTuningPhase('locking');
+      setTuningStatus(score >= 100
+        ? 'FREQUENCY CENTERED // LOCKING CARRIER'
+        : score >= 60
+          ? 'ALIGNING CARRIER // REDUCING INTERFERENCE'
+          : 'WEAK CARRIER // ATTEMPTING ACQUISITION');
+      await wait(duration * .26);
+
+      setTuningPhase('locked');
+      setTuningStatus(score >= 100
+        ? 'LOCK CONFIRMED // SIGNAL FOUND'
+        : score >= 60
+          ? 'PARTIAL LOCK // RESIDUAL NOISE'
+          : 'WEAK LOCK // INTERFERENCE REMAINS');
+      await wait(duration * .20);
     };
 
     try {
@@ -269,18 +318,13 @@ function App() {
       }
 
       if (!result) {
-        await animateCapture(0, 'NO MATCH // TRY A DIFFERENT FREQUENCY');
+        await animateFailure('NO MATCH // TRY A DIFFERENT FREQUENCY');
         resumeClock();
         setMessage('No match in today’s field catalog. Try another answer while the window is open.');
         return;
       }
 
-      const status = result.score >= 100
-        ? 'CARRIER LOCKED // SIGNAL FOUND'
-        : result.score >= 60
-          ? result.tier + ' // PARTIAL CARRIER LOCK'
-          : result.tier + ' // BURIED IN INTERFERENCE';
-      await animateCapture(result.score, status);
+      await animateCapture(result.score);
 
       const entry: Entry = { promptId: prompt.id, answer: clean, score: result.score, tier: result.tier, note: result.note };
       setGame((previous) => previous.phase === 'playing'
@@ -289,7 +333,7 @@ function App() {
       setAnswer('');
       setMessage('');
     } catch {
-      await animateCapture(0, 'RECEIVER OFFLINE // TRY AGAIN');
+      await animateFailure('RECEIVER OFFLINE // TRY AGAIN');
       resumeClock();
       setMessage('Could not reach the signal receiver. Check the connection and try again.');
     } finally {
@@ -447,11 +491,12 @@ function App() {
                       className="signal-capture"
                       key={tuningScore === null ? 'searching' : 'score-' + tuningScore}
                       data-grade={tuningGrade}
+                      data-phase={tuningPhase}
                       style={tuningCaptureStyle}
                     >
                       <div className="signal-capture-head">
                         <span className="signal-station"><i /> MT. AURORA / RECEIVER 07</span>
-                        <span className="signal-input-state">INPUT BUFFERED</span>
+                        <span className="signal-input-state">{tuningInputLabel}</span>
                       </div>
                       <div className="signal-capture-copy">
                         <div className="signal-capture-kicker">TRANSMISSION ANALYSIS</div>
@@ -468,8 +513,22 @@ function App() {
                         </svg>
                         <div className="signal-scanbeam" />
                         <div className="signal-lock-flare" />
+                        <div className="signal-lock-reticle" aria-hidden="true">
+                          <i className="reticle-corner top-left" />
+                          <i className="reticle-corner top-right" />
+                          <i className="reticle-corner bottom-left" />
+                          <i className="reticle-corner bottom-right" />
+                          <b className="reticle-center" />
+                          <span className="reticle-axis horizontal" />
+                          <span className="reticle-axis vertical" />
+                        </div>
                         <span className="signal-screen-label">RF / 104.7 MHZ</span>
-                        <span className="signal-screen-state">{tuningScore === 100 ? 'LOCKED' : tuningScore === null ? 'SEARCHING' : tuningScore + '% RECOVERED'}</span>
+                        <span className="signal-screen-state">{tuningScreenState}</span>
+                      </div>
+                      <div className="signal-lock-steps" data-phase={tuningPhase} aria-hidden="true">
+                        <span><i />01 / SCAN</span>
+                        <span><i />02 / TRACK</span>
+                        <span><i />03 / LOCK</span>
                       </div>
                       <div className="signal-capture-readout">
                         <div className="signal-answer-readout">
