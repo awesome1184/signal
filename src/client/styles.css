@@ -2632,8 +2632,8 @@ button:focus-visible,input:focus-visible {
   animation:signal-near-miss-frame .82s cubic-bezier(.18,.72,.2,1) both !important;
 }
 .perfect-capture .signal-capture[data-phase="slipping"] .signal-static {
-  opacity:.34 !important; filter:none !important;
-  animation:signal-near-miss-static .92s ease-out both !important;
+  opacity:.34; filter:none !important;
+  animation:signal-static-return .22s steps(2,end) infinite, signal-near-miss-static-wave .82s ease-in-out infinite !important;
 }
 .perfect-capture .signal-capture[data-phase="slipping"] .signal-clean-trace {
   opacity:.96 !important; stroke:#ffe1c4 !important;
@@ -2662,8 +2662,8 @@ button:focus-visible,input:focus-visible {
   box-shadow:0 16px 42px rgba(0,0,0,.4),0 0 17px rgba(255,153,82,.09) !important;
 }
 .perfect-capture .signal-capture[data-phase="recovering"] .signal-static {
-  opacity:.2 !important; filter:none !important;
-  animation:signal-near-miss-static-settle .9s ease-out both !important;
+  opacity:.2; filter:none !important;
+  animation:signal-static-return .22s steps(2,end) infinite, signal-near-miss-static-wave-settle 1.18s ease-in-out infinite !important;
 }
 .perfect-capture .signal-capture[data-phase="recovering"] .signal-clean-trace {
   opacity:.86 !important; stroke:#f4d9bd !important;
@@ -2731,4 +2731,19 @@ button:focus-visible,input:focus-visible {
   .perfect-capture .signal-capture[data-phase="recovering"] .signal-lock-reticle {
     animation:none !important; transition:none !important;
   }
+}
+
+
+/* Let interference breathe in clear, repeating waves instead of a single burst. */
+@keyframes signal-near-miss-static-wave {
+  0%,100% { opacity:.12; }
+  25% { opacity:.32; }
+  50% { opacity:.56; }
+  75% { opacity:.32; }
+}
+@keyframes signal-near-miss-static-wave-settle {
+  0%,100% { opacity:.1; }
+  25% { opacity:.2; }
+  50% { opacity:.34; }
+  75% { opacity:.2; }
 }
