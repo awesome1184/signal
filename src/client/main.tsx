@@ -16,53 +16,35 @@ function buildReceiverPaths(seed: number, score: number): ReceiverPaths {
     state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
     return state / 4294967296;
   };
-  const cycles = 2.5 + random() * 5.5;
+
+  // Keep the carrier readable: vary its frequency and phase, not its basic shape.
+  const cycles = 3.1 + random() * 2.4;
   const phase = random() * Math.PI * 2;
   const harmonicPhase = random() * Math.PI * 2;
-  const modulationPhase = random() * Math.PI * 2;
-  const harmonic = .12 + random() * .38;
-  const duty = .24 + random() * .48;
-  const sharpness = 1.8 + random() * 5;
-  const profile = Math.floor(random() * 6);
-  const amplitude = 9 + Math.max(0, Math.min(100, score)) * .31;
+  const harmonic = .1 + random() * .16;
+  const detail = .025 + random() * .055;
+  const amplitude = 10 + Math.max(0, Math.min(100, score)) * .3;
+
   const carrierPoints = Array.from({ length: 73 }, (_, index) => {
     const x = index * 10;
-    const turns = phase / (Math.PI * 2) + (index / 72) * cycles;
-    const angle = turns * Math.PI * 2;
-    const position = turns - Math.floor(turns);
-    const sine = Math.sin(angle);
-    let wave: number;
-    switch (profile) {
-      case 0: // layered analog carrier
-        wave = sine + harmonic * Math.sin(angle * 2 + harmonicPhase) + .12 * Math.sin(angle * 3.1 + modulationPhase);
-        break;
-      case 1: // triangular carrier
-        wave = 1 - 4 * Math.abs(position - .5);
-        wave += harmonic * Math.sin(angle * 2 + harmonicPhase);
-        break;
-      case 2: // clipped digital pulse with a randomized duty cycle
-        wave = (position < duty ? 1 : -1) * .82 + .18 * Math.tanh(sine * sharpness);
-        break;
-      case 3: // asymmetric sawtooth
-        wave = (2 * position - 1) * .82 + .18 * Math.sin(angle * 2 + harmonicPhase);
-        break;
-      case 4: // frequency-modulated carrier
-        wave = Math.sin(angle + .85 * Math.sin(angle * .47 + modulationPhase)) + harmonic * Math.sin(angle * 2.35 + harmonicPhase);
-        break;
-      default: // uneven burst carrier
-        wave = sine * (.58 + .42 * Math.sin(angle * .5 + modulationPhase)) + harmonic * Math.sin(angle * 2.7 + harmonicPhase);
-        break;
-    }
-    const jitter = (random() - .5) * (.08 + (1 - score / 100) * .18);
-    const y = 90 - amplitude * (wave + jitter);
-    return { x, y: Math.max(12, Math.min(168, y)) };
+    const angle = phase + (index / 72) * cycles * Math.PI * 2;
+    const wave = Math.sin(angle)
+      + harmonic * Math.sin(angle * 2 + harmonicPhase)
+      + detail * Math.sin(angle * 3 + phase * .7);
+    const y = 90 - amplitude * wave;
+    return { x, y: Math.max(14, Math.min(166, y)) };
   });
-  const carrier = carrierPoints.map((point, index) => `${index ? 'L' : 'M'}${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(' ');
-  const noisePoints = Array.from({ length: 55 }, (_, index) => ({
-    x: index * (720 / 54),
-    y: 18 + random() * 144
+  const carrier = carrierPoints.map((point, index) =>
+    `${index ? 'L' : 'M'}${point.x.toFixed(1)} ${point.y.toFixed(1)}`
+  ).join(' ');
+
+  const noisePoints = Array.from({ length: 37 }, (_, index) => ({
+    x: index * 20,
+    y: 52 + random() * 76
   }));
-  const noise = noisePoints.map((point, index) => `${index ? 'L' : 'M'}${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(' ');
+  const noise = noisePoints.map((point, index) =>
+    `${index ? 'L' : 'M'}${point.x.toFixed(1)} ${point.y.toFixed(1)}`
+  ).join(' ');
   return { carrier, noise };
 }
 type RunState = {
