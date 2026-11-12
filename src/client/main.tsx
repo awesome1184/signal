@@ -168,6 +168,145 @@ function MountainScene() {
   );
 }
 
+type TuningPhase = 'searching' | 'tracking' | 'locking' | 'surging' | 'slipping' | 'locked' | 'failed';
+
+let signalAudioContext: AudioContext | null = null;
+let signalMasterGain: GainNode | null = null;
+let receiverBed: { gain: GainNode; oscillators: OscillatorNode[] } | null = null;
+
+function getSignalAudioContext(): AudioContext | null {
+  if (typeof window === 'undefined' || typeof AudioContext === 'undefined') return null;
+  try {
+    if (!signalAudioContext) {
+      signalAudioContext = new AudioContext();
+      signalMasterGain = signalAudioContext.createGain();
+      signalMasterGain.gain.value = .62;
+      signalMasterGain.connect(signalAudioContext.destination);
+    }
+    if (signalAudioContext.state === 'suspended') void signalAudioContext.resume().catch(() => undefined);
+    return signalAudioContext;
+  } catch { return null; }
+}
+
+function scheduleSoftTone(context: AudioContext, frequency: number, startAt: number, duration: number, volume: number, endFrequency = frequency): void {
+  if (!signalMasterGain) return;
+  const oscillator = context.createOscillator();
+  const filter = context.createBiquadFilter();
+  const envelope = context.createGain();
+  oscillator.type = 'sine';
+  oscillator.frequency.setValueAtTime(frequency, startAt);
+  if (endFrequency !== frequency) oscillator.frequency.exponentialRampToValueAtTime(endFrequency, startAt + duration);
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(1450, startAt);
+  filter.Q.setValueAtTime(.45, startAt);
+  envelope.gain.setValueAtTime(.0001, startAt);
+  envelope.gain.linearRampToValueAtTime(volume, startAt + Math.min(.055, duration * .3));
+  envelope.gain.exponentialRampToValueAtTime(Math.max(.0001, volume * .42), startAt + duration * .56);
+  envelope.gain.exponentialRampToValueAtTime(.0001, startAt + duration);
+  oscillator.connect(filter);
+  filter.connect(envelope);
+  envelope.connect(signalMasterGain);
+  oscillator.start(startAt);
+  oscillator.stop(startAt + duration + .035);
+}
+
+function playSoftUiCue(): void {
+  const context = getSignalAudioContext();
+  if (!context) return;
+  const now = context.currentTime;
+  scheduleSoftTone(context, 293.66, now, .105, .008);
+  scheduleSoftTone(context, 440, now + .045, .16, .006);
+}
+
+function startReceiverBed(context: AudioContext): void {
+  if (receiverBed || !signalMasterGain) return;
+  const gain = context.createGain();
+  const filter = context.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(430, context.currentTime);
+  filter.Q.setValueAtTime(.35, context.currentTime);
+  gain.gain.setValueAtTime(.0001, context.currentTime);
+  gain.gain.exponentialRampToValueAtTime(.009, context.currentTime + .8);
+  filter.connect(gain);
+  gain.connect(signalMasterGain);
+  const oscillators = [146.83, 220].map((frequency) => {
+    const oscillator = context.createOscillator();
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(frequency, context.currentTime);
+    oscillator.connect(filter);
+    oscillator.start();
+    return oscillator;
+  });
+  receiverBed = { gain, oscillators };
+}
+
+function stopReceiverBed(): void {
+  if (!receiverBed || !signalAudioContext) return;
+  const bed = receiverBed;
+  receiverBed = null;
+  const now = signalAudioContext.currentTime;
+  bed.gain.gain.cancelScheduledValues(now);
+  bed.gain.gain.setTargetAtTime(.0001, now, .22);
+  bed.oscillators.forEach((oscillator) => {
+    try { oscillator.stop(now + .9); } catch { /* already stopped */ }
+  });
+}
+
+function playReceiverPhaseCue(phase: TuningPhase, score: number): void {
+  const context = getSignalAudioContext();
+  if (!context) return;
+  const now = context.currentTime;
+  switch (phase) {
+    case 'searching':
+      startReceiverBed(context);
+      scheduleSoftTone(context, 146.83, now, .5, .011, 174.61);
+      break;
+    case 'tracking':
+      scheduleSoftTone(context, 392, now, .34, .012);
+      scheduleSoftTone(context, 493.88, now + .1, .32, .009);
+      break;
+    case 'locking':
+      scheduleSoftTone(context, 440, now, .42, .011);
+      scheduleSoftTone(context, 554.37, now + .11, .4, .009);
+      scheduleSoftTone(context, 659.25, now + .22, .44, .008);
+      break;
+    case 'surging':
+      if (score >= 85) {
+        // Warm G-major voicing, with a gentle attack instead of a sharp victory sting.
+        scheduleSoftTone(context, 196, now, .95, .012);
+        scheduleSoftTone(context, 392, now + .06, .88, .018);
+        scheduleSoftTone(context, 493.88, now + .14, .82, .013);
+        scheduleSoftTone(context, 587.33, now + .22, .78, .011);
+        scheduleSoftTone(context, 783.99, now + .3, .7, .007);
+      } else {
+        scheduleSoftTone(context, 293.66, now, .62, .011);
+        scheduleSoftTone(context, 369.99, now + .1, .56, .009);
+        scheduleSoftTone(context, 440, now + .2, .52, .007);
+      }
+      break;
+    case 'slipping':
+      // A small downward bend signals the near miss without an alarm or buzzer.
+      scheduleSoftTone(context, 587.33, now, .82, .013, 554.37);
+      scheduleSoftTone(context, 293.66, now + .08, .72, .007, 277.18);
+      break;
+    case 'locked':
+      stopReceiverBed();
+      if (score >= 85) {
+        scheduleSoftTone(context, 392, now, .62, .008);
+      } else if (score >= 60) {
+        scheduleSoftTone(context, 369.99, now, .5, .008);
+        scheduleSoftTone(context, 440, now + .08, .48, .006);
+      } else if (score > 0) {
+        scheduleSoftTone(context, 293.66, now, .48, .008);
+      }
+      break;
+    case 'failed':
+      stopReceiverBed();
+      scheduleSoftTone(context, 261.63, now, .72, .011, 196);
+      break;
+  }
+}
+
 function scoreLabel(score: number): string {
   if (score >= 700) return 'PERFECT LOCK';
   if (score >= 600) return 'RARE SIGNAL';
@@ -189,6 +328,9 @@ function App() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardRow[]>([]);
   const [serverReady, setServerReady] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    try { return localStorage.getItem('signal:sound') !== 'off'; } catch { return true; }
+  });
   const [canTest, setCanTest] = useState(DEMO_MODE);
   const [testPanelOpen, setTestPanelOpen] = useState(DEMO_MODE);
   const [isTuning, setIsTuning] = useState(false);
@@ -325,7 +467,21 @@ function App() {
     return () => { active = false; };
   }, [game.phase, game.isTest, serverReady]);
 
+  const setReceiverPhase = (phase: TuningPhase, score = 0) => {
+    setTuningPhase(phase);
+    if (soundEnabled) playReceiverPhaseCue(phase, score);
+  };
+
+  const toggleSound = () => {
+    const next = !soundEnabled;
+    setSoundEnabled(next);
+    try { localStorage.setItem('signal:sound', next ? 'on' : 'off'); } catch { /* sound preference is optional */ }
+    if (next) playSoftUiCue();
+    else stopReceiverBed();
+  };
+
   const startGame = (isTest = false) => {
+    if (soundEnabled) playSoftUiCue();
     setMessage('');
     setAnswer('');
     setNow(Date.now());
@@ -344,7 +500,7 @@ function App() {
     setTuningScore(null);
     setTuningDisplayScore(0);
     setTuningDuration(900);
-    setTuningPhase('searching');
+    setReceiverPhase('searching', 0);
     setTuningStatus('CAPTURING INPUT // SCANNING NOISE');
     setIsTuning(true);
     setMessage('');
@@ -361,7 +517,7 @@ function App() {
     const animateFailure = async (status: string) => {
       setTuningScore(0);
       setTuningDuration(900);
-      setTuningPhase('failed');
+      setReceiverPhase('failed', 0);
       setTuningStatus(status);
       await wait(1700);
     };
@@ -387,12 +543,12 @@ function App() {
 
       // Let the raw static register before the first carrier event appears.
       await wait(650);
-      setTuningPhase('tracking');
+      setReceiverPhase('tracking', score);
       setTuningStatus('CARRIER DETECTED // TRACKING FREQUENCY');
       await wait(360);
       await animateScore(0, trackingTarget, duration * .40);
 
-      setTuningPhase('locking');
+      setReceiverPhase('locking', score);
       setTuningStatus(score >= 100
         ? 'FREQUENCY CENTERED // LOCKING CARRIER'
         : score >= 85
@@ -404,7 +560,7 @@ function App() {
       await animateScore(trackingTarget, lockingTarget, duration * .30);
 
       if (perfect || nearMiss) {
-        setTuningPhase('surging');
+        setReceiverPhase('surging', score);
         setTuningStatus(perfect
           ? 'CARRIER SPIKE // BREAKTHROUGH IMMINENT'
           : '100% CARRIER // LOCK CONFIRMED');
@@ -414,21 +570,21 @@ function App() {
         if (nearMiss) {
           // Keep the apparent perfect lock on screen before revealing the tiny drift.
           await wait(Math.max(1050, duration * .24));
-          setTuningPhase('slipping');
+          setReceiverPhase('slipping', score);
           setTuningStatus('CARRIER DRIFT // PERFECT LOCK LOST');
           await wait(500);
           // The score, reticle, and interference now move together at a readable pace.
           await animateScore(100, score, Math.max(1000, duration * .24));
-          setTuningPhase('locked');
+          setReceiverPhase('locked', score);
           setTuningStatus('NEAR-PERFECT // RESIDUAL CARRIER DRIFT');
           await wait(Math.max(750, duration * .16));
         } else {
-          setTuningPhase('locked');
+          setReceiverPhase('locked', score);
           setTuningStatus('100% CARRIER // SIGNAL FULLY ACQUIRED');
           await wait(Math.max(1100, duration * .24));
         }
       } else {
-        setTuningPhase(score > 0 ? 'locked' : 'failed');
+        setReceiverPhase(score > 0 ? 'locked' : 'failed', score);
         setTuningStatus(score >= 60
           ? 'PARTIAL LOCK // RESIDUAL NOISE'
           : score > 0
@@ -569,12 +725,21 @@ function App() {
       <MountainScene />
       <div className="screen-vignette" />
       <header className="topbar">
-        <div className="brand">
-          <div className="brand-symbol"><SignalIcon size={45} /></div>
-          <div className="brand-copy">
-            <div className="brand-name">SIGNAL</div>
-            <div className="brand-tagline">FIND THE SIGNAL IN THE NOISE.</div>
+        <div className="brand-row">
+          <div className="brand">
+            <div className="brand-symbol"><SignalIcon size={45} /></div>
+            <div className="brand-copy">
+              <div className="brand-name">SIGNAL</div>
+              <div className="brand-tagline">FIND THE SIGNAL IN THE NOISE.</div>
+            </div>
           </div>
+          <button className="sound-toggle" type="button" onClick={toggleSound} aria-pressed={soundEnabled} aria-label={soundEnabled ? 'Mute sound effects' : 'Enable sound effects'} title={soundEnabled ? 'Mute sound effects' : 'Enable sound effects'}>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 10v4h4l5 4V6l-5 4H4Z" />
+              {soundEnabled ? <><path d="M16 9a5 5 0 0 1 0 6" /><path d="M18.5 6.5a8.5 8.5 0 0 1 0 11" /></> : <path d="m17 9 5 6m0-6-5 6" />}
+            </svg>
+            <span>{soundEnabled ? 'SFX ON' : 'SFX OFF'}</span>
+          </button>
         </div>
         <div className="top-stats">
           <div className="top-stat date-stat"><span className="eyebrow">TODAY'S TRANSMISSION</span><strong>{dateLabel}</strong></div>
