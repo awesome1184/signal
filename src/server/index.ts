@@ -8,7 +8,13 @@ const app = new Hono();
 const boardKey = (day: string) => 'signal:v1:board:' + day;
 const resultsKey = (day: string) => 'signal:v1:results:' + day;
 const namesKey = (day: string) => 'signal:v1:names:' + day;
-const clampScore = (value: number) => Math.max(0, Math.min(MAX_SCORE, Math.floor(value)));
+const clampScore = (value: number) => Number.isFinite(value) ? Math.max(0, Math.min(MAX_SCORE, Math.floor(value))) : 0;
+const displayName = (value: unknown) => {
+  if (typeof value !== 'string') return 'Explorer';
+  const clean = value.replace(/^u\//i, '').replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 24);
+  return clean || 'Explorer';
+};
+const isTestUser = (value: unknown) => displayName(value).toLowerCase() === 'shadow_fen';
 
 async function leaderboard(day: string) {
   const key = boardKey(day);
@@ -26,18 +32,27 @@ app.get('/api/health', (c) => c.json({ ok: true, app: 'SIGNAL' }));
 app.get('/api/bootstrap', async (c) => {
   const day = getNewYorkDateKey();
   const userId = context.userId;
-  const username = (await reddit.getCurrentUsername()) ?? 'Explorer';
+  const username = displayName(await reddit.getCurrentUsername());
   const raw = userId ? await redis.hGet(resultsKey(day), userId) : null;
-  const result = raw ? JSON.parse(raw) : null;
+  let result = null;
+  if (raw) {
+    try { result = JSON.parse(raw); }
+    catch (error) { console.error('SIGNAL saved result could not be parsed:', error); }
+  }
   const playerCount = await redis.zCard(boardKey(day));
-  const canTest = username.replace(/^u\//i, '').toLowerCase() === 'shadow_fen';
+  const canTest = isTestUser(username);
   return c.json({ ok: true, dateKey: day, username, playerCount, leaderboard: await leaderboard(day), result, canTest });
 });
 
 app.post('/api/check-answer', async (c) => {
-  const body = await c.req.json<{ promptId?: string; answer?: string }>();
+  let body: { promptId?: string; answer?: string };
+  try { body = await c.req.json(); }
+  catch { return c.json({ ok: false, valid: false, message: 'Malformed answer request.' }, 400); }
   const promptId = typeof body.promptId === 'string' ? body.promptId : '';
-  const answer = typeof body.answer === 'string' ? body.answer.slice(0, 80) : '';
+  const answer = typeof body.answer === 'string' ? body.answer.trim() : '';
+  if (!answer || answer.length > 80) {
+    return c.json({ ok: false, valid: false, message: answer ? 'Answers must be 80 characters or fewer.' : 'Enter an answer first.' }, 400);
+  }
   const prompts = getDailyPrompts(getNewYorkDateKey());
   if (!prompts.some((prompt) => prompt.id === promptId)) {
     return c.json({ ok: false, valid: false }, 400);
@@ -47,13 +62,16 @@ app.post('/api/check-answer', async (c) => {
 });
 
 app.post('/api/test-answer', async (c) => {
-  const username = (await reddit.getCurrentUsername()) ?? '';
-  if (username.replace(/^u\//i, '').toLowerCase() !== 'shadow_fen') {
+  const username = await reddit.getCurrentUsername();
+  if (!isTestUser(username)) {
     return c.json({ ok: false, message: 'Test bench access is restricted.' }, 403);
   }
-  const body = await c.req.json<{ promptId?: string; score?: number }>();
+  let body: { promptId?: string; score?: number };
+  try { body = await c.req.json(); }
+  catch { return c.json({ ok: false, message: 'Malformed test request.' }, 400); }
   const promptId = typeof body.promptId === 'string' ? body.promptId : '';
   const score = typeof body.score === 'number' ? body.score : 0;
+  if (![10, 15, 30, 60, 85, 100].includes(score)) return c.json({ ok: false, message: 'Unknown score tier.' }, 400);
   const prompts = getDailyPrompts(getNewYorkDateKey());
   if (!prompts.some((prompt) => prompt.id === promptId)) return c.json({ ok: false }, 400);
   const answer = getTestAnswer(promptId, score);
@@ -64,15 +82,24 @@ app.post('/api/complete', async (c) => {
   const userId = context.userId;
   if (!userId) return c.json({ ok: false, message: 'Sign in to save a daily result.' }, 401);
 
-  const body = await c.req.json<{ entries?: Array<{ promptId?: string; answer?: string }> }>();
+  let body: { entries?: Array<{ promptId?: string; answer?: string }> };
+  try { body = await c.req.json(); }
+  catch { return c.json({ ok: false, message: 'Malformed result request.' }, 400); }
   const day = getNewYorkDateKey();
   const prompts = getDailyPrompts(day);
   const submitted = Array.isArray(body.entries) ? body.entries : [];
+  if (submitted.length !== prompts.length) {
+    return c.json({ ok: false, message: 'A daily result must contain all seven transmissions.' }, 400);
+  }
+  if (submitted.some((item, index) => item?.promptId !== prompts[index].id
+    || typeof item?.answer !== 'string' || item.answer.length > 80)) {
+    return c.json({ ok: false, message: 'The submitted transmissions are incomplete or invalid.' }, 400);
+  }
 
   const entries = prompts.map((prompt, index) => {
     const item = submitted[index];
-    const answer = typeof item?.answer === 'string' ? item.answer.slice(0, 80) : '';
-    const match = item?.promptId === prompt.id ? evaluateAnswer(prompt.id, answer) : null;
+    const answer = typeof item?.answer === 'string' ? item.answer.trim() : '';
+    const match = evaluateAnswer(prompt.id, answer);
     return {
       promptId: prompt.id,
       answer,
@@ -84,7 +111,7 @@ app.post('/api/complete', async (c) => {
 
   const score = entries.reduce((sum, entry) => sum + entry.score, 0);
   const result = { dateKey: day, score, entries, completedAt: new Date().toISOString() };
-  const username = (await reddit.getCurrentUsername()) ?? 'Explorer';
+  const username = displayName(await reddit.getCurrentUsername());
   const stored = await redis.hSetNX(resultsKey(day), userId, JSON.stringify(result));
 
   if (stored) {
