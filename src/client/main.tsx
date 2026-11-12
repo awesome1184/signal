@@ -59,6 +59,58 @@ function buildReceiverPaths(seed: number, score: number): ReceiverPaths {
 
   return { carrier, reticleX, reticleY };
 }
+type ReceiverStyle = 'classic' | 'phosphor' | 'amber' | 'blueprint' | 'vector';
+
+const WAVE_STYLE_OPTIONS: Array<{ id: ReceiverStyle; label: string; description: string }> = [
+  { id: 'classic', label: 'CLASSIC', description: 'Cool cyan oscilloscope' },
+  { id: 'phosphor', label: 'PHOSPHOR', description: 'Green analog CRT' },
+  { id: 'amber', label: 'AMBER', description: 'Warm radio instrument' },
+  { id: 'blueprint', label: 'BLUEPRINT', description: 'Precision blue trace' },
+  { id: 'vector', label: 'VECTOR', description: 'Violet high-voltage display' }
+];
+
+function loadReceiverStyle(): ReceiverStyle {
+  try {
+    const saved = localStorage.getItem('signal:wave-style');
+    return WAVE_STYLE_OPTIONS.some((option) => option.id === saved) ? saved as ReceiverStyle : 'classic';
+  } catch {
+    return 'classic';
+  }
+}
+
+function WaveStylePicker({
+  value,
+  onChange
+}: {
+  value: ReceiverStyle;
+  onChange: (style: ReceiverStyle) => void;
+}) {
+  return (
+    <div className="wave-style-picker">
+      <span className="wave-style-heading">WAVEFORM DISPLAY</span>
+      <div className="wave-style-options" role="group" aria-label="Choose waveform appearance">
+        {WAVE_STYLE_OPTIONS.map((option) => (
+          <button
+            key={option.id}
+            type="button"
+            className={'wave-style-option ' + (value === option.id ? 'selected' : '')}
+            data-wave-style={option.id}
+            aria-label={option.description}
+            aria-pressed={value === option.id}
+            title={option.description}
+            onClick={() => onChange(option.id)}
+          >
+            <svg viewBox="0 0 54 18" aria-hidden="true">
+              <path d="M1 9H7L10 6L13 12L17 2L21 16L25 4L29 13L33 7L37 9H53" />
+            </svg>
+            <small>{option.label}</small>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 type RunState = {
   dateKey: string;
   phase: 'ready' | 'playing' | 'reveal' | 'complete';
@@ -481,6 +533,7 @@ function App() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardRow[]>([]);
   const [serverReady, setServerReady] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [waveStyle, setWaveStyle] = useState<ReceiverStyle>(() => loadReceiverStyle());
   const [soundEnabled, setSoundEnabled] = useState(() => {
     let enabled = true;
     try { enabled = localStorage.getItem('signal:sound') !== 'off'; } catch { /* sound preference is optional */ }
@@ -587,6 +640,10 @@ function App() {
     '--carrier-glow-size': (3 + tuningLockProgress * 8) + 'px',
     '--carrier-glow-alpha': String(.45 + tuningLockProgress * .5)
   } as React.CSSProperties;
+
+  useEffect(() => {
+    try { localStorage.setItem('signal:wave-style', waveStyle); } catch { /* display preference is optional */ }
+  }, [waveStyle]);
 
   useEffect(() => {
     try { localStorage.setItem('signal:run:' + dayKey, JSON.stringify(game)); } catch { /* local storage is optional */ }
@@ -1010,6 +1067,8 @@ function App() {
               ))}
             </div>
 
+            <WaveStylePicker value={waveStyle} onChange={setWaveStyle} />
+
             {game.phase === 'ready' && (
               <div className="ready-view">
                 <div className="receiver-graphic">
@@ -1039,6 +1098,7 @@ function App() {
                       key={tuningScore === null ? 'searching' : 'score-' + tuningScore}
                       data-grade={tuningGrade}
                       data-phase={tuningPhase}
+                      data-wave-style={waveStyle}
                       style={tuningCaptureStyle}
                     >
                       <div className="signal-capture-head">
@@ -1164,6 +1224,7 @@ function App() {
                   className="signal-capture signal-result-card"
                   data-grade={currentEntry.score >= 100 ? 'perfect' : currentEntry.score >= 85 ? 'deep' : currentEntry.score >= 60 ? 'clear' : currentEntry.score >= 30 ? 'faint' : 'background'}
                   data-phase={currentEntry.score > 0 ? 'locked' : 'failed'}
+                  data-wave-style={waveStyle}
                   style={{
                     '--noise-final': String(Math.max(.025, 1 - currentEntry.score / 100 * .975)),
                     '--wave-final': String(Math.max(.08, currentEntry.score / 100)),
