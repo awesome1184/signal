@@ -2339,3 +2339,235 @@ button:focus-visible,input:focus-visible {
   .brand-row { width:100%; }
   .sound-toggle { min-height:34px;padding:0 9px; }
 }
+
+
+/* A simpler receiver language: one carrier, quiet static, and one closing reticle. */
+.play-view.tuning-view .signal-capture {
+  border-color:rgba(112,190,201,.34);
+  box-shadow:0 16px 42px rgba(0,0,0,.38),inset 0 1px 0 rgba(226,248,250,.05);
+}
+.play-view.tuning-view .signal-screen,
+.signal-result-card .signal-screen {
+  background:radial-gradient(ellipse at 50% 50%,rgba(22,78,82,.14),transparent 72%),#020a0e;
+  box-shadow:inset 0 0 24px rgba(0,0,0,.58);
+}
+.play-view.tuning-view .signal-screen-grid,
+.signal-result-card .signal-screen-grid {
+  opacity:.2;
+  background-size:48px 36px;
+  animation:none !important;
+}
+.signal-screen-grid::after { display:none; }
+.play-view.tuning-view .signal-static {
+  inset:0;
+  mix-blend-mode:screen;
+  background-image:
+    repeating-linear-gradient(0deg,rgba(220,246,247,.13) 0 1px,transparent 1px 5px),
+    repeating-linear-gradient(90deg,rgba(207,243,244,.09) 0 1px,transparent 1px 7px);
+  background-size:100% 5px,7px 100%;
+  animation:signal-static-clear var(--tune-duration) ease-out both !important;
+}
+.play-view.tuning-view .signal-static::after { display:none !important; }
+.play-view.tuning-view .signal-chaos-trace {
+  stroke:rgba(180,220,220,.62);
+  stroke-width:1;
+  opacity:.22;
+  filter:none;
+  animation:none !important;
+}
+.play-view.tuning-view .signal-clean-trace {
+  stroke:#a4f3ec;
+  stroke-width:2.2;
+  filter:drop-shadow(0 0 3px rgba(110,239,229,.42));
+  animation:signal-wave-lock var(--tune-duration) cubic-bezier(.2,.65,.25,1) both;
+}
+.play-view.tuning-view .signal-motion-trace,
+.signal-result-card .signal-motion-trace,
+.play-view.tuning-view .signal-scanbeam,
+.play-view.tuning-view .signal-lock-flare,
+.play-view.tuning-view .perfect-acquisition,
+.play-view.tuning-view .signal-perfect-flash,
+.signal-result-card .result-acquisition {
+  display:none !important;
+}
+.play-view.tuning-view .signal-screen::after { display:none !important; }
+.play-view.tuning-view .signal-lock-reticle {
+  width:clamp(100px,24%,154px);
+  animation:none !important;
+  filter:none;
+  transition:opacity .65s ease,transform .8s cubic-bezier(.2,.65,.25,1);
+}
+.play-view.tuning-view .reticle-corner {
+  width:18px;
+  height:18px;
+  border-color:rgba(143,230,231,.72);
+  filter:none !important;
+  transition:border-color .55s ease;
+}
+.play-view.tuning-view .reticle-center {
+  width:5px;
+  height:5px;
+  border:0;
+  background:#c9fff3;
+  box-shadow:0 0 8px rgba(108,245,224,.6);
+}
+.play-view.tuning-view .reticle-center::before,
+.play-view.tuning-view .reticle-center::after { display:none; }
+.play-view.tuning-view .signal-capture[data-phase="tracking"] .signal-lock-reticle {
+  opacity:.62;
+  transform:translate(-50%,-50%) scale(1.16);
+}
+.play-view.tuning-view .signal-capture[data-phase="locking"] .signal-lock-reticle {
+  opacity:.88;
+  transform:translate(-50%,-50%) scale(.94);
+  filter:none;
+}
+.play-view.tuning-view .signal-capture[data-phase="locked"] .signal-lock-reticle {
+  opacity:.94;
+  transform:translate(-50%,-50%) scale(.82);
+  filter:none;
+}
+.play-view.tuning-view .signal-capture[data-phase="locked"] .reticle-corner,
+.play-view.tuning-view .signal-capture[data-phase="locking"] .reticle-corner {
+  border-color:rgba(181,255,241,.92);
+  filter:none;
+}
+.play-view.tuning-view .signal-lock-steps span,
+.play-view.tuning-view .signal-lock-steps span i {
+  transition:color .4s ease,border-color .4s ease,background .4s ease;
+  box-shadow:none !important;
+}
+.play-view.tuning-view .signal-capture-copy {
+  animation:signal-simple-arrive .38s ease-out both;
+}
+.play-view.tuning-view .signal-input-state,
+.play-view.tuning-view .signal-screen-state,
+.play-view.tuning-view .signal-capture-status span {
+  animation:signal-simple-arrive .38s ease-out both;
+}
+.play-view.tuning-view .signal-station i,
+.play-view.tuning-view .signal-capture-status i {
+  animation:none !important;
+}
+.play-view.tuning-view .signal-quality-track i {
+  transition:width .11s linear;
+}
+.perfect-capture .signal-capture[data-phase="surging"] {
+  animation:none !important;
+  transform:none !important;
+  border-color:rgba(174,255,230,.72);
+  box-shadow:0 18px 48px rgba(0,0,0,.42),0 0 25px rgba(104,255,219,.13),inset 0 1px 0 rgba(244,255,250,.1);
+}
+.perfect-capture .signal-capture[data-phase="surging"] .signal-screen {
+  animation:none !important;
+  filter:none !important;
+  border-color:rgba(174,255,230,.7);
+}
+.perfect-capture .signal-capture[data-phase="surging"] .signal-clean-trace {
+  stroke:#e8fff6;
+  stroke-width:2.6;
+  filter:drop-shadow(0 0 5px rgba(176,255,232,.65));
+}
+.perfect-capture .signal-capture[data-phase="surging"] .signal-capture-copy h2 {
+  color:#e1fff4;
+  text-shadow:0 0 12px rgba(129,255,216,.28);
+}
+.perfect-capture .signal-capture[data-phase="slipping"] {
+  animation:none !important;
+  transform:none !important;
+  border-color:rgba(255,177,105,.62);
+  box-shadow:0 16px 42px rgba(0,0,0,.4),0 0 20px rgba(255,153,82,.1);
+}
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-static {
+  opacity:.18 !important;
+  filter:none !important;
+  animation:none !important;
+}
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-chaos-trace {
+  opacity:.36 !important;
+  stroke:#ffc18e;
+  filter:none;
+}
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-clean-trace {
+  opacity:.82;
+  stroke:#ffe1c4;
+  filter:none;
+}
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-lock-reticle {
+  opacity:.86;
+  transform:translate(-50%,-50%) translate(5px,-2px) scale(.9);
+  animation:none !important;
+  filter:none;
+}
+.perfect-capture .signal-capture[data-phase="slipping"] .reticle-corner {
+  border-color:#ffd0a4;
+  filter:none;
+}
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-capture-copy h2 {
+  color:#ffd2a8;
+  text-shadow:0 0 10px rgba(255,174,106,.28);
+}
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-capture-status,
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-capture-status i,
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-station i {
+  color:#ffd2a8;
+  background-color:#ffb16d;
+  box-shadow:none;
+}
+.signal-result-card .signal-motion-trace { display:none !important; }
+.signal-result-card .signal-chaos-trace {
+  opacity:.18 !important;
+  filter:none !important;
+  animation:none !important;
+}
+.signal-result-card .signal-clean-trace {
+  stroke-width:2.2;
+  filter:drop-shadow(0 0 3px rgba(110,239,229,.38));
+  animation:none !important;
+  opacity:var(--wave-final) !important;
+  stroke-dashoffset:0 !important;
+}
+.signal-result-card[data-grade="perfect"] {
+  box-shadow:0 18px 48px rgba(0,0,0,.42),0 0 26px rgba(78,242,204,.1),inset 0 1px 0 rgba(231,255,247,.1);
+}
+.signal-result-card[data-grade="perfect"] .signal-screen {
+  box-shadow:inset 0 0 25px rgba(36,169,139,.12);
+}
+.signal-result-card .signal-lock-reticle {
+  filter:none !important;
+  transition:none !important;
+}
+.signal-result-card .reticle-axis,
+.signal-result-card .reticle-center::before,
+.signal-result-card .reticle-center::after { display:none; }
+.signal-result-card .reticle-center {
+  width:5px;
+  height:5px;
+  border:0;
+  border-radius:50%;
+  background:#c9fff3;
+  box-shadow:0 0 7px rgba(108,245,224,.5);
+}
+.signal-result-card .signal-station i,
+.signal-result-card .signal-capture-status i { animation:none !important; }
+.signal-result-card .signal-result-score > strong {
+  animation:signal-simple-arrive .4s ease-out both !important;
+}
+@keyframes signal-simple-arrive {
+  from { opacity:0;transform:translateY(4px); }
+  to { opacity:1;transform:translateY(0); }
+}
+@media (max-width:680px) {
+  .play-view.tuning-view .signal-screen { height:155px; }
+  .play-view.tuning-view .signal-lock-reticle { width:112px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .play-view.tuning-view .signal-capture-copy,
+  .play-view.tuning-view .signal-input-state,
+  .play-view.tuning-view .signal-screen-state,
+  .play-view.tuning-view .signal-capture-status span,
+  .signal-result-card .signal-result-score > strong {
+    animation:none !important;
+  }
+  .play-view.tuning-view .signal-clean-trace { animation:none !important;stroke-dashoffset:0;opacity:var(--wave-final); }
+}
