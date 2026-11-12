@@ -40,8 +40,8 @@ function buildReceiverPaths(seed: number, score: number): ReceiverPaths {
         wave = 1 - 4 * Math.abs(position - .5);
         wave += harmonic * Math.sin(angle * 2 + harmonicPhase);
         break;
-      case 2: // clipped digital pulse
-        wave = Math.tanh(sine * sharpness) + .1 * Math.sin(angle * 3 + modulationPhase);
+      case 2: // clipped digital pulse with a randomized duty cycle
+        wave = (position < duty ? 1 : -1) * .82 + .18 * Math.tanh(sine * sharpness);
         break;
       case 3: // asymmetric sawtooth
         wave = (2 * position - 1) * .82 + .18 * Math.sin(angle * 2 + harmonicPhase);
