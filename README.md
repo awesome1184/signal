@@ -16,11 +16,11 @@ SIGNAL is an original daily open-answer game for Reddit, built with Devvit Web. 
 - Local browser preview with a sample answer catalog and sample leaderboard.
 - Separate compact Reddit post launch screen and expanded game.
 
-The answer bank is a deliberately small first-pass field catalog. It needs expansion, broader synonym coverage, and editorial review before public launch. The Pages preview is for checking the UI and core round flow; its sample leaderboard and local saves are not shared with Reddit.
+The current prototype has three seven-prompt sets, so the set rotation repeats every three days. The field catalog is a deliberately small first pass; it needs more daily content, broader synonym coverage, and editorial review before public launch. The Pages preview is for checking the UI and core round flow; its sample leaderboard and local saves are not shared with Reddit.
 
 ## Run the browser preview in GitHub Codespaces
 
-1. Open the repository in a Codespace.
+1. Open this repository in a Codespace.
 2. Run `npm install`.
 3. Run `npm run web:dev`.
 4. Open the forwarded port 5173.
@@ -29,13 +29,13 @@ The preview stores progress in the browser's local storage. It does not write Re
 
 ## Build and playtest on Devvit
 
-Requires Node.js 22 or newer and a logged-in Devvit CLI.
+Requires Node.js 24 or newer and the repository's local Devvit CLI.
 
 ```bash
 npm install
 npm run preflight
 npx devvit login
-npx devvit playtest
+npm run playtest
 ```
 
 Choose the public test subreddit when prompted. The subreddit moderator menu includes **Create a SIGNAL post**. The Devvit backend checks answers, saves one daily result per Reddit account, and maintains a leaderboard in Redis.
@@ -59,4 +59,4 @@ The Codespaces preview works without changing repository visibility or enabling 
 
 ## Hackathon checklist
 
-The game is designed as a short daily experience in a Reddit Interactive Post. Before hackathon submission, it still needs a public test subreddit with a working post, full answer catalog review, final README and submission description, app link, and a short demo video.
+The game is designed as a short daily experience in a Reddit Interactive Post. Before hackathon submission, it still needs a public test subreddit with a working post, a larger answer/content bank, a final README and submission description, an app link, and a short demo video.
