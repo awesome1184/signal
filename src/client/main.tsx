@@ -608,7 +608,7 @@ function App() {
                 <div
                   className="signal-capture signal-result-card"
                   data-grade={currentEntry.score >= 100 ? 'perfect' : currentEntry.score >= 85 ? 'deep' : currentEntry.score >= 60 ? 'clear' : currentEntry.score >= 30 ? 'faint' : 'background'}
-                  data-phase="locked"
+                  data-phase={currentEntry.score > 0 ? 'locked' : 'failed'}
                   style={{
                     '--noise-final': String(Math.max(.025, 1 - currentEntry.score / 100 * .975)),
                     '--wave-final': String(Math.max(.08, currentEntry.score / 100)),
