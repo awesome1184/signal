@@ -170,6 +170,7 @@ function MountainScene() {
 
 type TuningPhase = 'searching' | 'tracking' | 'locking' | 'surging' | 'slipping' | 'locked' | 'failed';
 
+let signalAudioEnabled = true;
 let signalAudioContext: AudioContext | null = null;
 let signalMasterGain: GainNode | null = null;
 let receiverBed: { gain: GainNode; oscillators: OscillatorNode[] } | null = null;
@@ -180,7 +181,7 @@ function getSignalAudioContext(): AudioContext | null {
     if (!signalAudioContext) {
       signalAudioContext = new AudioContext();
       signalMasterGain = signalAudioContext.createGain();
-      signalMasterGain.gain.value = .62;
+      signalMasterGain.gain.value = signalAudioEnabled ? .62 : .0001;
       signalMasterGain.connect(signalAudioContext.destination);
     }
     if (signalAudioContext.state === 'suspended') void signalAudioContext.resume().catch(() => undefined);
@@ -211,6 +212,7 @@ function scheduleSoftTone(context: AudioContext, frequency: number, startAt: num
 }
 
 function playSoftUiCue(): void {
+  if (!signalAudioEnabled) return;
   const context = getSignalAudioContext();
   if (!context) return;
   const now = context.currentTime;
@@ -240,6 +242,18 @@ function startReceiverBed(context: AudioContext): void {
   receiverBed = { gain, oscillators };
 }
 
+function setSignalAudioEnabled(enabled: boolean): void {
+  signalAudioEnabled = enabled;
+  if (!signalAudioContext || !signalMasterGain) {
+    if (!enabled) stopReceiverBed();
+    return;
+  }
+  const now = signalAudioContext.currentTime;
+  signalMasterGain.gain.cancelScheduledValues(now);
+  signalMasterGain.gain.setTargetAtTime(enabled ? .62 : .0001, now, .035);
+  if (!enabled) stopReceiverBed();
+}
+
 function stopReceiverBed(): void {
   if (!receiverBed || !signalAudioContext) return;
   const bed = receiverBed;
@@ -253,6 +267,7 @@ function stopReceiverBed(): void {
 }
 
 function playReceiverPhaseCue(phase: TuningPhase, score: number): void {
+  if (!signalAudioEnabled) return;
   const context = getSignalAudioContext();
   if (!context) return;
   const now = context.currentTime;
@@ -329,7 +344,10 @@ function App() {
   const [serverReady, setServerReady] = useState(false);
   const [copied, setCopied] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(() => {
-    try { return localStorage.getItem('signal:sound') !== 'off'; } catch { return true; }
+    let enabled = true;
+    try { enabled = localStorage.getItem('signal:sound') !== 'off'; } catch { /* sound preference is optional */ }
+    signalAudioEnabled = enabled;
+    return enabled;
   });
   const [canTest, setCanTest] = useState(DEMO_MODE);
   const [testPanelOpen, setTestPanelOpen] = useState(DEMO_MODE);
@@ -476,8 +494,8 @@ function App() {
     const next = !soundEnabled;
     setSoundEnabled(next);
     try { localStorage.setItem('signal:sound', next ? 'on' : 'off'); } catch { /* sound preference is optional */ }
+    setSignalAudioEnabled(next);
     if (next) playSoftUiCue();
-    else stopReceiverBed();
   };
 
   const startGame = (isTest = false) => {
