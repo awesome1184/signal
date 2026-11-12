@@ -1693,3 +1693,13 @@ button:focus-visible,input:focus-visible {
     opacity:1 !important;
   }
 }
+
+
+@media (prefers-reduced-motion:reduce) {
+  .perfect-capture .signal-capture[data-phase="surging"] .signal-screen,
+  .perfect-capture .signal-capture[data-phase="locked"] .signal-capture-copy h2 {
+    animation:none !important;
+    filter:none !important;
+    transform:none !important;
+  }
+}
