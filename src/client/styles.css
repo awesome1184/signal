@@ -3294,3 +3294,98 @@ button { user-select:none; }
   }
   .instrument-card:hover { transform:none; }
 }
+
+
+/* The receiver visibly closes around the carrier as its live score rises. */
+.play-view.tuning-view .signal-lock-reticle {
+  animation:none !important;
+  transition:transform .14s cubic-bezier(.2,.65,.25,1),opacity .14s ease,filter .14s ease !important;
+}
+.play-view.tuning-view .signal-capture:not([data-phase="slipping"]) .signal-lock-reticle {
+  opacity:var(--reticle-opacity) !important;
+  transform:translate(-50%,-50%) scale(var(--reticle-scale)) !important;
+  filter:drop-shadow(0 0 4px rgba(111,230,226,calc(.16 + var(--lock-progress) * .42))) !important;
+}
+.play-view.tuning-view .reticle-corner {
+  width:var(--reticle-corner-size);
+  height:var(--reticle-corner-size);
+  border-color:rgba(143,230,231,calc(.38 + var(--lock-progress) * .56)) !important;
+  transition:width .14s ease,height .14s ease,border-color .14s ease !important;
+}
+.play-view.tuning-view .reticle-center {
+  width:var(--reticle-dot-size);
+  height:var(--reticle-dot-size);
+  box-shadow:0 0 calc(4px + var(--lock-progress) * 9px) rgba(108,245,224,calc(.3 + var(--lock-progress) * .55)) !important;
+  transition:width .14s ease,height .14s ease,box-shadow .14s ease !important;
+}
+/* Circular acquisition meter fills around the center as the brackets converge. */
+.play-view.tuning-view .signal-lock-reticle::before {
+  content:"";
+  position:absolute;
+  inset:8%;
+  border-radius:50%;
+  background:conic-gradient(
+    from -90deg,
+    rgba(125,240,225,.88) 0 var(--lock-progress-pct),
+    rgba(125,240,225,.1) var(--lock-progress-pct) 100%
+  );
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 1.5px),#000 calc(100% - .6px));
+  mask:radial-gradient(farthest-side,transparent calc(100% - 1.5px),#000 calc(100% - .6px));
+  opacity:calc(.24 + var(--lock-progress) * .68);
+  filter:drop-shadow(0 0 4px rgba(115,241,222,.3));
+  transition:opacity .14s ease;
+  pointer-events:none;
+}
+.play-view.tuning-view .signal-capture:not([data-phase="slipping"]) .signal-clean-trace {
+  stroke-width:var(--carrier-stroke-width) !important;
+  filter:drop-shadow(0 0 calc(2px + var(--lock-progress) * 5px) rgba(110,239,239,.68)) !important;
+  transition:stroke-width .14s ease,filter .14s ease;
+}
+/* The LOCK step fills continuously, rather than switching on only at the end. */
+.play-view.tuning-view .signal-lock-steps[data-phase="locking"] span:nth-child(3),
+.play-view.tuning-view .signal-lock-steps[data-phase="surging"] span:nth-child(3) {
+  position:relative;
+  border-color:rgba(103,211,210,.34);
+  color:#83b7bb;
+}
+.play-view.tuning-view .signal-lock-steps[data-phase="locking"] span:nth-child(3)::after,
+.play-view.tuning-view .signal-lock-steps[data-phase="surging"] span:nth-child(3)::after {
+  content:"";
+  position:absolute;
+  left:0;
+  top:-2px;
+  width:var(--lock-progress-pct);
+  height:2px;
+  background:#83e4df;
+  box-shadow:0 0 8px rgba(111,231,222,.48);
+  transition:width .12s linear;
+}
+.play-view.tuning-view .signal-lock-steps[data-phase="surging"] span:nth-child(3) {
+  color:#b9efdf;
+}
+.play-view.tuning-view .signal-lock-steps[data-phase="surging"] span:nth-child(3)::after {
+  background:#c5ffe8;
+  box-shadow:0 0 10px rgba(169,255,226,.72);
+}
+/* When a near-miss begins to recover, the reticle opens with the slip,
+   then closes again in step with the recovery counter. */
+.perfect-capture .signal-capture[data-phase="recovering"] .signal-lock-reticle {
+  animation:none !important;
+  opacity:var(--reticle-opacity) !important;
+  transform:translate(-50%,-50%) scale(var(--reticle-scale)) !important;
+  filter:drop-shadow(0 0 5px rgba(255,190,140,.24)) !important;
+}
+.perfect-capture .signal-capture[data-phase="recovering"] .reticle-corner {
+  width:var(--reticle-corner-size);
+  height:var(--reticle-corner-size);
+}
+@media (prefers-reduced-motion:reduce) {
+  .play-view.tuning-view .signal-lock-reticle,
+  .play-view.tuning-view .reticle-corner,
+  .play-view.tuning-view .reticle-center,
+  .play-view.tuning-view .signal-lock-reticle::before,
+  .play-view.tuning-view .signal-clean-trace,
+  .play-view.tuning-view .signal-lock-steps span:nth-child(3)::after {
+    transition:none !important;
+  }
+}
