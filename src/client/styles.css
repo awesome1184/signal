@@ -2256,3 +2256,32 @@ button:focus-visible,input:focus-visible {
   background:#ffb16d;
   box-shadow:0 0 9px rgba(255,164,103,.6);
 }
+
+
+/* Receiver events stay on screen long enough to read before the next phase begins. */
+.play-view.tuning-view .signal-capture-copy {
+  animation:signal-phase-copy .78s cubic-bezier(.18,.72,.22,1) both;
+}
+.play-view.tuning-view .signal-input-state,
+.play-view.tuning-view .signal-screen-state,
+.play-view.tuning-view .signal-capture-status span {
+  animation:signal-phase-label .86s cubic-bezier(.18,.72,.22,1) both;
+}
+@keyframes signal-phase-copy {
+  0% {opacity:0;transform:translateY(8px);filter:blur(2px);}
+  55% {opacity:.82;filter:blur(.4px);}
+  100% {opacity:1;transform:translateY(0);filter:blur(0);}
+}
+@keyframes signal-phase-label {
+  0% {opacity:0;filter:blur(2px);}
+  45% {opacity:.7;}
+  100% {opacity:1;filter:blur(0);}
+}
+@media (prefers-reduced-motion:reduce) {
+  .play-view.tuning-view .signal-capture-copy,
+  .play-view.tuning-view .signal-input-state,
+  .play-view.tuning-view .signal-screen-state,
+  .play-view.tuning-view .signal-capture-status span {
+    animation:none !important;
+  }
+}
