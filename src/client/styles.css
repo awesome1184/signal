@@ -1375,3 +1375,15 @@ button:focus-visible,input:focus-visible {
   .tuning-lock-track i { width:100%; }
   .tuning-needle { animation:none !important; transform:rotate(12deg); }
 }
+
+@media (prefers-reduced-motion:reduce) {
+  .tuning-overlay,.tuning-overlay::before,.tuning-overlay::after,.tuning-console,
+  .tuning-console-head i,.tuning-heading,.tuning-frequency strong,.tuning-dial::before,
+  .tuning-needle,.tuning-dial-hub,.tuning-wave-front,.tuning-band i,
+  .tuning-lock-track i,.tuning-target strong,.tuning-status i,.tuning-status b {
+    animation:none !important;
+    transition:none !important;
+  }
+  .tuning-needle { transform:rotate(12deg); }
+  .tuning-lock-track i { width:100%; }
+}
