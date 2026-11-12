@@ -3,7 +3,34 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { getDailyPrompts, getNewYorkDateKey, formatDay, ROUND_SECONDS, MAX_SCORE, type Prompt } from '../shared/game';
 
-type Entry = { promptId: string; answer: string; score: number; tier: string; note: string };
+type Entry = { promptId: string; answer: string; score: number; tier: string; note: string; signalSeed?: number };
+type ReceiverPaths = { carrier: string; noise: string };
+
+function buildReceiverPaths(seed: number, score: number): ReceiverPaths {
+  let state = (Math.floor(seed) >>> 0) || 1;
+  const random = () => {
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+    return state / 4294967296;
+  };
+  const cycles = 3 + Math.floor(random() * 6);
+  const phase = random() * Math.PI * 2;
+  const harmonicPhase = random() * Math.PI * 2;
+  const harmonic = .08 + random() * .24;
+  const amplitude = 9 + Math.max(0, Math.min(100, score)) * .31;
+  const carrierPoints = Array.from({ length: 73 }, (_, index) => {
+    const x = index * 10;
+    const angle = phase + (index / 72) * cycles * Math.PI * 2;
+    const y = 90 - amplitude * (Math.sin(angle) + harmonic * Math.sin(angle * 2 + harmonicPhase));
+    return { x, y: Math.max(16, Math.min(164, y)) };
+  });
+  const carrier = carrierPoints.map((point, index) => `${index ? 'L' : 'M'}${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(' ');
+  const noisePoints = Array.from({ length: 55 }, (_, index) => ({
+    x: index * (720 / 54),
+    y: 18 + random() * 144
+  }));
+  const noise = noisePoints.map((point, index) => `${index ? 'L' : 'M'}${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(' ');
+  return { carrier, noise };
+}
 type RunState = {
   dateKey: string;
   phase: 'ready' | 'playing' | 'reveal' | 'complete';
@@ -134,13 +161,16 @@ function App() {
   const [tuningAnswer, setTuningAnswer] = useState('');
   const [tuningScore, setTuningScore] = useState<number | null>(null);
   const [tuningDisplayScore, setTuningDisplayScore] = useState(0);
+  const [tuningSignalSeed, setTuningSignalSeed] = useState(() => Math.floor(Math.random() * 0xffffffff) || 1);
   const [tuningDuration, setTuningDuration] = useState(900);
   const [tuningStatus, setTuningStatus] = useState('CAPTURING INPUT // SCANNING NOISE');
-  const [tuningPhase, setTuningPhase] = useState<'searching' | 'tracking' | 'locking' | 'surging' | 'locked' | 'failed'>('searching');
+  const [tuningPhase, setTuningPhase] = useState<'searching' | 'tracking' | 'locking' | 'surging' | 'slipping' | 'locked' | 'failed'>('searching');
 
   const currentPrompt: Prompt = prompts[Math.min(game.index, prompts.length - 1)];
   const total = game.entries.reduce((sum, entry) => sum + entry.score, 0);
   const currentEntry = game.entries[game.entries.length - 1];
+  const tuningSignalPaths = useMemo(() => buildReceiverPaths(tuningSignalSeed, tuningScore ?? 0), [tuningSignalSeed, tuningScore]);
+  const resultSignalPaths = useMemo(() => currentEntry ? buildReceiverPaths(currentEntry.signalSeed ?? 1, currentEntry.score) : null, [currentEntry]);
   const secondsLeft = game.deadline ? Math.max(0, Math.ceil((game.deadline - now) / 1000)) : ROUND_SECONDS;
   const completedPrompts = game.entries.length;
   const shownBoard = DEMO_MODE || !serverReady ? MOCK_BOARD : leaderboard;
@@ -150,14 +180,16 @@ function App() {
     : tuningPhase === 'searching' || tuningScore === null ? 'READING THE STATIC'
     : tuningPhase === 'tracking' ? 'CARRIER DETECTED'
     : tuningPhase === 'locking' ? 'LOCKING SIGNAL'
-    : tuningPhase === 'surging' ? 'CARRIER OVERLOAD'
+    : tuningPhase === 'surging' ? (tuningScore === 100 ? 'CARRIER OVERLOAD' : 'PERFECT LOCK')
+    : tuningPhase === 'slipping' ? 'SIGNAL SLIPPED'
     : tuningScore >= 100 ? 'SIGNAL FOUND'
     : tuningScore >= 60 ? 'PARTIAL LOCK'
     : 'WEAK ACQUISITION';
   const tuningInputLabel = tuningPhase === 'searching' ? 'INPUT BUFFERED'
     : tuningPhase === 'tracking' ? 'CARRIER TRACKING'
     : tuningPhase === 'locking' ? 'ACQUIRING LOCK'
-    : tuningPhase === 'surging' ? 'CARRIER SPIKE'
+    : tuningPhase === 'surging' ? 'LOCK CONFIRMED'
+    : tuningPhase === 'slipping' ? 'CARRIER DRIFT DETECTED'
     : tuningPhase === 'locked' && tuningScore === 100 ? 'LOCK CONFIRMED'
     : tuningPhase === 'locked' && (tuningScore ?? 0) >= 60 ? 'PARTIAL LOCK'
     : tuningPhase === 'locked' ? 'WEAK LOCK'
@@ -165,16 +197,23 @@ function App() {
   const tuningScreenState = tuningPhase === 'searching' ? 'SEARCHING'
     : tuningPhase === 'tracking' ? 'TRACKING'
     : tuningPhase === 'locking' ? 'ACQUIRING'
-    : tuningPhase === 'surging' ? 'BREAKTHROUGH'
+    : tuningPhase === 'surging' ? 'LOCKED'
+    : tuningPhase === 'slipping' ? 'SLIPPING'
     : tuningPhase === 'locked' && tuningScore === 100 ? 'LOCKED'
     : tuningPhase === 'locked' && (tuningScore ?? 0) >= 60 ? 'PARTIAL LOCK'
     : tuningPhase === 'locked' ? 'WEAK LOCK'
     : 'NO CARRIER';
   const tuningCaption = tuningPhase === 'surging' && tuningScore === 100
     ? 'Carrier strength is breaking clean through the noise floor.'
-    : tuningPhase === 'locked' && tuningScore === 100
-      ? 'Perfect acquisition. No interference detected.'
-      : 'Separating the carrier from the noise floor.';
+    : tuningPhase === 'surging' && (tuningScore ?? 0) >= 85
+      ? 'Full-strength carrier. Perfect lock confirmed.'
+      : tuningPhase === 'slipping'
+        ? 'A tiny frequency drift breaks the perfect lock. Signal settling.'
+        : tuningPhase === 'locked' && tuningScore === 100
+          ? 'Perfect acquisition. No interference detected.'
+          : tuningPhase === 'locked' && (tuningScore ?? 0) >= 85
+            ? 'Near-perfect acquisition. A trace of interference remains.'
+            : 'Separating the carrier from the noise floor.';
   const tuningNoiseFinal = tuningScore === null ? 1 : Math.max(.025, 1 - tuningScore / 100 * .975);
   const tuningWaveFinal = tuningScore === null ? .02 : Math.max(.08, tuningScore / 100);
   const tuningChaosFinal = tuningScore === null ? .95 : Math.max(.03, .95 - tuningScore / 100 * .92);
@@ -243,7 +282,7 @@ function App() {
         if (!active || !data?.ok) return;
         setPlayerCount(Number(data.playerCount) || 0);
         if (Array.isArray(data.leaderboard)) setLeaderboard(data.leaderboard);
-        if (data.result?.entries) setGame((previous) => ({ ...previous, entries: data.result.entries }));
+        if (data.result?.entries) setGame((previous) => ({ ...previous, entries: data.result.entries.map((entry: Entry, index: number) => ({ ...entry, signalSeed: previous.entries[index]?.signalSeed })) }));
       })
       .catch(() => setMessage('Result is visible locally. The community board is temporarily unavailable.'));
     return () => { active = false; };
@@ -262,6 +301,8 @@ function App() {
     if (isTuning) return;
 
     const tuningStartedAt = Date.now();
+    const signalSeed = Math.floor(Math.random() * 0xffffffff) || 1;
+    setTuningSignalSeed(signalSeed);
     setTuningAnswer(clean);
     setTuningScore(null);
     setTuningDisplayScore(0);
@@ -294,36 +335,52 @@ function App() {
       setTuningDuration(duration);
 
       const perfect = score === 100;
+      const nearMiss = score >= 85 && score < 100;
       const animateScore = async (from: number, to: number, segmentMs: number) => {
-        const steps = Math.max(1, Math.ceil(segmentMs / 52));
+        const steps = Math.max(1, Math.ceil(segmentMs / 48));
         for (let step = 1; step <= steps; step++) {
           await wait(segmentMs / steps);
           setTuningDisplayScore(Math.round(from + (to - from) * (step / steps)));
         }
       };
 
-      const trackingTarget = Math.round(score * (perfect ? .34 : .38));
-      const lockingTarget = Math.round(score * (perfect ? .86 : .88));
+      const trackingTarget = Math.round(score * (perfect ? .34 : nearMiss ? .36 : .38));
+      const lockingTarget = Math.round(score * (perfect ? .86 : nearMiss ? .9 : .88));
 
       setTuningPhase('tracking');
       setTuningStatus('CARRIER DETECTED // TRACKING FREQUENCY');
-      await animateScore(0, trackingTarget, duration * (perfect ? .44 : .48));
+      await animateScore(0, trackingTarget, duration * (perfect ? .44 : nearMiss ? .42 : .48));
 
       setTuningPhase('locking');
       setTuningStatus(score >= 100
         ? 'FREQUENCY CENTERED // LOCKING CARRIER'
-        : score >= 60
-          ? 'ALIGNING CARRIER // REDUCING INTERFERENCE'
-          : 'WEAK CARRIER // ATTEMPTING ACQUISITION');
-      await animateScore(trackingTarget, lockingTarget, duration * (perfect ? .24 : .32));
+        : score >= 85
+          ? 'FREQUENCY CENTERED // FINAL LOCK APPROACH'
+          : score >= 60
+            ? 'ALIGNING CARRIER // REDUCING INTERFERENCE'
+            : 'WEAK CARRIER // ATTEMPTING ACQUISITION');
+      await animateScore(trackingTarget, lockingTarget, duration * (perfect ? .24 : nearMiss ? .22 : .32));
 
-      if (perfect) {
+      if (perfect || nearMiss) {
         setTuningPhase('surging');
-        setTuningStatus('CARRIER SPIKE // BREAKTHROUGH IMMINENT');
-        await animateScore(lockingTarget, score, duration * .14);
-        setTuningPhase('locked');
-        setTuningStatus('100% CARRIER // SIGNAL FULLY ACQUIRED');
-        await wait(duration * .18);
+        setTuningStatus(perfect
+          ? 'CARRIER SPIKE // BREAKTHROUGH IMMINENT'
+          : '100% CARRIER // LOCK CONFIRMED');
+        await animateScore(lockingTarget, 100, duration * (perfect ? .14 : .10));
+
+        if (nearMiss) {
+          await wait(duration * .07);
+          setTuningPhase('slipping');
+          setTuningStatus('CARRIER DRIFT // PERFECT LOCK LOST');
+          await animateScore(100, score, duration * .10);
+          setTuningPhase('locked');
+          setTuningStatus('NEAR-PERFECT // RESIDUAL CARRIER DRIFT');
+          await wait(duration * .09);
+        } else {
+          setTuningPhase('locked');
+          setTuningStatus('100% CARRIER // SIGNAL FULLY ACQUIRED');
+          await wait(duration * .18);
+        }
       } else {
         setTuningPhase(score > 0 ? 'locked' : 'failed');
         setTuningStatus(score >= 60
@@ -361,7 +418,7 @@ function App() {
 
       await animateCapture(result.score);
 
-      const entry: Entry = { promptId: prompt.id, answer: clean, score: result.score, tier: result.tier, note: result.note };
+      const entry: Entry = { promptId: prompt.id, answer: clean, score: result.score, tier: result.tier, note: result.note, signalSeed };
       setGame((previous) => previous.phase === 'playing'
         ? { ...previous, phase: 'reveal', deadline: null, entries: [...previous.entries, entry] }
         : previous);
@@ -521,7 +578,7 @@ function App() {
             {game.phase === 'playing' && (
               <div className={'play-view ' + (isTuning ? 'tuning-view' : '')}>
                 {isTuning && (
-                  <div className={'signal-capture-overlay ' + (tuningScore === 100 ? 'perfect-capture' : '')} role="status" aria-live="polite">
+                  <div className={'signal-capture-overlay ' + ((tuningScore ?? 0) >= 85 ? 'perfect-capture' : '')} role="status" aria-live="polite">
                     <div
                       className="signal-capture"
                       key={tuningScore === null ? 'searching' : 'score-' + tuningScore}
@@ -543,8 +600,8 @@ function App() {
                         <div className="signal-static" />
                         <svg className="signal-traces" viewBox="0 0 720 180" preserveAspectRatio="none" aria-hidden="true">
                           <path className="signal-centerline" d="M0 90H720" />
-                          <path className="signal-chaos-trace" d="M0 90 12 78 19 115 27 42 34 128 43 63 52 100 61 35 68 117 78 77 87 96 96 25 105 145 114 57 123 106 132 68 141 125 151 45 160 99 169 73 180 90 190 52 199 132 208 69 218 101 227 29 238 148 247 73 258 117 268 48 277 103 288 71 298 94 307 35 317 142 327 64 336 119 346 55 356 102 366 78 376 90 388 41 398 133 408 67 418 111 428 31 438 148 448 70 458 112 468 48 478 100 488 76 498 91 508 37 518 145 528 61 538 116 548 57 558 101 568 72 578 90 589 44 599 134 609 68 619 109 629 34 639 147 649 72 659 115 669 49 679 98 689 76 700 91 720 90" />
-                          <path className="signal-clean-trace" d="M0 90 C30 90 30 35 60 35 S90 145 120 145 S150 90 180 90 C210 90 210 35 240 35 S270 145 300 145 S330 90 360 90 C390 90 390 35 420 35 S450 145 480 145 S510 90 540 90 C570 90 570 35 600 35 S630 145 660 145 S690 90 720 90" />
+                          <path className="signal-chaos-trace" d="{resultSignalPaths?.noise ?? ''}" />
+                          <path className="signal-clean-trace" d="{resultSignalPaths?.carrier ?? ''}" />
                           <path className="signal-motion-trace" d="M0 90 C30 90 30 35 60 35 S90 145 120 145 S150 90 180 90 C210 90 210 35 240 35 S270 145 300 145 S330 90 360 90 C390 90 390 35 420 35 S450 145 480 145 S510 90 540 90 C570 90 570 35 600 35 S630 145 660 145 S690 90 720 90" />
                         </svg>
                         <div className="signal-scanbeam" />
@@ -599,7 +656,7 @@ function App() {
                       </div>
                       <div className="signal-capture-status"><i /><span>{tuningStatus}</span></div>
                     </div>
-                    {tuningScore === 100 && <div className="signal-perfect-flash" aria-hidden="true" />}
+                    {(tuningScore ?? 0) >= 85 && <div className="signal-perfect-flash" aria-hidden="true" />}
                   </div>
                 )}
                 {!isTuning && <>
@@ -648,8 +705,8 @@ function App() {
                   <div className="signal-result-hero">
                     <div className="signal-capture-copy">
                       <div className="signal-capture-kicker">TRANSMISSION {String(game.index + 1).padStart(2, '0')} / ACQUISITION REPORT</div>
-                      <h2>{currentEntry.score > 0 ? 'SIGNAL LOCKED' : 'NO SIGNAL'}</h2>
-                      <p>{currentEntry.score === 100 ? 'Perfect carrier. The noise floor has been eliminated.' : currentEntry.score >= 60 ? 'A stable carrier recovered from the interference.' : currentEntry.score > 0 ? 'A weak carrier recovered. Interference remains.' : 'No stable carrier could be recovered.'}</p>
+                      <h2>{currentEntry.score === 100 ? 'SIGNAL LOCKED' : currentEntry.score >= 85 ? 'SIGNAL ALMOST LOCKED' : currentEntry.score > 0 ? 'PARTIAL SIGNAL LOCK' : 'NO SIGNAL'}</h2>
+                      <p>{currentEntry.score === 100 ? 'Perfect carrier. The noise floor has been eliminated.' : currentEntry.score >= 85 ? 'It looked perfect for a moment. A final trace of drift kept the carrier just shy of a flawless lock.' : currentEntry.score >= 60 ? 'A stable carrier recovered from the interference.' : currentEntry.score > 0 ? 'A weak carrier recovered. Interference remains.' : 'No stable carrier could be recovered.'}</p>
                     </div>
                     <div className="signal-result-score">
                       <span>POINTS RECOVERED</span>
@@ -687,7 +744,7 @@ function App() {
                       </div>
                     )}
                     <span className="signal-screen-label">RF / 104.7 MHZ</span>
-                    <span className="signal-screen-state">{currentEntry.score > 0 ? 'LOCKED' : 'NO CARRIER'}</span>
+                    <span className="signal-screen-state">{currentEntry.score === 100 ? 'LOCKED' : currentEntry.score >= 85 ? 'NEAR LOCK' : currentEntry.score > 0 ? 'PARTIAL LOCK' : 'NO CARRIER'}</span>
                   </div>
                   <div className="signal-lock-steps" data-phase={currentEntry.score > 0 ? 'locked' : 'failed'} aria-hidden="true">
                     <span><i />01 / SCAN</span>
@@ -709,7 +766,7 @@ function App() {
                     <div className="signal-quality-track"><i /></div>
                     <strong>{currentEntry.score}%</strong>
                   </div>
-                  <div className="signal-capture-status"><i /><span>{currentEntry.score === 100 ? '100% CARRIER // LOCK CONFIRMED' : currentEntry.score > 0 ? 'CARRIER STABLE // RESULT RECORDED' : 'NO CARRIER // TRANSMISSION CLOSED'}</span></div>
+                  <div className="signal-capture-status"><i /><span>{currentEntry.score === 100 ? '100% CARRIER // LOCK CONFIRMED' : currentEntry.score >= 85 ? 'NEAR-PERFECT // FINAL CARRIER DRIFT' : currentEntry.score > 0 ? 'CARRIER STABLE // RESULT RECORDED' : 'NO CARRIER // TRANSMISSION CLOSED'}</span></div>
                 </div>
                 <p className="signal-result-note">{currentEntry.note}</p>
                 <button className="primary-button next-button" onClick={nextPrompt}>{game.index === 6 ? 'VIEW SCAN REPORT' : 'NEXT TRANSMISSION'} <span className="button-arrow">↗</span></button>
