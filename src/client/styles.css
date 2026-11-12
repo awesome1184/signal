@@ -2121,3 +2121,19 @@ button:focus-visible,input:focus-visible {
   .signal-result-card .signal-motion-trace { opacity:.45; }
   .play-view.tuning-view .signal-quality-track i { transition:none; }
 }
+
+
+/* Keep the finishing report in the same receiver footprint; the score has already counted up. */
+.signal-result-view { min-height:560px; }
+.signal-result-card { width:min(880px,100%); }
+.signal-result-score > strong,
+.signal-result-card[data-grade="perfect"] .signal-result-score > strong {
+  animation:none;
+  opacity:1;
+  transform:none;
+  filter:none;
+}
+@media (max-width:680px) {
+  .signal-result-view { min-height:0; }
+  .signal-result-card { width:100%; }
+}
