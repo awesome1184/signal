@@ -213,7 +213,7 @@ function App() {
     if (isTuning) return;
 
     const tuningStartedAt = Date.now();
-    const minimumTune = new Promise<void>((resolve) => window.setTimeout(resolve, 1550));
+    const minimumTune = new Promise<void>((resolve) => window.setTimeout(resolve, 7000));
     setTuningAnswer(clean);
     setIsTuning(true);
     setMessage('');
@@ -433,11 +433,12 @@ function App() {
                       <div className="tuning-band">
                         <span>88.0</span><div><i /></div><span>108.0</span>
                       </div>
+                      <div className="tuning-lock-track" aria-label="Signal lock progress"><i /></div>
                       <div className="tuning-target">
                         <span>LOCKING ONTO</span>
                         <strong>{tuningAnswer}</strong>
                       </div>
-                      <div className="tuning-status"><i /> ANALYZING TRANSMISSION <b>...</b></div>
+                      <div className="tuning-status"><i /> HUNTING FOR A CLEAN SIGNAL <b>...</b></div>
                     </div>
                   </div>
                 )}
