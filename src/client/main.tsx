@@ -4,7 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { getDailyPrompts, getNewYorkDateKey, formatDay, ROUND_SECONDS, MAX_SCORE, type Prompt } from '../shared/game';
 
 type Entry = { promptId: string; answer: string; score: number; tier: string; note: string; signalSeed?: number };
-type ReceiverPaths = { carrier: string; reticleY: number };
+type ReceiverPaths = { carrier: string; reticleX: number; reticleY: number };
 
 function receiverFrequency(seed: number): string {
   return (88 + ((Math.floor(seed) >>> 0) % 2000) / 100).toFixed(1);
@@ -39,260 +39,26 @@ function buildReceiverPaths(seed: number, score: number): ReceiverPaths {
     `${index ? 'L' : 'M'}${point.x.toFixed(1)} ${point.y.toFixed(1)}`
   ).join(' ');
 
-  // Lock to the strongest nearby crest or trough, not the exact midpoint.
-  // The midpoint can sit on the centerline even while the carrier grows around it.
-  const lockWindow = carrierPoints.slice(31, 42);
-  const lockPoint = lockWindow.reduce((strongest, point) =>
-    Math.abs(point.y - 90) > Math.abs(strongest.y - 90) ? point : strongest
-  , lockWindow[0]);
-  const reticleY = Math.max(23, Math.min(77, 50 + ((lockPoint.y - 90) / 180) * 100 * .82));
-
-  return { carrier, reticleY };
-}
-type ReceiverAnimation = 'lock' | 'radar' | 'spectrum' | 'waterfall' | 'constellation';
-
-const RECEIVER_VISUALIZERS: Array<{ id: ReceiverAnimation; label: string; short: string; glyph: string }> = [
-  { id: 'lock', label: 'Lock-On', short: 'LOCK', glyph: '⌖' },
-  { id: 'radar', label: 'Radar Sweep', short: 'RADAR', glyph: '◉' },
-  { id: 'spectrum', label: 'Spectrum Analyzer', short: 'BARS', glyph: '▥' },
-  { id: 'waterfall', label: 'Signal Waterfall', short: 'FLOW', glyph: '▤' },
-  { id: 'constellation', label: 'Phase Constellation', short: 'PHASE', glyph: '✣' }
-];
-
-function loadReceiverAnimation(): ReceiverAnimation {
-  try {
-    const saved = localStorage.getItem('signal:visualizer');
-    return RECEIVER_VISUALIZERS.some((item) => item.id === saved) ? saved as ReceiverAnimation : 'lock';
-  } catch {
-    return 'lock';
-  }
-}
-
-function VisualizerPicker({
-  value,
-  onChange
-}: {
-  value: ReceiverAnimation;
-  onChange: (next: ReceiverAnimation) => void;
-}) {
-  return (
-    <div className="receiver-visualizer-picker">
-      <span className="visualizer-picker-label">RECEIVER DISPLAY</span>
-      <div className="visualizer-picker-options" role="group" aria-label="Choose receiver animation">
-        {RECEIVER_VISUALIZERS.map((visualizer) => (
-          <button
-            key={visualizer.id}
-            type="button"
-            className={'visualizer-option ' + (value === visualizer.id ? 'selected' : '')}
-            aria-label={'Use ' + visualizer.label + ' animation'}
-            aria-pressed={value === visualizer.id}
-            title={visualizer.label}
-            onClick={() => onChange(visualizer.id)}
-          >
-            <span aria-hidden="true">{visualizer.glyph}</span>
-            <small>{visualizer.short}</small>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function createSeededRandom(seed: number): () => number {
-  let state = (Math.floor(seed) >>> 0) || 1;
-  return () => {
-    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
-    return state / 4294967296;
-  };
-}
-
-const CONSTELLATION_TARGETS: Array<[number, number]> = [
-  [50, 14], [68, 26], [79, 50], [68, 74], [50, 86], [32, 74],
-  [21, 50], [32, 26], [50, 35], [64, 50], [50, 65], [36, 50], [50, 50]
-];
-
-function ReceiverVisualization({
-  mode,
-  paths,
-  seed,
-  answer,
-  progress
-}: {
-  mode: ReceiverAnimation;
-  paths: ReceiverPaths;
-  seed: number;
-  answer: string;
-  progress: number;
-}) {
-  const strength = Math.max(0, Math.min(1, progress));
-  const visualStyle = {
-    '--visual-progress': String(strength),
-    '--visual-progress-pct': (strength * 100).toFixed(1) + '%'
-  } as React.CSSProperties;
-  const staticLayer = <div className="signal-static" aria-hidden="true" />;
-
-  if (mode === 'lock') {
-    return (
-      <>
-        <div className="signal-screen-grid" />
-        {staticLayer}
-        <svg className="signal-traces" viewBox="0 0 720 180" preserveAspectRatio="none" aria-hidden="true">
-          <path className="signal-centerline" d="M0 90H720" />
-          <g className="signal-carrier-group">
-            <path id="signal-live-carrier" className="signal-clean-trace" d={paths.carrier} />
-            {answer && (
-              <text className="signal-carrier-word">
-                <textPath
-                  href="#signal-live-carrier"
-                  startOffset="50%"
-                  textAnchor="middle"
-                  textLength={Math.min(650, Math.max(44,
-                    answer.replace(/\s/g, '').length * 11.5
-                    + Math.max(0, answer.trim().split(/\s+/).length - 1) * 22
-                  ))}
-                  lengthAdjust="spacing"
-                >{answer.toUpperCase()}</textPath>
-              </text>
-            )}
-          </g>
-        </svg>
-        <div className="signal-lock-reticle" style={{ top: paths.reticleY + '%' }} aria-hidden="true">
-          <i className="reticle-corner top-left" />
-          <i className="reticle-corner top-right" />
-          <i className="reticle-corner bottom-left" />
-          <i className="reticle-corner bottom-right" />
-          <b className="reticle-center" />
-        </div>
-      </>
-    );
-  }
-
-  if (mode === 'radar') {
-    return (
-      <>
-        {staticLayer}
-        <div className="visual-radar" style={visualStyle} aria-hidden="true">
-          <div className="radar-disk">
-            <i className="radar-ring radar-ring-inner" />
-            <i className="radar-ring radar-ring-middle" />
-            <i className="radar-cross radar-cross-horizontal" />
-            <i className="radar-cross radar-cross-vertical" />
-            <i className="radar-sweep" />
-            <i className="radar-blip radar-blip-one" />
-            <i className="radar-blip radar-blip-two" />
-            <i className="radar-blip radar-blip-three" />
-            <i className="radar-origin" />
-          </div>
-          <span className="radar-range radar-range-left">RNG 04.8</span>
-          <span className="radar-range radar-range-right">AZ 072°</span>
-        </div>
-      </>
-    );
-  }
-
-  if (mode === 'spectrum') {
-    const peakA = 7 + ((Math.floor(seed) >>> 0) % 25);
-    const peakB = 37 - peakA;
-    const bars = Array.from({ length: 42 }, (_, index) => {
-      const peak = Math.max(
-        0,
-        1 - Math.abs(index - peakA) / 7.2,
-        .72 * (1 - Math.abs(index - peakB) / 5.4)
-      );
-      const ripple = (Math.sin((index + 1) * .87 + (seed % 97)) + 1) * .5;
-      return {
-        height: Math.min(94, 5 + ripple * 8 + peak * (9 + strength * 72)),
-        delay: -((index % 9) * .13)
-      };
-    });
-    return (
-      <>
-        {staticLayer}
-        <div className="visual-spectrum" style={visualStyle} aria-hidden="true">
-          <div className="spectrum-grid-lines" />
-          <div className="spectrum-bars">
-            {bars.map((bar, index) => (
-              <i
-                key={index}
-                className="spectrum-bar"
-                style={{ height: bar.height + '%', '--bar-delay': bar.delay + 's' } as React.CSSProperties}
-              />
-            ))}
-          </div>
-          <div className="spectrum-frequency-labels"><span>LOW / 20 HZ</span><span>FREQUENCY BAND</span><span>HIGH / 20 KHZ</span></div>
-        </div>
-      </>
-    );
-  }
-
-  if (mode === 'waterfall') {
-    const rows = Array.from({ length: 8 }, (_, row) => {
-      const ridgeCenter = 5 + ((Math.floor(seed) >>> 0) % 13) + row * 3;
-      return (
-        <div className="waterfall-row" key={row} style={{ '--row-delay': (row * -.29) + 's' } as React.CSSProperties}>
-          {Array.from({ length: 38 }, (_, column) => {
-            const ridgeDistance = Math.abs(column - ((ridgeCenter + 38) % 38));
-            const ridge = Math.max(0, 1 - ridgeDistance / 5.8);
-            const grain = (Math.sin((column + 2) * 1.61 + row * 2.37 + (seed % 83)) + 1) * .5;
-            const opacity = Math.min(.96, .06 + grain * .12 + ridge * (.12 + strength * .76));
-            return <i key={column} style={{ opacity }} />;
-          })}
-        </div>
-      );
-    });
-    return (
-      <>
-        {staticLayer}
-        <div className="visual-waterfall" style={visualStyle} aria-hidden="true">
-          <div className="waterfall-axis"><span>HIGH</span><span>RF</span><span>LOW</span></div>
-          <div className="waterfall-data">{rows}</div>
-          <span className="waterfall-time">LIVE SPECTRAL HISTORY</span>
-        </div>
-      </>
-    );
-  }
-
-  const random = createSeededRandom(seed ^ 0x6d2b79f5);
-  const scatterAmount = Math.pow(1 - strength, .92);
-  const dots = CONSTELLATION_TARGETS.map(([targetX, targetY], index) => {
-    const scatterX = 5 + random() * 90;
-    const scatterY = 10 + random() * 80;
-    return {
-      x: targetX + (scatterX - targetX) * scatterAmount,
-      y: targetY + (scatterY - targetY) * scatterAmount,
-      delay: (index % 5) * .045
-    };
+  // Track an actual crest or trough near the center of the receiver.
+  // Position is mapped directly from SVG coordinates so the bracket sits on
+  // the waveform itself, both horizontally and vertically.
+  const lockWindow = carrierPoints.slice(26, 47);
+  const extrema = lockWindow.filter((point, index) => {
+    const previous = lockWindow[index - 1];
+    const next = lockWindow[index + 1];
+    if (!previous || !next) return false;
+    return (point.y <= previous.y && point.y <= next.y)
+      || (point.y >= previous.y && point.y >= next.y);
   });
-  const constellationPath = 'M50 14 L68 26 L79 50 L68 74 L50 86 L32 74 L21 50 L32 26 Z M50 14 L50 35 L64 50 L50 65 L50 86 M21 50 L36 50 L50 50 L64 50 L79 50';
-  return (
-    <>
-      {staticLayer}
-      <div className="visual-constellation" style={visualStyle} aria-hidden="true">
-        <svg className="constellation-lines" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <path
-            d={constellationPath}
-            style={{ strokeDasharray: '290', strokeDashoffset: String(290 * (1 - strength)) }}
-          />
-        </svg>
-        {dots.map((dot, index) => (
-          <i
-            key={index}
-            className="constellation-dot"
-            style={{
-              left: dot.x + '%',
-              top: dot.y + '%',
-              opacity: .26 + strength * .74,
-              transitionDelay: dot.delay + 's'
-            }}
-          />
-        ))}
-        <b className="constellation-core" />
-        <span className="constellation-readout">PHASE COHERENCE / {Math.round(strength * 100)}%</span>
-      </div>
-    </>
-  );
-}
+  const candidates = extrema.length ? extrema : lockWindow;
+  const lockPoint = candidates.reduce((strongest, point) =>
+    Math.abs(point.y - 90) > Math.abs(strongest.y - 90) ? point : strongest
+  , candidates[0]);
+  const reticleX = Math.max(18, Math.min(82, lockPoint.x / 720 * 100));
+  const reticleY = Math.max(22, Math.min(78, lockPoint.y / 180 * 100));
 
+  return { carrier, reticleX, reticleY };
+}
 type RunState = {
   dateKey: string;
   phase: 'ready' | 'playing' | 'reveal' | 'complete';
@@ -715,7 +481,6 @@ function App() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardRow[]>([]);
   const [serverReady, setServerReady] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [receiverAnimation, setReceiverAnimation] = useState<ReceiverAnimation>(() => loadReceiverAnimation());
   const [soundEnabled, setSoundEnabled] = useState(() => {
     let enabled = true;
     try { enabled = localStorage.getItem('signal:sound') !== 'off'; } catch { /* sound preference is optional */ }
@@ -807,7 +572,7 @@ function App() {
     '--score-width': tuningDisplayScore + '%',
     '--lock-progress': String(tuningLockProgress),
     '--lock-progress-pct': (tuningLockProgress * 100).toFixed(1) + '%',
-    '--reticle-scale': String(1.82 - tuningLockProgress * .98),
+    '--reticle-scale': String(1.48 - tuningLockProgress * .72),
     '--reticle-opacity': String(.42 + tuningLockProgress * .58),
     '--reticle-shadow-alpha': String(.2 + tuningLockProgress * .65),
     '--reticle-ring-opacity': String(.55 + tuningLockProgress * .45),
@@ -822,10 +587,6 @@ function App() {
     '--carrier-glow-size': (3 + tuningLockProgress * 8) + 'px',
     '--carrier-glow-alpha': String(.45 + tuningLockProgress * .5)
   } as React.CSSProperties;
-
-  useEffect(() => {
-    try { localStorage.setItem('signal:visualizer', receiverAnimation); } catch { /* visualizer preference is optional */ }
-  }, [receiverAnimation]);
 
   useEffect(() => {
     try { localStorage.setItem('signal:run:' + dayKey, JSON.stringify(game)); } catch { /* local storage is optional */ }
@@ -1249,8 +1010,6 @@ function App() {
               ))}
             </div>
 
-            <VisualizerPicker value={receiverAnimation} onChange={setReceiverAnimation} />
-
             {game.phase === 'ready' && (
               <div className="ready-view">
                 <div className="receiver-graphic">
@@ -1291,14 +1050,36 @@ function App() {
                         <h2>{tuningHeading}</h2>
                         <p>{tuningCaption}</p>
                       </div>
-                      <div className="signal-screen" data-visualizer={receiverAnimation} style={{ '--reticle-y': tuningSignalPaths.reticleY + '%' } as React.CSSProperties} aria-label="Live receiver signal visualization">
-                        <ReceiverVisualization
-                          mode={receiverAnimation}
-                          paths={tuningSignalPaths}
-                          seed={tuningSignalSeed}
-                          answer={tuningAnswer}
-                          progress={tuningLockProgress}
-                        />
+                      <div className="signal-screen" style={{ '--reticle-x': tuningSignalPaths.reticleX + '%', '--reticle-y': tuningSignalPaths.reticleY + '%' } as React.CSSProperties} aria-label="Live receiver waveform resolving from static">
+                        <div className="signal-screen-grid" />
+                        <div className="signal-static" />
+                        <svg className="signal-traces" viewBox="0 0 720 180" preserveAspectRatio="none" aria-hidden="true">
+                          <path className="signal-centerline" d="M0 90H720" />
+                          <g className="signal-carrier-group">
+                            <path id="signal-live-carrier" className="signal-clean-trace" d={tuningSignalPaths.carrier} />
+                            {tuningAnswer && (
+                              <text className="signal-carrier-word" aria-hidden="true">
+                                <textPath
+                                  href="#signal-live-carrier"
+                                  startOffset="50%"
+                                  textAnchor="middle"
+                                  textLength={Math.min(650, Math.max(44,
+                                    tuningAnswer.replace(/\s/g, '').length * 11.5
+                                    + Math.max(0, tuningAnswer.trim().split(/\s+/).length - 1) * 22
+                                  ))}
+                                  lengthAdjust="spacing"
+                                >{tuningAnswer.toUpperCase()}</textPath>
+                              </text>
+                            )}
+                          </g>
+                        </svg>
+                        <div className="signal-lock-reticle" aria-hidden="true">
+                          <i className="reticle-corner top-left" />
+                          <i className="reticle-corner top-right" />
+                          <i className="reticle-corner bottom-left" />
+                          <i className="reticle-corner bottom-right" />
+                          <b className="reticle-center" />
+                        </div>
                         <span className="signal-screen-label">RF / {receiverFrequency(tuningSignalSeed)} MHZ</span>
                         <span className="signal-screen-state" key={tuningPhase}>{tuningScreenState}</span>
                       </div>
@@ -1411,14 +1192,20 @@ function App() {
                       <div className="signal-result-tier">{currentEntry.tier}</div>
                     </div>
                   </div>
-                  <div className="signal-screen signal-result-screen" data-visualizer={receiverAnimation} style={{ '--reticle-y': (resultSignalPaths?.reticleY ?? 50) + '%' } as React.CSSProperties} aria-label={'Receiver signal quality: ' + currentEntry.score + ' out of 100'}>
-                    <ReceiverVisualization
-                      mode={receiverAnimation}
-                      paths={resultSignalPaths ?? { carrier: '', reticleY: 50 }}
-                      seed={currentEntry.signalSeed ?? 1}
-                      answer={currentEntry.answer}
-                      progress={currentEntry.score / 100}
-                    />
+                  <div className="signal-screen signal-result-screen" style={{ '--reticle-x': (resultSignalPaths?.reticleX ?? 50) + '%', '--reticle-y': (resultSignalPaths?.reticleY ?? 50) + '%' } as React.CSSProperties} aria-label={'Receiver signal quality: ' + currentEntry.score + ' out of 100'}>
+                    <div className="signal-screen-grid" />
+                    <div className="signal-static" />
+                    <svg className="signal-traces" viewBox="0 0 720 180" preserveAspectRatio="none" aria-hidden="true">
+                      <path className="signal-centerline" d="M0 90H720" />
+                      <path className="signal-clean-trace" d={resultSignalPaths?.carrier ?? ''} />
+                    </svg>
+                    <div className="signal-lock-reticle" aria-hidden="true">
+                      <i className="reticle-corner top-left" />
+                      <i className="reticle-corner top-right" />
+                      <i className="reticle-corner bottom-left" />
+                      <i className="reticle-corner bottom-right" />
+                      <b className="reticle-center" />
+                    </div>
                     <span className="signal-screen-label">RF / {receiverFrequency(currentEntry.signalSeed ?? 1)} MHZ</span>
                     <span className="signal-screen-state">{currentEntry.score === 100 ? 'LOCKED' : currentEntry.score >= 85 ? 'NEAR LOCK' : currentEntry.score > 0 ? 'PARTIAL LOCK' : 'NO CARRIER'}</span>
                   </div>
