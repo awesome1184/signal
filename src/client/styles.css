@@ -3443,3 +3443,17 @@ button { user-select:none; }
     transition:none !important;
   }
 }
+
+
+/* Vertically track the carrier at the center of the receiver display. */
+.signal-screen .signal-lock-reticle {
+  top:var(--reticle-y,50%);
+}
+.play-view.tuning-view .signal-screen .signal-lock-reticle {
+  transition:top .24s cubic-bezier(.2,.65,.25,1),transform .22s cubic-bezier(.2,.65,.25,1),opacity .22s ease,filter .22s ease !important;
+}
+@media (prefers-reduced-motion:reduce) {
+  .signal-screen .signal-lock-reticle {
+    transition:none !important;
+  }
+}
