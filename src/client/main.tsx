@@ -940,7 +940,7 @@ function App() {
         </div>
         <div className="top-stats">
           <div className="top-stat date-stat"><span className="eyebrow">TODAY'S TRANSMISSION</span><strong>{dateLabel}</strong></div>
-          <div className="top-stat"><span className="stat-icon flame">✦</span><strong>01</strong><span className="eyebrow">DAILY SCAN</span></div>
+          <div className="top-stat"><span className="stat-icon flame" aria-hidden="true">✦</span><strong>07</strong><span className="eyebrow">PROMPTS</span></div>
           <div className="top-stat"><span className="stat-icon bars">▮▮▮</span><strong>{serverReady ? playerCount.toLocaleString() : '—'}</strong><span className="eyebrow">ON FREQUENCY</span></div>
         </div>
       </header>
@@ -956,10 +956,18 @@ function App() {
           <section className="game-panel scan-hum">
             <div className="panel-scanline" aria-hidden="true" />
             <div className="panel-topline">
-              <div><span className="eyebrow">INCOMING TRANSMISSION</span><div className="panel-title">Today's signal scan</div></div>
+              <div><span className="eyebrow">INCOMING TRANSMISSION</span><div className="panel-title">Today's signal scan</div><span className="panel-subtitle">One answer. Seven chances to stand out.</span></div>
               <div className="round-count"><strong>{String(game.phase === 'complete' ? 7 : game.index + 1).padStart(2, '0')}</strong><span>/ 07</span></div>
             </div>
-            <div className="progress-grid" aria-label={completedPrompts + ' of 7 prompts completed'}>
+            <div
+              className="progress-grid"
+              role="progressbar"
+              aria-label="Daily scan progress"
+              aria-valuemin={0}
+              aria-valuemax={7}
+              aria-valuenow={completedPrompts}
+              aria-valuetext={completedPrompts + ' of 7 prompts completed'}
+            >
               {prompts.map((prompt, index) => (
                 <div key={prompt.id} className={'progress-cell ' + (index < completedPrompts ? 'done' : index === game.index && game.phase !== 'complete' ? 'active' : '')}><span>{String(index + 1).padStart(2, '0')}</span></div>
               ))}
@@ -1065,21 +1073,50 @@ function App() {
                 {!isTuning && <>
                 <div className="question-meta">
                   <span className="channel-label">{currentPrompt.channel}</span>
-                  <div className={'timer-pill ' + (secondsLeft <= 7 ? 'urgent' : '')}><span className="timer-ring"><span /></span><strong>{String(secondsLeft).padStart(2, '0')}</strong><span>SEC</span></div>
+                  <div
+                    className={'timer-pill ' + (secondsLeft <= 7 ? 'urgent' : '')}
+                    role="timer"
+                    aria-label={secondsLeft + ' seconds remaining'}
+                    aria-live={secondsLeft <= 5 ? 'polite' : 'off'}
+                    aria-atomic="true"
+                  ><span className="timer-ring" aria-hidden="true"><span /></span><strong>{String(secondsLeft).padStart(2, '0')}</strong><span>SEC</span></div>
                 </div>
                 <div className="timer-track"><i style={{ width: (secondsLeft / ROUND_SECONDS * 100) + '%' }} /></div>
                 <div className="question-index">TRANSMISSION {String(game.index + 1).padStart(2, '0')}</div>
                 <h1 className="question-text">{currentPrompt.prompt}</h1>
-                <p className="question-context">{currentPrompt.context}</p>
+                <p className="question-context" id="question-context">{currentPrompt.context}</p>
+                <details className="hint-disclosure">
+                  <summary><span>REQUEST FIELD HINT</span><span className="hint-mark" aria-hidden="true">+</span></summary>
+                  <p>{currentPrompt.hint}</p>
+                </details>
                 <form className="answer-form" onSubmit={(event) => { event.preventDefault(); void validateAnswer(currentPrompt, answer); }}>
-                  <label htmlFor="signal-answer">YOUR RESPONSE</label>
+                  <div className="answer-helper-row">
+                    <label htmlFor="signal-answer">YOUR RESPONSE</label>
+                    <span id="answer-counter" className={answerRemaining <= 12 ? 'answer-counter near-limit' : 'answer-counter'}>{answerCharacters}/80</span>
+                  </div>
                   <div className="answer-control">
-                    <input id="signal-answer" value={answer} onChange={(event) => setAnswer(event.target.value)} maxLength={80} autoComplete="off" spellCheck={false} placeholder="Type one answer..." autoFocus disabled={isTuning} />
+                    <input
+                      ref={answerInputRef}
+                      id="signal-answer"
+                      value={answer}
+                      onChange={(event) => { setAnswer(event.target.value); if (message) setMessage(''); }}
+                      maxLength={80}
+                      autoComplete="off"
+                      autoCapitalize="off"
+                      spellCheck={false}
+                      enterKeyHint="send"
+                      aria-label="Your answer"
+                      aria-describedby="question-context answer-counter"
+                      placeholder="Type one answer..."
+                      autoFocus
+                      disabled={isTuning}
+                    />
                     <button type="submit" className="primary-button submit-button" disabled={isTuning}>TRANSMIT <span className="button-arrow">↗</span></button>
                   </div>
+                  <p className="answer-footnote">One answer per transmission. Specific answers can carry a stronger signal.</p>
                 </form>
                 <div className="play-footer"><span><span className="tiny-pulse" /> RECEIVER OPEN</span><button className="text-button" onClick={skipPrompt} disabled={isTuning}>SKIP THIS FREQUENCY</button></div>
-                {message && <div className="inline-message" role="status">{message}</div>}
+                {message && <div className="inline-message" role="status" aria-live="polite">{message}</div>}
                 </>}
               </div>
             )}
@@ -1135,7 +1172,7 @@ function App() {
                     <span className="signal-screen-label">RF / {receiverFrequency(currentEntry.signalSeed ?? 1)} MHZ</span>
                     <span className="signal-screen-state">{currentEntry.score === 100 ? 'LOCKED' : currentEntry.score >= 85 ? 'NEAR LOCK' : currentEntry.score > 0 ? 'PARTIAL LOCK' : 'NO CARRIER'}</span>
                   </div>
-                  <div className="signal-lock-steps" data-phase={currentEntry.score > 0 ? 'locked' : 'failed'} aria-hidden="true">
+                  <div className="signal-lock-steps" data-phase={currentEntry.score > 0 ? 'locked' : 'failed'} aria-label="Signal scan steps: scan, track, lock">
                     <span><i />01 / SCAN</span>
                     <span><i />02 / TRACK</span>
                     <span><i />03 / LOCK</span>
@@ -1159,33 +1196,39 @@ function App() {
                 </div>
                 <p className="signal-result-note">{currentEntry.note}</p>
                 <button className="primary-button next-button" onClick={nextPrompt}>{game.index === 6 ? 'VIEW SCAN REPORT' : 'NEXT TRANSMISSION'} <span className="button-arrow">↗</span></button>
-                {message && <div className="inline-message" role="status">{message}</div>}
+                {message && <div className="inline-message" role="status" aria-live="polite">{message}</div>}
               </div>
             )}
 
             {game.phase === 'complete' && (
               <div className="complete-view">
-                <div className="complete-overline">DAILY SCAN COMPLETE</div>
+                <div className="complete-overline">DAILY SCAN COMPLETE <span>{game.entries.filter((entry) => entry.score > 0).length} SIGNALS RECOVERED</span></div>
                 <h1>{scoreLabel(total)}</h1>
-                <div className="final-score"><strong>{total}</strong><span>/ 700</span></div>
+                <div className="final-score" role="group" aria-label={'Final score ' + total + ' out of 700'}><strong>{total}</strong><span>/ 700</span></div>
                 <p className="complete-subtitle">{total >= 600 ? 'You found some remarkable signals in the noise.' : total >= 300 ? 'A good scan. You heard more than the obvious.' : 'The airwaves were crowded today. Tune in again tomorrow.'}</p>
+                <div className="complete-stat-strip">
+                  <span><strong>{game.entries.filter((entry) => entry.score > 0).length}</strong> SIGNALS FOUND</span>
+                  <span><strong>{game.entries.filter((entry) => entry.score >= 85).length}</strong> DEEP CUTS</span>
+                  <span><strong>{Math.round(total / Math.max(1, game.entries.length))}</strong> AVG / ROUND</span>
+                </div>
                 <div className="result-list">
                   {prompts.map((prompt, index) => {
                     const entry = game.entries[index] ?? { score: 0, tier: 'NO SIGNAL', answer: '' };
                     return <div className="result-row" key={prompt.id}>
-                      <span className="result-number">{String(index + 1).padStart(2, '0')}</span>
+                      <span className="result-number" aria-label={'Prompt ' + (index + 1)}>{String(index + 1).padStart(2, '0')}</span>
                       <span className="result-prompt">{prompt.prompt}</span>
-                      <span className="result-answer">{entry.answer || '—'}</span>
-                      <strong className={entry.score >= 60 ? 'rare-score' : ''}>{entry.score}</strong>
+                      <span className="result-answer" title={entry.answer || 'No answer'}>{entry.answer || '—'}</span>
+                      <span className="result-tier">{entry.tier ?? 'NO SIGNAL'}</span>
+                      <strong className={entry.score >= 60 ? 'rare-score' : ''} aria-label={entry.score + ' points'}>{entry.score}</strong>
                     </div>;
                   })}
                 </div>
                 <div className="complete-actions">
-                  <button className="primary-button" onClick={() => void copyResult()}>{copied ? 'COPIED' : 'COPY RESULT'} <span className="button-arrow">↗</span></button>
+                  <button className="primary-button" onClick={() => void copyResult()} aria-label="Copy your complete daily result">{copied ? 'RESULT COPIED' : 'COPY FULL RESULT'} <span className="button-arrow">↗</span></button>
                   {DEMO_MODE && <button className="secondary-button" onClick={resetPreview}>RESET LOCAL PREVIEW</button>}
                 </div>
                 <p className="fine-print">{game.isTest ? 'TEST RUN · RESULTS ARE NOT SAVED TO THE COMMUNITY BOARD' : 'A new set of transmissions arrives at midnight Eastern.'}</p>
-                {message && <div className="inline-message" role="status">{message}</div>}
+                {message && <div className="inline-message" role="status" aria-live="polite">{message}</div>}
               </div>
             )}
           </section>
