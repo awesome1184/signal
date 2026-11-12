@@ -16,16 +16,46 @@ function buildReceiverPaths(seed: number, score: number): ReceiverPaths {
     state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
     return state / 4294967296;
   };
-  const cycles = 3 + Math.floor(random() * 6);
+  const cycles = 2.5 + random() * 5.5;
   const phase = random() * Math.PI * 2;
   const harmonicPhase = random() * Math.PI * 2;
-  const harmonic = .08 + random() * .24;
+  const modulationPhase = random() * Math.PI * 2;
+  const harmonic = .12 + random() * .38;
+  const duty = .24 + random() * .48;
+  const sharpness = 1.8 + random() * 5;
+  const profile = Math.floor(random() * 6);
   const amplitude = 9 + Math.max(0, Math.min(100, score)) * .31;
   const carrierPoints = Array.from({ length: 73 }, (_, index) => {
     const x = index * 10;
-    const angle = phase + (index / 72) * cycles * Math.PI * 2;
-    const y = 90 - amplitude * (Math.sin(angle) + harmonic * Math.sin(angle * 2 + harmonicPhase));
-    return { x, y: Math.max(16, Math.min(164, y)) };
+    const turns = phase / (Math.PI * 2) + (index / 72) * cycles;
+    const angle = turns * Math.PI * 2;
+    const position = turns - Math.floor(turns);
+    const sine = Math.sin(angle);
+    let wave: number;
+    switch (profile) {
+      case 0: // layered analog carrier
+        wave = sine + harmonic * Math.sin(angle * 2 + harmonicPhase) + .12 * Math.sin(angle * 3.1 + modulationPhase);
+        break;
+      case 1: // triangular carrier
+        wave = 1 - 4 * Math.abs(position - .5);
+        wave += harmonic * Math.sin(angle * 2 + harmonicPhase);
+        break;
+      case 2: // clipped digital pulse
+        wave = Math.tanh(sine * sharpness) + .1 * Math.sin(angle * 3 + modulationPhase);
+        break;
+      case 3: // asymmetric sawtooth
+        wave = (2 * position - 1) * .82 + .18 * Math.sin(angle * 2 + harmonicPhase);
+        break;
+      case 4: // frequency-modulated carrier
+        wave = Math.sin(angle + .85 * Math.sin(angle * .47 + modulationPhase)) + harmonic * Math.sin(angle * 2.35 + harmonicPhase);
+        break;
+      default: // uneven burst carrier
+        wave = sine * (.58 + .42 * Math.sin(angle * .5 + modulationPhase)) + harmonic * Math.sin(angle * 2.7 + harmonicPhase);
+        break;
+    }
+    const jitter = (random() - .5) * (.08 + (1 - score / 100) * .18);
+    const y = 90 - amplitude * (wave + jitter);
+    return { x, y: Math.max(12, Math.min(168, y)) };
   });
   const carrier = carrierPoints.map((point, index) => `${index ? 'L' : 'M'}${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(' ');
   const noisePoints = Array.from({ length: 55 }, (_, index) => ({
@@ -376,13 +406,15 @@ function App() {
         await animateScore(lockingTarget, 100, duration * (perfect ? .14 : .10));
 
         if (nearMiss) {
-          await wait(duration * .07);
+          // Hold the apparent perfect lock long enough for the player to believe it.
+          await wait(Math.max(720, duration * .18));
           setTuningPhase('slipping');
           setTuningStatus('CARRIER DRIFT // PERFECT LOCK LOST');
-          await animateScore(100, score, duration * .10);
+          // Let the counter and reticle drift down together instead of snapping back.
+          await animateScore(100, score, Math.max(900, duration * .22));
           setTuningPhase('locked');
           setTuningStatus('NEAR-PERFECT // RESIDUAL CARRIER DRIFT');
-          await wait(duration * .09);
+          await wait(Math.max(420, duration * .10));
         } else {
           setTuningPhase('locked');
           setTuningStatus('100% CARRIER // SIGNAL FULLY ACQUIRED');
