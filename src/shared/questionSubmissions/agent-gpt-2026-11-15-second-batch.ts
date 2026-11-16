@@ -17,7 +17,7 @@ export const QUESTION_SUBMISSIONS_BATCH_2: Prompt[] = [
     channel: 'VOLCANO ATLAS',
     prompt: 'Name a volcano listed in the Smithsonian Global Volcanism Program Holocene Volcano List.',
     context: 'The answer must be a named volcanic feature in the Smithsonian Global Volcanism Program Holocene list. This includes volcanoes with observed, dated, credible, or otherwise recorded Holocene evidence; it does not require a currently erupting volcano. Use the catalogue name or an unambiguous recognized alias.',
-    hint: 'The catalogue includes well-known mountains, volcanic fields, islands, and submarine volcanoes.'
+    hint: 'Familiar examples include Mount Fuji, Mount Etna, Kilauea, and Mount Vesuvius.'
   },
   {
     id: 'solar-system-moon',
@@ -38,7 +38,7 @@ export const QUESTION_SUBMISSIONS_BATCH_2: Prompt[] = [
     channel: 'CANADIAN PARKS',
     prompt: 'Name a national park or national park reserve in Canada.',
     context: 'The answer must be a site formally designated as a national park or national park reserve in Canada and listed by Parks Canada. National historic sites, provincial parks, marine conservation areas, and proposed parks do not count unless the named site also has national park or reserve status.',
-    hint: 'Parks Canada protects landscapes from the Arctic to the Atlantic and Pacific coasts.'
+    hint: 'Banff and Jasper are two famous examples; the list also includes parks in every Canadian region.'
   },
   {
     id: 'pokemon-species',
