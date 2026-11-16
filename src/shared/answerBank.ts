@@ -240,12 +240,11 @@ export function getAnswerEntries(): AnswerEntry[] {
   return [...unique.values()];
 }
 
-export function evaluateAnswer(promptId: string, rawAnswer: string, selectedAnswerId?: string): AnswerResult | null {
+export function evaluateAnswer(promptId: string, rawAnswer: string): AnswerResult | null {
   const answer = normalizeAnswer(rawAnswer);
   if (!answer) return null;
   const match = (BANK[promptId] ?? []).find((record) =>
-    (!selectedAnswerId || answerRecordId(promptId, record) === selectedAnswerId)
-    && record.aliases.some((alias) => normalizeAnswer(alias) === answer)
+    record.aliases.some((alias) => normalizeAnswer(alias) === answer)
   );
   return match ? {
     score: match.score,
@@ -255,10 +254,7 @@ export function evaluateAnswer(promptId: string, rawAnswer: string, selectedAnsw
   } : null;
 }
 
-export function getTestAnswer(promptId: string, score: number, selectedAnswerId?: string): string | null {
-  const record = (BANK[promptId] ?? []).find((candidate) =>
-    candidate.score === score
-    && (!selectedAnswerId || answerRecordId(promptId, candidate) === selectedAnswerId)
-  );
+export function getTestAnswer(promptId: string, score: number): string | null {
+  const record = (BANK[promptId] ?? []).find((candidate) => candidate.score === score);
   return record?.aliases[0] ?? null;
 }
