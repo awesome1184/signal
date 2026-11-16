@@ -176,13 +176,14 @@ export const ANSWER_SUBMISSIONS_BATCH_2: Record<string, AnswerRecord[]> = {
     ]},
     { score: 60, tier: 'RARE', note: 'A less commonly named national park or national park reserve listed by Parks Canada.', names: [
       'Ivvavik National Park', 'Vuntut National Park', 'Wapusk National Park',
+      ['Kejimkujik National Park and National Historic Site', 'Kejimkujik National Park'],
       'Sirmilik National Park', 'Quttinirpaaq National Park',
       'Qausuittuq National Park', 'Ukkusiksalik National Park',
       'Torngat Mountains National Park', 'Nahanni National Park Reserve',
       'Mingan Archipelago National Park Reserve'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A remote or less familiar Parks Canada national park reserve.', names: [
-      'Gulf Islands National Park Reserve', 'Gwaii Haanas National Park Reserve',
+      'Gulf Islands National Park Reserve', ['Gwaii Haanas National Park Reserve', 'Gwaii Haanas National Park Reserve, National Marine Conservation Area Reserve, and Haida Heritage Site'],
       'Kluane National Park and Reserve', 'Sable Island National Park Reserve',
       'Thousand Islands National Park', 'Nááts’įhch’oh National Park Reserve',
       'Tuktut Nogait National Park', 'Akami-Uapishkᵁ-KakKasuak-Mealy Mountains National Park Reserve'
