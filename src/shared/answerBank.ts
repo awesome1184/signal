@@ -66,7 +66,7 @@ const BASE_BANK: Record<string, AnswerRecord[]> = {
     { aliases: ['car stereo'], score: 15, tier: 'FAMILIAR', note: 'A radio receiver built into a vehicle.' },
     { aliases: ['radio scanner', 'scanner'], score: 30, tier: 'UNCOMMON', note: 'A receiver that searches across radio frequencies.' },
     { aliases: ['crystal radio', 'crystal set', 'crystal receiver'], score: 60, tier: 'RARE', note: 'An early receiver that can work without a battery.' },
-    { aliases: ['software defined radio', 'software-defined radio', 'sdr'], score: 85, tier: 'DEEP CUT', note: 'A receiver that uses software to process radio signals.' },
+    { aliases: ['software defined radio', 'sdr'], score: 85, tier: 'DEEP CUT', note: 'A receiver that uses software to process radio signals.' },
     { aliases: ['coherer'], score: 100, tier: 'SIGNAL FOUND', note: 'An early radio-wave detector used in wireless receivers.' }
   ],
   'night-wait': [
@@ -132,7 +132,7 @@ const BASE_BANK: Record<string, AnswerRecord[]> = {
     { aliases: ['multipath', 'multipath propagation', 'multipath interference'], score: 30, tier: 'UNCOMMON', note: 'A signal arrives by multiple paths and interferes with itself.' },
     { aliases: ['ionosphere'], score: 60, tier: 'RARE', note: 'Changes in the ionosphere can alter radio propagation.' },
     { aliases: ['tropospheric ducting', 'tropospheric propagation'], score: 85, tier: 'DEEP CUT', note: 'Atmospheric layers can trap and carry radio waves unusually far.' },
-    { aliases: ['sporadic e', 'sporadic-e'], score: 100, tier: 'SIGNAL FOUND', note: 'Intense ionization can unexpectedly alter VHF propagation.' }
+    { aliases: ['sporadic e'], score: 100, tier: 'SIGNAL FOUND', note: 'Intense ionization can unexpectedly alter VHF propagation.' }
   ],
   'meteorite-feature': [
     { aliases: ['iron'], score: 10, tier: 'BACKGROUND', note: 'Iron is common in many meteorites.' },
