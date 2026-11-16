@@ -849,7 +849,9 @@ function App() {
   }, [dayKey]);
 
   useEffect(() => {
-    if (game.phase === 'playing' && !isTuning) answerInputRef.current?.focus({ preventScroll: true });
+    if (game.phase !== 'playing' || isTuning) return;
+    if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) return;
+    answerInputRef.current?.focus({ preventScroll: true });
   }, [game.phase, game.index, isTuning]);
 
   useEffect(() => {
@@ -1192,7 +1194,7 @@ function App() {
       ...rows,
       '',
       'Find the signal in the noise.'
-    ].filter((line) => line !== '').join('\n');
+    ].join('\n');
     try {
       if (typeof navigator.share === 'function') {
         await navigator.share({ title: 'SIGNAL // Daily scan', text: shareText });
@@ -1459,7 +1461,6 @@ function App() {
                       aria-label="Your answer"
                       aria-describedby="question-context answer-counter"
                       placeholder="Type one answer..."
-                      autoFocus
                       disabled={isTuning}
                     />
                     <button type="submit" className="primary-button submit-button" disabled={isTuning}>TRANSMIT <span className="button-arrow">↗</span></button>
