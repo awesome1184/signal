@@ -12,11 +12,14 @@ SIGNAL is an original daily open-answer game for Reddit, built with Devvit Web. 
 - Six score tiers: 10, 15, 30, 60, 85, and 100 points.
 - 700-point maximum daily score.
 - One saved result per Reddit account per day.
-- Redis-backed, subreddit-scoped leaderboard.
-- Local browser preview with a sample answer catalog and sample leaderboard.
+- Redis-backed, subreddit-scoped leaderboard and shared daily content rotation.
+- Seven randomly selected, never-before-used questions per day.
+- Archive fallback that uses distinct answer entries not selected during the previous seven days once the unused question pool is exhausted.
+- New questions remain inactive until at least one accepted answer is added to their answer bank.
+- Local browser preview with a sample leaderboard and localStorage-backed simulation of the same content rotation.
 - Separate compact Reddit post launch screen and expanded game.
 
-The current prototype has three seven-prompt sets, so the set rotation repeats every three days. The field catalog is a deliberately small first pass; it needs more daily content, broader synonym coverage, and editorial review before public launch. The Pages preview is for checking the UI and core round flow; its sample leaderboard and local saves are not shared with Reddit.
+The initial question and answer catalogs are deliberately small. As new question IDs and answer records are committed, they automatically become eligible for future daily rotations. The Devvit server stores permanent question usage and recent answer usage in Redis; the Pages/Codespaces preview simulates that history locally in the browser, so preview rotations are not shared with Reddit.
 
 ## Run the browser preview in GitHub Codespaces
 
@@ -48,7 +51,9 @@ The Codespaces preview works without changing repository visibility or enabling 
 
 ## Daily game rules
 
-- The daily set contains seven shared prompts.
+- The daily set contains seven shared prompts selected once for the entire subreddit installation.
+- Questions are not repeated until the approved question pool is exhausted.
+- Archive fallback uses one randomly selected answer per transmission and avoids answers selected in the preceding seven days whenever enough unused answers remain.
 - Each prompt has a 25-second answer window.
 - One accepted answer is scored per prompt.
 - Answers are checked against the current field catalog.
