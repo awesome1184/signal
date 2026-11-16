@@ -166,7 +166,7 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
       'Crepitation', 'Purl'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'An uncommon literary or technical sound word.', names: [
-      'Murmuration', 'Purl'
+      'Murmuration', 'Croon'
     ]}
   ),
 
