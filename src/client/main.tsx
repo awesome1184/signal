@@ -770,7 +770,7 @@ function App() {
   const [tuningScore, setTuningScore] = useState<number | null>(null);
   const [tuningDisplayScore, setTuningDisplayScore] = useState(0);
   const [tuningSignalSeed, setTuningSignalSeed] = useState(() => Math.floor(Math.random() * 0xffffffff) || 1);
-  const [tuningDuration, setTuningDuration] = useState(900);
+  const [tuningDuration, setTuningDuration] = useState(1700);
   const [tuningStatus, setTuningStatus] = useState('CAPTURING INPUT // SCANNING NOISE');
   const [tuningPhase, setTuningPhase] = useState<TuningPhase>('searching');
 
@@ -820,19 +820,6 @@ function App() {
     : tuningPhase === 'locked' && (tuningScore ?? 0) >= 60 ? 'PARTIAL LOCK'
     : tuningPhase === 'locked' ? 'WEAK LOCK'
     : 'NO CARRIER';
-  const tuningCaption = tuningPhase === 'surging' && tuningScore === 100
-    ? 'Carrier strength is breaking clean through the noise floor.'
-    : tuningPhase === 'surging' && (tuningScore ?? 0) >= 85
-      ? 'Full-strength carrier. Perfect lock confirmed.'
-      : tuningPhase === 'slipping'
-        ? 'A phase offset pulls the carrier outside the receiver window.'
-         : tuningPhase === 'recovering'
-           ? 'The receiver is compensating for the drift. A trace of interference remains.'
-        : tuningPhase === 'locked' && tuningScore === 100
-          ? 'Perfect acquisition. No interference detected.'
-          : tuningPhase === 'locked' && (tuningScore ?? 0) >= 85
-            ? 'Near-perfect acquisition. A trace of interference remains.'
-            : 'Separating the carrier from the noise floor.';
   const tuningNoiseFinal = tuningScore === null ? 1 : Math.max(.025, 1 - tuningScore / 100 * .975);
   const tuningWaveFinal = tuningScore === null ? .02 : Math.max(.08, tuningScore / 100);
   const tuningChaosFinal = tuningScore === null ? .95 : Math.max(.03, .95 - tuningScore / 100 * .92);
@@ -1050,13 +1037,13 @@ function App() {
     submittingRef.current = true;
     const signalSeed = Math.floor(Math.random() * 0xffffffff) || 1;
     setTuningSignalSeed(signalSeed); setTuningAnswer(clean); setTuningScore(null);
-    setTuningDisplayScore(0); setTuningDuration(900); setReceiverPhase('searching', 0);
+    setTuningDisplayScore(0); setTuningDuration(1700); setReceiverPhase('searching', 0);
     setTuningStatus('CAPTURING INPUT // SCANNING NOISE'); setIsTuning(true); setMessage('');
     const wait = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
     const animateFailure = async (status: string) => {
-      setTuningScore(0); setTuningDisplayScore(0); setTuningDuration(450);
+      setTuningScore(0); setTuningDisplayScore(0); setTuningDuration(900);
       setReceiverPhase('failed', 0); setTuningStatus(status);
-      if (!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) await wait(450);
+      if (!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) await wait(750);
     };
     const animateCapture = async (score: number) => {
       setTuningScore(score);
@@ -1065,9 +1052,9 @@ function App() {
         setTuningStatus(score === 100 ? 'SIGNAL FOUND // PERFECT LOCK' : 'CARRIER ACQUIRED // RESULT CONFIRMED');
         return;
       }
-      setTuningDisplayScore(0); setTuningDuration(1750);
+      setTuningDisplayScore(0); setTuningDuration(3600);
       const animateScore = async (from: number, to: number, ms: number) => {
-        const steps = Math.max(1, Math.ceil(ms / 55));
+        const steps = Math.max(1, Math.ceil(ms / 70));
         for (let step = 1; step <= steps; step++) {
           await wait(ms / steps);
           setTuningDisplayScore(Math.round(from + (to - from) * (step / steps)));
@@ -1075,18 +1062,18 @@ function App() {
       };
       const midpoint = Math.round(score * .56);
       setReceiverPhase('tracking', score); setTuningStatus('CARRIER DETECTED // TRACKING FREQUENCY');
-      await animateScore(0, midpoint, 560);
+      await animateScore(0, midpoint, 1250);
       setReceiverPhase('locking', score);
       setTuningStatus(score >= 85 ? 'FREQUENCY CENTERED // FINAL LOCK' : 'ALIGNING CARRIER // REDUCING INTERFERENCE');
-      await animateScore(midpoint, score, 650);
+      await animateScore(midpoint, score, 1500);
       if (score >= 85 && score < 100) {
         setReceiverPhase('slipping', score); setTuningStatus('NEAR LOCK // A TRACE OF DRIFT REMAINS');
-        await wait(230); setReceiverPhase('recovering', score);
-        setTuningStatus('AUTO-CORRECTION // FINAL ALIGNMENT'); await wait(210);
+        await wait(420); setReceiverPhase('recovering', score);
+        setTuningStatus('AUTO-CORRECTION // FINAL ALIGNMENT'); await wait(350);
       }
       setReceiverPhase('locked', score);
       setTuningStatus(score === 100 ? '100% CARRIER // PERFECT LOCK' : 'CARRIER ACQUIRED // RESULT CONFIRMED');
-      setTuningDisplayScore(score); await wait(180);
+      setTuningDisplayScore(score); await wait(300);
     };
     try {
       let result: { score: number; tier: string; note: string } | null = null;
@@ -1481,8 +1468,7 @@ function App() {
                       <div className="signal-capture-copy" key={tuningPhase}>
                         <div className="signal-capture-kicker">TRANSMISSION ANALYSIS</div>
                         <h2>{tuningHeading}</h2>
-                        <p>{tuningCaption}</p>
-                      </div>
+                            </div>
                       <div className="signal-screen" style={{ '--reticle-x': tuningSignalPaths.reticleX + '%', '--reticle-y': tuningSignalPaths.reticleY + '%' } as React.CSSProperties} aria-label="Live receiver waveform resolving from static">
                         <div className="signal-screen-grid" />
                         <div className="signal-static" />
@@ -1644,7 +1630,6 @@ function App() {
                     <div className="signal-capture-copy">
                       <div className="signal-capture-kicker">TRANSMISSION {String(game.index + 1).padStart(2, '0')} / ACQUISITION REPORT</div>
                       <h2 ref={revealHeadingRef} tabIndex={-1}>{currentEntry.score === 100 ? 'SIGNAL LOCKED' : currentEntry.score >= 85 ? 'SIGNAL ALMOST LOCKED' : currentEntry.score > 0 ? 'PARTIAL SIGNAL LOCK' : 'NO SIGNAL'}</h2>
-                      <p>{currentEntry.score === 100 ? 'Perfect carrier. The noise floor has been eliminated.' : currentEntry.score >= 85 ? 'It looked perfect for a moment. A final trace of drift kept the carrier just shy of a flawless lock.' : currentEntry.score >= 60 ? 'A stable carrier recovered from the interference.' : currentEntry.score > 0 ? 'A weak carrier recovered. Interference remains.' : 'No stable carrier could be recovered.'}</p>
                     </div>
                     <div className="signal-result-score">
                       <span>POINTS RECOVERED</span>
@@ -1693,7 +1678,6 @@ function App() {
                   </div>
                   <div className="signal-capture-status"><i /><span>{currentEntry.score === 100 ? '100% CARRIER // LOCK CONFIRMED' : currentEntry.score >= 85 ? 'NEAR-PERFECT // FINAL CARRIER DRIFT' : currentEntry.score > 0 ? 'CARRIER STABLE // RESULT RECORDED' : 'NO CARRIER // TRANSMISSION CLOSED'}</span></div>
                 </div>
-                <p className="signal-result-note">{currentEntry.note}</p>
                 <button className="primary-button next-button" onClick={nextPrompt}>{game.index === 6 ? 'VIEW SCAN REPORT' : 'NEXT QUESTION'} <span className="button-arrow">↗</span></button>
                 {message && <div className="inline-message" role="status" aria-live="polite">{message}</div>}
                 {message && !lastUnmatchedAnswer && !DEMO_MODE && /(offline|could not|retry|refresh|sync|network|fetch)/i.test(message) && (
@@ -1707,7 +1691,6 @@ function App() {
                 <div className="complete-overline">DAILY SCAN COMPLETE <span>{game.entries.filter((entry) => entry.score > 0).length} SIGNALS RECOVERED · PLAYER {playerName}</span></div>
                 <h1 ref={completeHeadingRef} tabIndex={-1}>{scoreLabel(total)}</h1>
                 <div className="final-score" role="group" aria-label={'Final score ' + total + ' out of 700'}><strong>{total}</strong><span>/ 700</span></div>
-                <p className="complete-subtitle">{total >= 600 ? 'You found some remarkable signals in the noise.' : total >= 300 ? 'A good scan. You heard more than the obvious.' : 'The airwaves were crowded today. Tune in again tomorrow.'}</p>
                 <p className="scoring-explainer">Your score is based on the catalog rarity of your accepted answers. Maximum: 700 points.</p>
                 <div className="complete-stat-strip">
                   <span><strong>{game.entries.filter((entry) => entry.score > 0).length}</strong> SIGNALS FOUND</span>
