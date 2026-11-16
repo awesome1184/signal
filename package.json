@@ -8,7 +8,7 @@
     "build": "vite build",
     "build:pages": "vite build --config vite.pages.config.ts --mode pages",
     "web:dev": "vite --config vite.pages.config.ts --mode pages --base / --host 0.0.0.0",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.server.json",
     "preflight": "npm run typecheck && npm run build",
     "upload": "npm run typecheck && devvit upload",
     "playtest": "devvit playtest"

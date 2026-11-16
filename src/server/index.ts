@@ -187,7 +187,7 @@ app.post('/api/start', async (c) => {
   const saved = await redis.hGet(resultsKey(day), userId);
   if (saved) return c.json({ ok: true, completed: true, result: JSON.parse(saved) });
 
-  const created = await mutatePlayerRun(day, userId, (current) => {
+  const created = await mutatePlayerRun<'existing' | 'started'>(day, userId, (current) => {
     if (current) return { write: false, value: 'existing' as const };
     const now = Date.now();
     const run: PlayerRun = {
@@ -234,7 +234,14 @@ app.post('/api/check-answer', async (c) => {
   }
   if (!userId) return c.json({ ok: false, valid: false, message: 'Sign in to submit a daily answer.' }, 401);
 
-  const outcome = await mutatePlayerRun(getNewYorkDateKey(), userId, (current) => {
+  type CheckOutcome =
+    | { kind: 'stale' }
+    | { kind: 'expired' }
+    | { kind: 'limit'; attemptsRemaining: number }
+    | { kind: 'fast'; attemptsRemaining: number }
+    | { kind: 'accepted'; result: { score: number; tier: string; note: string } }
+    | { kind: 'rejected'; attemptsRemaining: number };
+  const outcome = await mutatePlayerRun<CheckOutcome>(getNewYorkDateKey(), userId, (current) => {
     if (!current || current.phase !== 'playing' || current.index !== selectedIndex
       || daily.prompts[current.index]?.id !== promptId) {
       return { write: false, value: { kind: 'stale' as const } };
@@ -319,7 +326,7 @@ app.post('/api/skip', async (c) => {
   const selectedIndex = daily.prompts.findIndex((prompt) => prompt.id === promptId);
   if (selectedIndex < 0) return c.json({ ok: false, message: 'Unknown transmission.' }, 400);
 
-  const outcome = await mutatePlayerRun(day, userId, (current) => {
+  const outcome = await mutatePlayerRun<'stale' | 'early' | 'ok'>(day, userId, (current) => {
     if (!current || current.phase !== 'playing' || current.index !== selectedIndex) {
       return { write: false, value: 'stale' as const };
     }
@@ -352,7 +359,7 @@ app.post('/api/next', async (c) => {
   if (!userId) return c.json({ ok: false, message: 'Sign in to continue the daily scan.' }, 401);
   const day = getNewYorkDateKey();
   const username = displayName(await reddit.getCurrentUsername());
-  const outcome = await mutatePlayerRun(day, userId, (current) => {
+  const outcome = await mutatePlayerRun<'missing' | 'complete' | 'not-ready' | 'next'>(day, userId, (current) => {
     if (!current) return { write: false, value: 'missing' as const };
     if (current.phase === 'complete') return { write: false, value: 'complete' as const };
     if (current.phase !== 'reveal') return { write: false, value: 'not-ready' as const };
