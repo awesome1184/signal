@@ -1038,8 +1038,8 @@ function App() {
     submittingRef.current = true;
     const signalSeed = Math.floor(Math.random() * 0xffffffff) || 1;
     setTuningSignalSeed(signalSeed); setTuningAnswer(clean); setTuningScore(null); setTuningTier('');
-    setTuningDisplayScore(0); setTuningDuration(1700); setReceiverPhase('searching', 0);
-    setTuningStatus('CAPTURING INPUT // SCANNING NOISE'); setIsTuning(true); setMessage('');
+    setTuningDisplayScore(0); setTuningDuration(5600); setReceiverPhase('searching', 0);
+    setTuningStatus('CAPTURING INPUT // SCANNING STATIC'); setIsTuning(true); setMessage('');
     const wait = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
     const animateFailure = async (status: string) => {
       setTuningTier(status.startsWith('NO MATCH') ? 'NO MATCH' : 'NO SIGNAL');
@@ -1055,8 +1055,8 @@ function App() {
         return;
       }
 
-      // Give the answer a full dive-and-scan sequence before revealing its rarity.
-      setTuningDisplayScore(0); setTuningDuration(5600);
+      // Let the observatory receiver track and resolve the carrier before revealing its rarity.
+      setTuningDisplayScore(0); setTuningDuration(score >= 85 && score < 100 ? 6500 : 5600);
       const animateScore = async (from: number, to: number, ms: number) => {
         const steps = Math.max(1, Math.ceil(ms / 70));
         for (let step = 1; step <= steps; step++) {
@@ -1070,7 +1070,7 @@ function App() {
       await wait(1900);
 
       setReceiverPhase('locking', score);
-      setTuningStatus('SONAR SWEEP // RESOLVING CARRIER');
+      setTuningStatus('RECEIVER SWEEP // PHASE ALIGNMENT');
       await wait(1900);
 
       if (score >= 85 && score < 100) {
@@ -1404,7 +1404,7 @@ function App() {
             {!DEMO_MODE && serverReady && <span className="preview-chip connected">REDDIT LINK ACTIVE</span>}
           </div>
 
-          <section className={'game-panel scan-hum phase-' + game.phase + ' ' + (game.phase === 'playing' ? 'active-round' : '') + (isTuning ? ' answer-dive-active' : '')}>
+          <section className={'game-panel scan-hum phase-' + game.phase + ' ' + (game.phase === 'playing' ? 'active-round' : '')}>
             <div className="panel-scanline" aria-hidden="true" />
             <div className="panel-topline">
               <div><span className="eyebrow">INCOMING TRANSMISSION</span><div className="panel-title">Today's signal scan</div><span className="panel-subtitle">One answer. Seven chances to stand out.</span></div>
@@ -1468,40 +1468,77 @@ function App() {
                 {isTuning && (
                   <div className={'signal-capture-overlay ' + ((tuningScore ?? 0) >= 85 ? 'perfect-capture' : '')}>
                     <div
-                      className="signal-capture"
+                      className="signal-capture signal-live-capture"
                       key={tuningScore === null ? 'searching' : 'score-' + tuningScore}
                       data-grade={tuningGrade}
                       data-phase={tuningPhase}
                       data-wave-style={waveStyle}
                       style={tuningCaptureStyle}
                     >
-                      <div className="signal-dive-hud">
-                        <div className="signal-dive-total">
-                          <span>RUN TOTAL</span>
-                          <strong>{total + (tuningPhase === 'locked' ? tuningDisplayScore : 0)}</strong>
+                      <div className="signal-capture-head">
+                        <span className="signal-station"><i /> MT. AURORA / RECEIVER 07</span>
+                        <span className="signal-input-state">RF / {receiverFrequency(tuningSignalSeed)} MHZ</span>
+                      </div>
+                      <div className="signal-capture-copy">
+                        <div className="signal-capture-kicker">TRANSMISSION {String(game.index + 1).padStart(2, '0')} / LIVE ACQUISITION</div>
+                        <h2>{tuningHeading}</h2>
+                        <p>{tuningInputLabel}</p>
+                      </div>
+                      <div
+                        className="signal-screen signal-live-screen"
+                        style={{
+                          '--reticle-x': tuningSignalPaths.reticleX + '%',
+                          '--reticle-y': tuningSignalPaths.reticleY + '%'
+                        } as React.CSSProperties}
+                        aria-label="SIGNAL receiver waveform acquisition"
+                      >
+                        <div className="signal-screen-grid" />
+                        <div className="signal-static" />
+                        <svg className="signal-traces" viewBox="0 0 720 180" preserveAspectRatio="none" aria-hidden="true">
+                          <path className="signal-centerline" d="M0 90H720" />
+                          <path className="signal-clean-trace" d={tuningSignalPaths.carrier} />
+                        </svg>
+                        <ReceiverModeOverlay mode={waveStyle} />
+                        <div className="signal-lock-reticle" aria-hidden="true">
+                          <i className="reticle-corner top-left" />
+                          <i className="reticle-corner top-right" />
+                          <i className="reticle-corner bottom-left" />
+                          <i className="reticle-corner bottom-right" />
+                          <b className="reticle-center" />
                         </div>
-                        <div className="signal-dive-progress">
-                          <div>{Array.from({ length: 7 }, (_, index) => <i key={index} className={index < game.index ? 'done' : index === game.index ? 'current' : ''} />)}</div>
-                          <span>TRANSMISSION {String(game.index + 1).padStart(2, '0')} / 07</span>
+                        <div className="signal-lock-flare" aria-hidden="true" />
+                        <div className="signal-scanbeam" aria-hidden="true" />
+                        <span className="signal-screen-label">CARRIER / LIVE PHASE</span>
+                        <span className="signal-screen-state">{tuningScreenState}</span>
+                      </div>
+                      <div className="signal-capture-readout">
+                        <div className="signal-answer-readout">
+                          <span>DECODED RESPONSE</span>
+                          <strong className="signal-live-answer">{tuningAnswer}</strong>
                         </div>
-                        <div className="signal-dive-award">
-                          <span>ANSWER VALUE</span>
-                          <strong>{tuningPhase === 'locked' ? '+' + tuningDisplayScore : '—'}</strong>
+                        <div className="signal-score-readout">
+                          <span>RECOVERED POINTS</span>
+                          <strong>{tuningPhase === 'locked' ? '+' + tuningDisplayScore : tuningPhase === 'failed' ? '0' : '—'}</strong>
+                          <small>/ 100</small>
                         </div>
                       </div>
-                      <div className="signal-dive-scene" aria-label="Underwater sonar answer reveal">
-                        <div className="signal-dive-water" />
-                        <div className="signal-dive-plant signal-dive-plant-left"><i /><i /><i /><i /></div>
-                        <div className="signal-dive-plant signal-dive-plant-right"><i /><i /><i /><i /></div>
-                        <div className="signal-dive-bubbles" aria-hidden="true" />
-                        <div className="signal-dive-sonar-line" aria-hidden="true" />
-                        <div className="signal-answer-marker">{tuningAnswer.toUpperCase()}</div>
-                        <div className="signal-grade-reveal" data-phase={tuningPhase} aria-live="polite">
-                          <span>{tuningTier ? tuningTier.toUpperCase() : 'SCANNING'}</span>
-                          <em>{tuningAnswer}</em>
-                          <strong>{tuningPhase === 'locked' ? '+' + tuningDisplayScore : tuningPhase === 'failed' ? '0' : '—'}<small> POINTS</small></strong>
-                        </div>
+                      <div className="signal-lock-steps" data-phase={tuningPhase === 'failed' ? 'failed' : tuningPhase === 'locked' ? 'locked' : tuningPhase}>
+                        <span><i />01 / SCAN</span>
+                        <span><i />02 / TRACK</span>
+                        <span><i />03 / LOCK</span>
                       </div>
+                      <div className="signal-quality-row">
+                        <span>ACQUISITION QUALITY</span>
+                        <div className="signal-quality-track"><i /></div>
+                        <strong>{tuningPhase === 'locked' ? tuningDisplayScore : tuningPhase === 'failed' ? 0 : '—'}%</strong>
+                      </div>
+                      {(tuningPhase === 'locked' || tuningPhase === 'failed') && (
+                        <div className={'signal-live-grade ' + (tuningPhase === 'failed' ? 'failed' : '')} aria-live="polite">
+                          <span>RARITY CLASSIFIED</span>
+                          <strong>{tuningTier.toUpperCase()}</strong>
+                        </div>
+                      )}
+                      <div className="signal-capture-status"><i /><span>{tuningStatus}</span></div>
                     </div>
                   </div>
                 )}
