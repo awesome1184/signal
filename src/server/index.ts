@@ -171,7 +171,7 @@ app.get('/api/bootstrap', async (c) => {
   }
   let run: PlayerRun | null = null;
   if (userId !== null) {
-    run = parsePlayerRun(await redis.get(runKey(day, userId)));
+    run = parsePlayerRun((await redis.get(runKey(day, userId))) ?? null);
   }
   if (!result && run?.phase === 'complete' && userId) {
     result = await storeCompletedResult(day, userId, username, run);
@@ -423,7 +423,7 @@ app.post('/api/report-answer', async (c) => {
   const answer = typeof body.answer === 'string' ? body.answer.trim() : '';
   if (!answer || answer.length > 80) return c.json({ ok: false, message: 'Enter an answer of 80 characters or fewer.' }, 400);
   const day = getNewYorkDateKey();
-  const run = parsePlayerRun(await redis.get(runKey(day, userId)));
+  const run = parsePlayerRun((await redis.get(runKey(day, userId))) ?? null);
   if (!run || run.phase !== 'playing' || run.lastRejectedAnswer.toLowerCase().replace(/\s+/g, ' ') !== answer.toLowerCase().replace(/\s+/g, ' ')
     || run.entries.length !== run.index) {
     return c.json({ ok: false, message: 'Only a just-rejected answer can be reported.' }, 409);
