@@ -184,7 +184,7 @@ function hydrateSelection(selection: SavedDailySelection): ResolvedDailySelectio
       ...source,
       id: selected.id,
       channel: 'ARCHIVE // ' + source.channel,
-      context: 'ARCHIVE ROUND — This is an open-answer question. Any accepted answer in this question’s catalog can earn its assigned rarity score. The archive selection avoids source answers used in the previous seven days when enough fresh entries remain. ' + source.context
+      context: 'ARCHIVE ROUND — Any accepted answer in this question’s catalog counts. Points are based on that answer’s assigned rarity. ' + source.context
     };
   });
   return { mode: selection.mode, prompts, selections: selection.prompts };
