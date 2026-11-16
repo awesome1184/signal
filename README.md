@@ -13,7 +13,7 @@ SIGNAL is an original daily open-answer game for Reddit, built with Devvit Web. 
 - 700-point maximum daily score.
 - One saved result per Reddit account per day.
 - Redis-backed, subreddit-scoped leaderboard and shared daily content rotation.
-- Up to seven randomly selected, never-before-used questions per day; when fewer than seven remain, archive-answer transmissions fill the open slots.
+- Up to seven randomly selected, never-before-used questions per day; when fewer than seven remain, open-answer archive questions fill the open slots.
 - Archive rounds reuse a question selected from the answer archive, but remain open-answer: any accepted catalog answer for that question counts. The rotation avoids recently selected archive seeds for seven days when enough fresh entries remain.
 - New questions remain inactive until at least one accepted answer is added to their answer bank.
 - Local browser preview with a sample leaderboard and localStorage-backed simulation of the same content rotation.
