@@ -1520,6 +1520,7 @@ function App() {
                         <svg className="signal-traces" viewBox="0 0 720 180" preserveAspectRatio="none" aria-hidden="true">
                           <path className="signal-centerline" d="M0 90H720" />
                           <path className="signal-clean-trace" d={tuningSignalPaths.carrier} />
+                          <path className="signal-motion-trace" d={tuningSignalPaths.carrier} />
                         </svg>
                         <ReceiverModeOverlay mode={waveStyle} />
                         <div className="signal-lock-reticle" aria-hidden="true">

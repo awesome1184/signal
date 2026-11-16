@@ -607,11 +607,93 @@
   margin-top:2px;
   letter-spacing:.13em;
 }
+.signal-live-capture .signal-motion-trace {
+  fill:none;
+  stroke:#e0ffff;
+  stroke-width:1.7;
+  stroke-linecap:round;
+  stroke-dasharray:10 25;
+  stroke-dashoffset:0;
+  opacity:.08;
+  filter:drop-shadow(0 0 5px rgba(140,255,247,.82));
+  animation:signal-motion-travel 1.55s linear infinite;
+  transition:opacity .42s ease,stroke .35s ease,filter .35s ease;
+}
+.signal-live-capture[data-phase="tracking"] .signal-motion-trace { opacity:.38; }
+.signal-live-capture[data-phase="locking"] .signal-motion-trace { opacity:.68; }
+.signal-live-capture[data-phase="slipping"] .signal-motion-trace {
+  opacity:.32;
+  stroke:#ffd0a1;
+  filter:drop-shadow(0 0 5px rgba(255,177,105,.75));
+}
+.signal-live-capture[data-phase="recovering"] .signal-motion-trace {
+  opacity:.84;
+  stroke:#c8fff1;
+  filter:drop-shadow(0 0 8px rgba(134,255,228,.9));
+}
+.signal-live-capture[data-phase="surging"] .signal-motion-trace {
+  opacity:1;
+  stroke:#e9fff4;
+  stroke-width:2.3;
+  animation-duration:.72s;
+}
+.signal-live-capture[data-phase="locked"] .signal-motion-trace {
+  opacity:.56;
+  animation-duration:2.8s;
+}
+.signal-live-capture[data-phase="failed"] .signal-motion-trace { opacity:0; }
+.signal-live-capture[data-phase="locking"] .reticle-corner,
+.signal-live-capture[data-phase="locked"] .reticle-corner {
+  border-color:rgba(196,255,242,.98);
+  filter:drop-shadow(0 0 5px rgba(134,255,228,.58));
+}
+.signal-live-capture[data-phase="slipping"] .signal-scanbeam {
+  background:linear-gradient(90deg,transparent,rgba(255,190,128,.9),transparent);
+  box-shadow:0 0 14px rgba(255,177,105,.48);
+}
+.signal-live-capture[data-phase="recovering"] .signal-scanbeam,
+.signal-live-capture[data-phase="locked"] .signal-scanbeam {
+  background:linear-gradient(90deg,transparent,rgba(190,255,239,.95),transparent);
+  box-shadow:0 0 16px rgba(120,255,226,.62);
+}
+.signal-live-capture .signal-station i,
+.signal-live-capture .signal-capture-status i {
+  animation:signal-live-led-pulse 1.8s ease-in-out infinite alternate !important;
+}
+.signal-live-capture[data-phase="locked"] .signal-station i,
+.signal-live-capture[data-phase="locked"] .signal-capture-status i {
+  background:#9effd8;
+  box-shadow:0 0 12px rgba(115,255,215,.78);
+  animation-duration:3.2s !important;
+}
+@keyframes signal-live-led-pulse {
+  from {opacity:.42;filter:brightness(.85);}
+  to {opacity:1;filter:brightness(1.35);}
+}
+.signal-live-capture[data-phase="locked"] .signal-score-readout strong {
+  animation:signal-live-score-confirm .62s cubic-bezier(.16,.8,.22,1) both;
+}
+@keyframes signal-live-score-confirm {
+  0% {opacity:0;transform:translateY(7px) scale(.86);filter:blur(3px);}
+  72% {opacity:1;transform:translateY(-2px) scale(1.06);filter:blur(0);}
+  100% {opacity:1;transform:translateY(0) scale(1);filter:blur(0);}
+}
+.signal-live-capture[data-phase="surging"] {
+  animation:signal-live-card-confirm .42s cubic-bezier(.16,.8,.22,1) both;
+}
+@keyframes signal-live-card-confirm {
+  0% {transform:scale(1);}
+  48% {transform:scale(1.012);}
+  100% {transform:scale(1);}
+}
 .signal-live-capture .signal-scanbeam {
   display:block;
   animation:signal-scan-pass var(--tune-duration) cubic-bezier(.18,.62,.22,1) both;
 }
 .signal-live-capture .signal-lock-reticle {
+  left:var(--reticle-x,50%);
+  top:var(--reticle-y,50%);
+  transition:left .28s cubic-bezier(.2,.68,.24,1),top .28s cubic-bezier(.2,.68,.24,1),opacity .35s ease,filter .35s ease;
   animation:signal-live-reticle-search 3.6s ease-in-out infinite alternate;
 }
 .signal-live-capture[data-phase="locking"] .signal-lock-reticle {
@@ -830,11 +912,17 @@
   .play-view.tuning-view .signal-screen::after,
   .signal-live-capture .signal-scanbeam,
   .signal-live-capture .signal-lock-reticle,
+  .signal-live-capture .signal-motion-trace,
+  .signal-live-capture .signal-station i,
+  .signal-live-capture .signal-capture-status i,
   .signal-live-grade,
   .signal-live-capture .signal-live-answer {
     animation:none !important;
     transition:none !important;
   }
+  .signal-live-capture .signal-motion-trace { animation:none !important;opacity:.44 !important; }
+  .signal-live-capture .signal-station i,
+  .signal-live-capture .signal-capture-status i { animation:none !important; }
   .signal-live-capture .signal-live-answer {
     opacity:1 !important;
     filter:none !important;

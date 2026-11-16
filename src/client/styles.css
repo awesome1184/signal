@@ -2047,10 +2047,10 @@ button:focus-visible,input:focus-visible {
 .play-view.tuning-view .signal-lock-reticle {
   animation:signal-reticle-search 3.6s ease-in-out infinite alternate;
 }
-.play-view.tuning-view .signal-capture[data-phase="locking"] .signal-lock-reticle {
+.play-view.tuning-view .signal-capture:not(.signal-live-capture)[data-phase="locking"] .signal-lock-reticle {
   animation:signal-reticle-converge .62s cubic-bezier(.16,.8,.2,1) both;
 }
-.play-view.tuning-view .signal-capture[data-phase="locked"] .signal-lock-reticle {
+.play-view.tuning-view .signal-capture:not(.signal-live-capture)[data-phase="locked"] .signal-lock-reticle {
   animation:signal-reticle-settle .7s cubic-bezier(.16,.8,.2,1) both;
 }
 .play-view.tuning-view .signal-capture[data-phase="tracking"] .signal-screen-grid,
@@ -2381,17 +2381,17 @@ button:focus-visible,input:focus-visible {
   filter:drop-shadow(0 0 3px rgba(110,239,229,.42));
   animation:signal-wave-lock var(--tune-duration) cubic-bezier(.2,.65,.25,1) both;
 }
-.play-view.tuning-view .signal-motion-trace,
+.play-view.tuning-view .signal-capture:not(.signal-live-capture) .signal-motion-trace,
 .signal-result-card .signal-motion-trace,
-.play-view.tuning-view .signal-scanbeam,
-.play-view.tuning-view .signal-lock-flare,
+.play-view.tuning-view .signal-capture:not(.signal-live-capture) .signal-scanbeam,
+.play-view.tuning-view .signal-capture:not(.signal-live-capture) .signal-lock-flare,
 .play-view.tuning-view .perfect-acquisition,
 .play-view.tuning-view .signal-perfect-flash,
 .signal-result-card .result-acquisition {
   display:none !important;
 }
-.play-view.tuning-view .signal-screen::after { display:none !important; }
-.play-view.tuning-view .signal-lock-reticle {
+.play-view.tuning-view .signal-capture:not(.signal-live-capture) .signal-screen::after { display:none !important; }
+.play-view.tuning-view .signal-capture:not(.signal-live-capture) .signal-lock-reticle {
   width:clamp(100px,24%,154px);
   animation:none !important;
   filter:none;
@@ -2413,16 +2413,16 @@ button:focus-visible,input:focus-visible {
 }
 .play-view.tuning-view .reticle-center::before,
 .play-view.tuning-view .reticle-center::after { display:none; }
-.play-view.tuning-view .signal-capture[data-phase="tracking"] .signal-lock-reticle {
+.play-view.tuning-view .signal-capture:not(.signal-live-capture)[data-phase="tracking"] .signal-lock-reticle {
   opacity:.62;
   transform:translate(-50%,-50%) scale(1.16);
 }
-.play-view.tuning-view .signal-capture[data-phase="locking"] .signal-lock-reticle {
+.play-view.tuning-view .signal-capture:not(.signal-live-capture)[data-phase="locking"] .signal-lock-reticle {
   opacity:.88;
   transform:translate(-50%,-50%) scale(.94);
   filter:none;
 }
-.play-view.tuning-view .signal-capture[data-phase="locked"] .signal-lock-reticle {
+.play-view.tuning-view .signal-capture:not(.signal-live-capture)[data-phase="locked"] .signal-lock-reticle {
   opacity:.94;
   transform:translate(-50%,-50%) scale(.82);
   filter:none;
@@ -2445,8 +2445,8 @@ button:focus-visible,input:focus-visible {
 .play-view.tuning-view .signal-capture-status span {
   animation:signal-simple-arrive .38s ease-out both;
 }
-.play-view.tuning-view .signal-station i,
-.play-view.tuning-view .signal-capture-status i {
+.play-view.tuning-view .signal-capture:not(.signal-live-capture) .signal-station i,
+.play-view.tuning-view .signal-capture:not(.signal-live-capture) .signal-capture-status i {
   animation:none !important;
 }
 .play-view.tuning-view .signal-quality-track i {
