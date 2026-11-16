@@ -205,7 +205,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Pipevine swallowtail', 'Battus philenor']
     ]},
     { score: 30, tier: 'UNCOMMON', note: 'An accepted Papilionidae species beyond the best-known examples.', names: [
-      ['Zebra swallowtail', 'Eurytides marcellus'],
+      ['Zebra swallowtail', 'Protographium marcellus', 'Eurytides marcellus'],
       ['Common Mormon', 'Papilio polytes'],
       ['Ulysses butterfly', 'Papilio ulysses'],
       ['Apollo butterfly', 'Parnassius apollo']
@@ -257,7 +257,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
     ]},
     { score: 60, tier: 'RARE', note: 'A less familiar accepted orchid species in the World Orchids checklist.', names: [
       ["Rothschild's slipper orchid", 'Paphiopedilum rothschildianum'],
-      ['Star of Bethlehem orchid', 'Angraecum sesquipedale'],
+      ['Darwin orchid', 'Angraecum sesquipedale'],
       ['Giant orchid', 'Grammatophyllum speciosum'],
       ['Snow orchid', 'Coelogyne cristata'],
       ['Tiger orchid', 'Stanhopea tigrina'],
@@ -276,7 +276,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Retusa aerides', 'Aerides odorata'],
       ['Plicate spathoglottis', 'Spathoglottis plicata'],
       ['Anceps laelia', 'Laelia anceps'],
-      ['Tigrina stanhopea', 'Stanhopea tigrina'],
+      ['Long-whiskered bulbophyllum', 'Bulbophyllum longissimum'],
       ['Kingianum dendrobium', 'Dendrobium kingianum']
     ]},
     { score: 100, tier: 'SIGNAL FOUND', note: 'A striking, narrowly distributed orchid species described from Colombia in the 2010s.', names: [
@@ -331,7 +331,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
 
   'ich-heritage-element': records(
     { score: 10, tier: 'BACKGROUND', note: 'A highly recognizable element formally inscribed by UNESCO as intangible cultural heritage.', names: [
-      ['Flamenco', 'Flamenco'],
+      'Flamenco',
       ['Tango', 'Argentine tango']
     ]},
     { score: 15, tier: 'FAMILIAR', note: 'A widely known UNESCO-inscribed cultural practice or tradition.', names: [
@@ -380,7 +380,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Galápagos', 'Galapagos Islands']
     ]},
     { score: 15, tier: 'FAMILIAR', note: 'A prominent UNESCO-designated biosphere reserve.', names: [
-      ['Doñana', 'Donana'],
+      'Doñana',
       ['Sian Ka’an', 'Sian Kaan'],
       ['Central Amazon']
     ]},
@@ -406,9 +406,9 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Central Balkan', 'Central Balkan Biosphere Reserve'],
       ['Rhön', 'Rhön Biosphere Reserve'],
       ['Black Forest', 'Schwarzwald'],
-      ['Białowieża', 'Bialowieza'],
+      'Białowieża',
       ['Camargue', 'Camargue Biosphere Reserve'],
-      ['Cévennes', 'Cevennes'],
+      'Cévennes',
       ['Menorca', 'Menorca Biosphere Reserve'],
       ['Lanzarote', 'Lanzarote Biosphere Reserve'],
       ['Urdaibai', 'Urdaibai Biosphere Reserve'],
@@ -432,7 +432,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
     { score: 30, tier: 'UNCOMMON', note: 'A current member city in the UNESCO Creative Cities Network.', names: [
       ['Bologna', 'Bologna, City of Music'],
       ['Kingston', 'Kingston, City of Music'],
-      ['Bogotá', 'Bogota'],
+      'Bogotá',
       ['Chengdu', 'Chengdu, City of Gastronomy']
     ]},
     { score: 60, tier: 'RARE', note: 'A less commonly named UNESCO Creative City with a designated creative field.', names: [
@@ -451,16 +451,16 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Isfahan', 'Isfahan, City of Crafts and Folk Art'],
       ['Kanazawa', 'Kanazawa, City of Crafts and Folk Art'],
       ['Baguio', 'Baguio, City of Crafts and Folk Art'],
-      ['Paducah', 'Paducah, City of Crafts and Folk Art'],
-      ['Dénia', 'Denia, City of Gastronomy'],
+      ['Chiang Mai', 'Chiang Mai, City of Crafts and Folk Art'],
+      ['Dénia', 'Denia City of Gastronomy'],
       ['Jeonju', 'Jeonju, City of Gastronomy'],
       ['Östersund', 'Ostersund, City of Gastronomy'],
-      ['Saint-Étienne', 'Saint-Etienne, City of Design'],
+      ['Saint-Étienne', 'Saint-Etienne City of Design'],
       ['Mannheim', 'Mannheim, City of Music'],
       ['Norrköping', 'Norrkoping, City of Music']
     ]},
     { score: 100, tier: 'SIGNAL FOUND', note: 'A newly designated and less widely known member of the 2025 UNESCO Creative Cities cohort.', names: [
-      ['Kahramanmaraş', 'Kahramanmaras']
+      'Kahramanmaraş'
     ]}
   ),
 
@@ -580,7 +580,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A less familiar wine-grape cultivar documented by VIVC or the University of Adelaide database.', names: [
       ['Bobal', 'Bobal grape'],
-      ['Airén', 'Airen'],
+      'Airén',
       ['Trebbiano Toscano', 'Ugni Blanc'],
       ['Macabeo', 'Viura'],
       ['Mazuelo', 'Carignan', 'Cariñena'],
@@ -588,9 +588,9 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Tannat', 'Tannat grape'],
       ['Saperavi', 'Saperavi grape'],
       ['Mourvèdre', 'Monastrell'],
-      ['Carménère', 'Carmenere'],
+      'Carménère',
       ['Petit Verdot', 'Petit verdot grape'],
-      ['Grüner Veltliner', 'Gruner Veltliner'],
+      'Grüner Veltliner',
       ['Glera', 'Prosecco grape'],
       ['Corvina', 'Corvina Veronese']
     ]},
@@ -610,7 +610,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Queso Manchego', 'Manchego']
     ]},
     { score: 30, tier: 'UNCOMMON', note: 'A registered PDO or PGI cheese name in the EU geographical-indications register.', names: [
-      ['Comté', 'Comte'],
+      'Comté',
       ['Grana Padano', 'Grana Padano cheese'],
       ['Cabrales', 'Queso de Cabrales'],
       ['Idiazabal', 'Queso Idiazabal']
@@ -637,7 +637,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Queso de Valdeón', 'Valdeon'],
       ['Queso Tetilla', 'Tetilla'],
       ['Morbier', 'Morbier cheese'],
-      ['Époisses', 'Epoisses'],
+      'Époisses',
       ['Livarot', 'Livarot cheese']
     ]},
     { score: 100, tier: 'SIGNAL FOUND', note: 'A particularly obscure registered regional cheese whose protected name appears in the EU register.', names: [
@@ -648,7 +648,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
   'roller-coaster': records(
     { score: 10, tier: 'BACKGROUND', note: 'A famous roller coaster with its own RCDB ride record.', names: [
       ['Steel Vengeance', 'Steel Vengeance coaster'],
-      ['Space Mountain', 'Space Mountain roller coaster']
+      ['Matterhorn Bobsleds', 'Matterhorn']
     ]},
     { score: 15, tier: 'FAMILIAR', note: 'A widely known roller coaster listed in RCDB.', names: [
       ['Millennium Force', 'Millennium Force coaster'],
@@ -658,7 +658,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
     { score: 30, tier: 'UNCOMMON', note: 'A distinct named coaster ride recorded in the Roller Coaster DataBase.', names: [
       ['Iron Gwazi', 'Iron Gwazi coaster'],
       ['VelociCoaster', 'Jurassic World VelociCoaster'],
-      ['El Toro', 'El Toro coaster'],
+      ['El Toro (Six Flags Great Adventure)', 'El Toro coaster'],
       ['The Smiler', 'The Smiler coaster']
     ]},
     { score: 60, tier: 'RARE', note: 'A less commonly named coaster with a distinct RCDB entry.', names: [
@@ -676,7 +676,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['F.L.Y.', 'FLY coaster'],
       ['Wodan Timburcoaster', 'Wodan'],
       ['Balder', 'Balder coaster'],
-      ['Wildfire (Kolmården)', 'Wildfire Kolmarden'],
+      ['Wildfire (Kolmården)', 'Wildfire at Kolmården'],
       ['Toutatis', 'Toutatis coaster'],
       ['Oziris', 'Oziris coaster'],
       ['Red Force', 'Red Force coaster'],
@@ -684,7 +684,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Takabisha', 'Takabisha coaster'],
       ['Thunder Dolphin', 'Thunder Dolphin coaster'],
       ['The Flying Dinosaur', 'Flying Dinosaur'],
-      ['Voyage', 'The Voyage']
+      ['The Voyage', 'Voyage']
     ]},
     { score: 100, tier: 'SIGNAL FOUND', note: 'A less widely known named coaster with a dedicated RCDB record.', names: [
       ['Anubis The Ride', 'Anubis']
