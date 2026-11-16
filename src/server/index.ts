@@ -101,7 +101,8 @@ async function mutatePlayerRun<T>(
   const key = runKey(day, userId);
   for (let attempt = 0; attempt < 8; attempt++) {
     const transaction = await redis.watch(key);
-    const current = parsePlayerRun(await transaction.get(key));
+    const currentRaw = await (transaction.get as unknown as (key: string) => Promise<string | null>)(key);
+    const current = parsePlayerRun(currentRaw);
     const plan = update(current);
     if (!plan.write) {
       await transaction.unwatch();
@@ -152,7 +153,7 @@ app.get('/api/health', (c) => c.json({ ok: true, app: 'SIGNAL' }));
 app.get('/api/bootstrap', async (c) => {
   const day = getNewYorkDateKey();
   const daily = await getRotatedDailySelection(day);
-  const userId = context.userId;
+  const userId = context.userId ?? null;
   const username = displayName(await reddit.getCurrentUsername());
   const raw = userId ? await redis.hGet(resultsKey(day), userId) : null;
   let result = null;
@@ -401,6 +402,7 @@ app.post('/api/next', async (c) => {
 
 app.post('/api/report-answer', async (c) => {
   const userId = context.userId;
+  if (!userId) return c.json({ ok: false, message: 'Sign in to report a missing answer.' }, 401);
   if (!userId) return c.json({ ok: false, message: 'Sign in to report a missing answer.' }, 401);
   let body: { promptId?: string; answer?: string };
   try { body = await c.req.json(); }

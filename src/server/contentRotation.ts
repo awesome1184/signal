@@ -196,7 +196,7 @@ function hydrateSelection(selection: SavedDailySelection): ResolvedDailySelectio
 export async function getRotatedDailySelection(dateKey: string): Promise<ResolvedDailySelection> {
   for (let attempt = 0; attempt < 8; attempt++) {
     const transaction = await redis.watch(ROTATION_KEY);
-    const raw = await transaction.get(ROTATION_KEY);
+    const raw = await (transaction.get as unknown as (key: string) => Promise<string | null>)(ROTATION_KEY);
     const state = parseState(raw);
     const existing = state.daily[dateKey];
 

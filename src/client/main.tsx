@@ -1453,7 +1453,7 @@ function App() {
                 </form>
                 <div className="play-footer"><span><span className="tiny-pulse" /> RECEIVER OPEN</span><button className="text-button" onClick={skipPrompt} disabled={isTuning}>SKIP THIS FREQUENCY</button></div>
                 {message && <div className="inline-message" role="status" aria-live="polite">{message}</div>}
-                {message && !lastUnmatchedAnswer && !DEMO_MODE && /(offline|could not|retry|refresh|sync)/i.test(message) && (
+                {message && !lastUnmatchedAnswer && !DEMO_MODE && /(offline|could not|retry|refresh|sync|network|fetch)/i.test(message) && (
                   <button type="button" className="text-button sync-game-button" onClick={retryBootstrap}>SYNC DAILY RUN</button>
                 )}
                 {lastUnmatchedAnswer && !game.isTest && (
@@ -1555,6 +1555,9 @@ function App() {
                 <p className="signal-result-note">{currentEntry.note}</p>
                 <button className="primary-button next-button" onClick={nextPrompt}>{game.index === 6 ? 'VIEW SCAN REPORT' : 'NEXT TRANSMISSION'} <span className="button-arrow">↗</span></button>
                 {message && <div className="inline-message" role="status" aria-live="polite">{message}</div>}
+                {message && !lastUnmatchedAnswer && !DEMO_MODE && /(offline|could not|retry|refresh|sync|network|fetch)/i.test(message) && (
+                  <button type="button" className="text-button sync-game-button" onClick={retryBootstrap}>SYNC DAILY RUN</button>
+                )}
               </div>
             )}
 
@@ -1588,6 +1591,9 @@ function App() {
                 </div>
                 <p className="fine-print">{game.isTest ? 'TEST RUN · RESULTS ARE NOT SAVED TO THE COMMUNITY BOARD' : 'A new set of transmissions arrives at midnight Eastern.'}</p>
                 {message && <div className="inline-message" role="status" aria-live="polite">{message}</div>}
+                {message && !lastUnmatchedAnswer && !DEMO_MODE && /(offline|could not|retry|refresh|sync|network|fetch)/i.test(message) && (
+                  <button type="button" className="text-button sync-game-button" onClick={retryBootstrap}>SYNC DAILY RUN</button>
+                )}
               </div>
             )}
           </section>
