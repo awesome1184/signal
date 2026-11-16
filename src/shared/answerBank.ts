@@ -16,11 +16,10 @@ export type AnswerEntry = {
   note: string;
 };
 
-const BANK: Record<string, AnswerRecord[]> = {
+const BASE_BANK: Record<string, AnswerRecord[]> = {
   ...ANSWER_SUBMISSIONS_BATCH_2,
   ...ANSWER_SUBMISSIONS_BATCH_3,
   ...ANSWER_SUBMISSIONS_ACCESSIBILITY,
-  ...ANSWER_SUBMISSIONS_CORE_EXPANSION,
   'night-bird': [
     { aliases: ['owl'], score: 10, tier: 'BACKGROUND', note: 'A familiar night hunter.' },
     { aliases: ['barn owl', 'western barn owl'], score: 15, tier: 'FAMILIAR', note: 'A specific species, though widely known.' },
@@ -190,6 +189,18 @@ const BANK: Record<string, AnswerRecord[]> = {
     { aliases: ['fallstreak hole', 'hole punch cloud'], score: 85, tier: 'DEEP CUT', note: 'A circular gap in a cloud layer caused by ice formation.' },
     { aliases: ['sprites', 'red sprites'], score: 100, tier: 'SIGNAL FOUND', note: 'Brief electrical flashes high above thunderstorms.' }
   ]
+};
+
+// Merge supplemental entries into the original pools after their base arrays,
+// so existing question records are extended rather than overwritten.
+const BANK: Record<string, AnswerRecord[]> = {
+  ...BASE_BANK,
+  ...Object.fromEntries(
+    Object.entries(ANSWER_SUBMISSIONS_CORE_EXPANSION).map(([promptId, additions]) => [
+      promptId,
+      [...(BASE_BANK[promptId] ?? []), ...additions]
+    ])
+  )
 };
 
 export function normalizeAnswer(value: string): string {
