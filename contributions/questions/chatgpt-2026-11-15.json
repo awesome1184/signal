@@ -5,7 +5,7 @@
     "agent": "chatgpt",
     "submittedOn": "2026-11-15",
     "baseBranch": "main",
-    "baseCommit": "9258bb2e862a0f94774d0358bddca8cb24e86900",
+    "baseCommit": "814532ee967961e7a0461c371872bdef7a7d82d1",
     "answerPoolsIncluded": false,
     "note": "Question-only contribution. Do not activate these questions in daily rotation until Phase B answer records have been committed and validated."
   },
