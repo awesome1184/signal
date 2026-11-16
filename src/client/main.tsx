@@ -224,6 +224,7 @@ function getPreviewDailyPrompts(dateKey: string): Prompt[] {
         const source = prompt.sourcePromptId ? getPromptById(prompt.sourcePromptId) : undefined;
         return {
           ...prompt,
+          archiveSeedId: prompt.archiveSeedId ?? (prompt as Prompt & { fallbackAnswerId?: string }).fallbackAnswerId,
           context: 'ARCHIVE ROUND — This is an open-answer question. Any accepted answer in this question’s catalog can earn its assigned rarity score. ' + (source?.context ?? prompt.context)
         };
       });
@@ -289,7 +290,7 @@ function getPreviewDailyPrompts(dateKey: string): Prompt[] {
           channel: 'ARCHIVE // ' + source.channel,
           context: 'ARCHIVE ROUND — This is an open-answer question. Any accepted answer in this question’s catalog can earn its assigned rarity score. The archive selection avoids source answers used in the previous seven days when enough fresh entries remain. ' + source.context,
           sourcePromptId: entry.promptId,
-          fallbackAnswerId: entry.id
+          archiveSeedId: entry.id
         });
         state.usedAnswers[entry.id] = dateKey;
       });
