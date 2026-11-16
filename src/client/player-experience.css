@@ -108,3 +108,305 @@
   animation-duration: 18s;
 }
 .active-round .progress-cell.active::after { opacity: .2; }
+
+/* IMMERSIVE SIGNAL: observatory atmosphere, focused question stage, clear reveals. */
+.app-shell {
+  background:
+    radial-gradient(ellipse at 72% 10%, rgba(65,150,177,.19), transparent 37%),
+    radial-gradient(ellipse at 12% 48%, rgba(28,76,111,.17), transparent 44%),
+    linear-gradient(180deg,#07131f 0%,#091724 52%,#06111a 100%);
+}
+.mountain-scene { opacity:.72; filter:saturate(.92) contrast(1.06); transition:opacity .8s ease,filter .8s ease; }
+.screen-vignette {
+  background:
+    radial-gradient(ellipse at 70% 24%,rgba(63,172,188,.10),transparent 38%),
+    linear-gradient(180deg,rgba(5,13,22,.03),rgba(5,14,22,.10) 34%,#07131d 73%,#07131d);
+}
+.mountain-signal-beam { opacity:.22; transition:opacity .7s ease,filter .7s ease; }
+.mountain-signal-ray {
+  stroke:#69e1e7; stroke-width:1.35; stroke-linecap:round; stroke-dasharray:5 12;
+  filter:drop-shadow(0 0 4px rgba(91,216,232,.55));
+  animation:mountain-signal-travel 13s linear infinite;
+}
+.mountain-signal-ray:nth-child(2) { animation-duration:9s; }
+.mountain-signal-ray:nth-child(3) { animation-duration:15s; }
+.mountain-signal-arc { stroke:rgba(111,229,231,.72); stroke-width:1.1; stroke-dasharray:2 7; opacity:.7; }
+.mountain-signal-node {
+  fill:#d2ffff; stroke:#5bd8e8; stroke-width:1.5;
+  filter:drop-shadow(0 0 8px rgba(91,216,232,.95));
+  animation:mountain-node-pulse 2.8s ease-in-out infinite;
+}
+@keyframes mountain-signal-travel { to { stroke-dashoffset:-136; } }
+@keyframes mountain-node-pulse {
+  0%,100% { opacity:.48; }
+  50% { opacity:1; }
+}
+.app-shell.world-awake .mountain-scene { opacity:.79; filter:saturate(1.04) contrast(1.07); }
+.app-shell.world-awake .mountain-signal-beam { opacity:.38; }
+.app-shell.world-resonant .mountain-scene { opacity:.88; filter:saturate(1.13) contrast(1.1); }
+.app-shell.world-resonant .mountain-signal-beam { opacity:.72; filter:drop-shadow(0 0 12px rgba(91,216,232,.36)); }
+.app-shell.phase-reveal .mountain-signal-beam,.app-shell.phase-complete .mountain-signal-beam { opacity:.8; }
+
+/* During a timed round, the surrounding dashboard recedes and the prompt
+   becomes the clear focal point. */
+.app-shell.round-active .game-panel {
+  min-height:0; padding:clamp(16px,2.6vw,30px); overflow:visible;
+  border-color:transparent; border-radius:0; background:transparent; box-shadow:none;
+}
+.app-shell.round-active .game-panel::before,.app-shell.round-active .panel-scanline { display:none; }
+.app-shell.round-active .panel-topline {
+  align-items:center; padding:0 3px 13px; border-bottom:1px solid rgba(91,216,232,.16);
+}
+.app-shell.round-active .panel-title {
+  color:#eaf7fb; font-size:clamp(24px,2.5vw,30px); letter-spacing:.045em;
+}
+.app-shell.round-active .panel-subtitle { color:#86a8b5; font-size:10px; letter-spacing:.035em; }
+.app-shell.round-active .round-count strong { color:#f2f8fb; text-shadow:0 0 18px rgba(91,216,232,.35); }
+.app-shell.round-active .progress-grid { gap:8px; margin:18px 3px 15px; }
+.app-shell.round-active .progress-cell {
+  height:5px; overflow:visible; border-radius:99px;
+  background:rgba(74,111,130,.30); transition:background .35s ease,height .35s ease,box-shadow .35s ease;
+}
+.app-shell.round-active .progress-cell span { top:9px; color:#718f9d; font-size:8px; }
+.app-shell.round-active .progress-cell.done {
+  background:linear-gradient(90deg,#43b8c8,#8cebf0); box-shadow:0 0 12px rgba(91,216,232,.34);
+}
+.app-shell.round-active .progress-cell.active {
+  height:6px; background:linear-gradient(90deg,#e88e3d,#ffd08d); box-shadow:0 0 15px rgba(245,163,75,.48);
+}
+.app-shell.round-active .receiver-settings {
+  width:min(300px,100%); margin:13px 0 0 auto;
+  border-color:rgba(91,216,232,.14); background:rgba(5,20,30,.48);
+}
+.app-shell.round-active .receiver-settings > summary { min-height:32px; font-size:8px; }
+.app-shell.round-active .play-view {
+  position:relative; isolation:isolate; min-height:500px; margin-top:15px;
+  padding:clamp(28px,4.1vw,48px) clamp(22px,5.2vw,66px) 25px;
+  overflow:hidden; border:1px solid rgba(91,216,232,.28); border-radius:19px;
+  background:
+    radial-gradient(ellipse at 86% 0%,rgba(91,216,232,.13),transparent 43%),
+    radial-gradient(ellipse at 4% 100%,rgba(38,108,135,.12),transparent 48%),
+    linear-gradient(145deg,rgba(9,29,43,.97),rgba(4,15,24,.985) 72%);
+  box-shadow:0 22px 65px rgba(0,0,0,.25),0 0 36px rgba(51,166,184,.075),inset 0 1px 0 rgba(223,250,255,.055);
+}
+.app-shell.round-active .play-view::before {
+  content:""; position:absolute; z-index:-1; inset:0; pointer-events:none; opacity:.42;
+  background:
+    linear-gradient(115deg,transparent 0 63%,rgba(91,216,232,.055) 63.1%,transparent 63.35%),
+    repeating-linear-gradient(0deg,rgba(131,206,218,.035) 0 1px,transparent 1px 5px);
+  mask-image:linear-gradient(180deg,#000,transparent 88%);
+}
+.app-shell.round-active .question-meta { align-items:center; gap:16px; }
+.app-shell.round-active .channel-label {
+  display:inline-flex; align-items:center; min-height:27px; padding:0 10px;
+  border:1px solid rgba(91,216,232,.22); border-radius:4px;
+  background:rgba(13,53,67,.40); color:#83e4ec; font-size:9px; letter-spacing:.14em;
+}
+.app-shell.round-active .timer-pill {
+  min-height:40px; padding:0 12px; border:1px solid rgba(245,163,75,.30);
+  border-radius:7px; background:rgba(62,39,20,.27); color:#ffc17c;
+}
+.app-shell.round-active .timer-pill strong { font-size:28px; font-variant-numeric:tabular-nums; }
+.app-shell.round-active .timer-pill.urgent {
+  border-color:rgba(255,111,91,.55); background:rgba(82,28,28,.42); color:#ff917d;
+}
+.app-shell.round-active .timer-track {
+  height:3px; margin-top:9px; border-radius:99px; background:rgba(100,137,151,.18);
+}
+.app-shell.round-active .timer-track i {
+  border-radius:inherit; background:linear-gradient(90deg,#5bd8e8,#f5a34b);
+  box-shadow:0 0 10px rgba(91,216,232,.32); transition:width .25s linear;
+}
+.app-shell.round-active .question-index {
+  display:inline-flex; align-items:center; min-height:22px;
+  margin-top:clamp(30px,4vw,43px); color:#e9ac69; font-size:9px; letter-spacing:.16em;
+}
+.app-shell.round-active .question-text {
+  max-width:900px; margin:13px 0 12px; color:#f5fbfd;
+  font-size:clamp(35px,4.5vw,59px); line-height:1.06; letter-spacing:.015em;
+  text-wrap:pretty; text-shadow:0 3px 25px rgba(0,0,0,.26);
+}
+.app-shell.round-active .question-context {
+  max-width:680px; margin-bottom:22px; color:#a8bfca; font-size:13px; line-height:1.7;
+}
+.app-shell.round-active .hint-disclosure {
+  width:fit-content; max-width:100%; margin:0 0 17px;
+  border-color:rgba(91,216,232,.17); border-radius:6px; background:rgba(4,18,27,.42);
+}
+.app-shell.round-active .hint-disclosure summary { min-height:38px; padding:0 11px; color:#9dc2cc; }
+.app-shell.round-active .hint-disclosure p { max-width:540px; padding:0 11px 12px; color:#a7bdc6; line-height:1.55; }
+.app-shell.round-active .answer-form {
+  margin-top:auto; padding-top:19px; border-top:1px solid rgba(91,216,232,.14);
+}
+.app-shell.round-active .answer-form label { color:#8bc4d0; letter-spacing:.16em; }
+.app-shell.round-active .answer-control input {
+  height:58px; border-color:rgba(91,216,232,.53); border-radius:8px;
+  background:rgba(2,13,21,.84);
+  box-shadow:inset 0 1px 0 rgba(219,252,255,.035),0 0 0 3px rgba(91,216,232,.035);
+  font-size:16px; transition:border-color .18s ease,box-shadow .18s ease,background .18s ease;
+}
+.app-shell.round-active .answer-control input:focus {
+  border-color:#8cecf0; background:#061a26;
+  box-shadow:0 0 0 3px rgba(91,216,232,.12),0 0 25px rgba(91,216,232,.10); outline:none;
+}
+.app-shell.round-active .answer-control input::placeholder { color:#718d9c; font-style:normal; }
+.app-shell.round-active .submit-button {
+  min-height:58px; min-width:180px; border-radius:8px;
+  box-shadow:0 0 0 3px rgba(245,163,75,.08),0 8px 25px rgba(235,132,39,.20);
+}
+.app-shell.round-active .submit-button:hover:not(:disabled) {
+  box-shadow:0 0 0 4px rgba(245,163,75,.13),0 12px 30px rgba(235,132,39,.25);
+}
+.app-shell.round-active .play-footer { margin-top:13px; }
+.app-shell.round-active .play-footer > span { color:#8ec9b3; letter-spacing:.12em; }
+.app-shell.round-active .side-column {
+  opacity:.78; filter:saturate(.78); transition:opacity .35s ease,filter .35s ease;
+}
+.app-shell.round-active .instrument-card {
+  border-color:rgba(91,216,232,.21);
+  background:linear-gradient(150deg,rgba(6,21,32,.86),rgba(5,15,24,.88));
+  box-shadow:inset 0 0 22px rgba(91,216,232,.025),0 8px 20px rgba(0,0,0,.10);
+}
+
+/* The acquisition report reads as a reward, not another instrument dashboard. */
+.app-shell.phase-reveal .game-panel {
+  border-color:rgba(91,216,232,.34);
+  background:radial-gradient(ellipse at 50% 5%,rgba(91,216,232,.10),transparent 55%),linear-gradient(145deg,rgba(7,23,35,.97),rgba(4,14,23,.98));
+}
+.app-shell.phase-reveal .signal-result-view {
+  width:100%; max-width:850px; min-height:0; margin:0 auto;
+  padding:clamp(18px,3vw,30px) 0 18px; gap:14px;
+}
+.app-shell.phase-reveal .signal-result-card {
+  width:100%; padding:clamp(17px,3vw,27px);
+  border:1px solid rgba(113,219,222,.40); border-radius:17px;
+  background:radial-gradient(ellipse at 50% 0%,rgba(67,179,189,.14),transparent 48%),linear-gradient(145deg,rgba(11,32,44,.99),rgba(3,13,20,.99) 72%);
+  box-shadow:0 24px 65px rgba(0,0,0,.38),0 0 35px rgba(91,216,232,.085),inset 0 1px 0 rgba(226,248,250,.09);
+}
+.app-shell.phase-reveal .signal-result-hero { padding:8px 0 17px; gap:20px; }
+.app-shell.phase-reveal .signal-result-hero .signal-capture-copy h2 {
+  color:#f0fbfc; font-size:clamp(29px,4.5vw,45px); line-height:1.02;
+  text-shadow:0 0 25px rgba(91,216,232,.15);
+}
+.app-shell.phase-reveal .signal-result-hero .signal-capture-copy p { color:#a5c0c8; font-size:12px; }
+.app-shell.phase-reveal .signal-result-score {
+  min-width:150px; padding:13px 15px 11px; border-color:rgba(107,224,224,.38);
+  border-radius:10px; background:radial-gradient(ellipse at 50% 0%,rgba(91,216,232,.18),transparent 70%),rgba(3,19,27,.84);
+  box-shadow:0 0 25px rgba(91,216,232,.07),inset 0 1px 0 rgba(220,255,255,.09);
+}
+.app-shell.phase-reveal .signal-result-score > strong {
+  display:inline-block; color:#f2ffff; font-size:clamp(62px,8vw,82px);
+  text-shadow:0 0 24px rgba(91,216,232,.38);
+}
+.app-shell.phase-reveal .signal-result-tier {
+  display:inline-flex; align-items:center; justify-content:center; margin-top:10px;
+  padding:6px 10px; border:1px solid rgba(91,216,232,.28); border-radius:99px;
+  background:rgba(91,216,232,.085); color:#a9f0f0; letter-spacing:.12em;
+}
+.app-shell.phase-reveal .signal-result-screen {
+  height:168px; border-radius:10px;
+  box-shadow:inset 0 0 30px rgba(91,216,232,.08),0 10px 25px rgba(0,0,0,.20);
+}
+.app-shell.phase-reveal .signal-lock-steps,.app-shell.phase-reveal .signal-capture-status { display:none; }
+.app-shell.phase-reveal .signal-result-readout { gap:20px; padding:16px 0 13px; }
+.app-shell.phase-reveal .signal-answer-readout strong { color:#e7f9fb; font-size:15px; }
+.app-shell.phase-reveal .signal-result-scan-total strong { color:#eaf8fb; font-size:27px; }
+.app-shell.phase-reveal .signal-quality-row { padding-top:12px; color:#91adb8; }
+.app-shell.phase-reveal .signal-quality-track { height:7px; border-radius:99px; overflow:hidden; }
+.app-shell.phase-reveal .signal-result-note {
+  max-width:680px; margin:0 auto 2px; color:#a8c0c8;
+  font-size:12px; line-height:1.65; text-align:center;
+}
+.app-shell.phase-reveal .next-button {
+  min-width:min(300px,100%); min-height:54px; margin-top:2px;
+  box-shadow:0 0 0 3px rgba(245,163,75,.09),0 11px 30px rgba(235,132,39,.22);
+}
+
+/* The final score becomes the visual anchor of the completed daily run. */
+.app-shell.phase-complete .game-panel {
+  border-color:rgba(91,216,232,.35);
+  background:radial-gradient(ellipse at 50% 0%,rgba(91,216,232,.10),transparent 46%),linear-gradient(145deg,rgba(7,22,34,.97),rgba(4,14,23,.985));
+}
+.app-shell.phase-complete .complete-view {
+  max-width:950px; margin:0 auto; padding:clamp(23px,4vw,42px) 2% 18px;
+  background:radial-gradient(ellipse at 50% 8%,rgba(91,216,232,.075),transparent 48%);
+}
+.app-shell.phase-complete .complete-overline { color:#a5c7cf; font-size:9px; letter-spacing:.17em; }
+.app-shell.phase-complete .complete-view h1 {
+  margin:12px 0 0; color:#8feaf0; font-size:clamp(34px,5vw,53px);
+  letter-spacing:.09em; text-shadow:0 0 30px rgba(91,216,232,.18);
+}
+.app-shell.phase-complete .final-score { margin:17px 0 10px; gap:11px; }
+.app-shell.phase-complete .final-score strong {
+  color:#f5fcff; font-size:clamp(76px,10vw,112px);
+  text-shadow:0 0 32px rgba(91,216,232,.22);
+}
+.app-shell.phase-complete .complete-subtitle { color:#bfd0d7; font-size:13px; }
+.app-shell.phase-complete .complete-stat-strip {
+  max-width:560px; margin:18px auto; padding:13px 0;
+  border-top:1px solid rgba(91,216,232,.16); border-bottom:1px solid rgba(91,216,232,.16);
+}
+.app-shell.phase-complete .complete-stat-strip > span { color:#91aebb; font-size:9px; letter-spacing:.08em; }
+.app-shell.phase-complete .complete-stat-strip strong { color:#f2fbfd; font-size:25px; }
+.app-shell.phase-complete .personal-rank {
+  border-color:rgba(91,216,232,.29); border-radius:9px;
+  background:linear-gradient(135deg,rgba(17,64,77,.45),rgba(5,21,31,.75));
+  box-shadow:inset 0 1px 0 rgba(230,255,255,.055),0 8px 25px rgba(0,0,0,.12);
+}
+.app-shell.phase-complete .result-list {
+  border-color:rgba(91,216,232,.25); border-radius:11px;
+  background:rgba(2,13,21,.44); box-shadow:0 12px 30px rgba(0,0,0,.15);
+}
+.app-shell.phase-complete .result-row { min-height:43px; border-top-color:rgba(91,216,232,.095); }
+.app-shell.phase-complete .result-row:hover { background:rgba(91,216,232,.045); }
+.app-shell.phase-complete .complete-actions .primary-button { min-height:52px; min-width:min(270px,100%); }
+
+/* Responsive tuning: preserve the hierarchy on phones and short screens. */
+@media (max-width:720px) {
+  .mountain-scene { height:min(560px,56vh); min-height:360px; }
+  .app-shell.round-active .game-panel { padding:12px 0 0; }
+  .app-shell.round-active .panel-topline { padding:0 4px 11px; }
+  .app-shell.round-active .panel-title { font-size:24px; }
+  .app-shell.round-active .panel-subtitle { font-size:9px; }
+  .app-shell.round-active .progress-grid { margin:16px 3px 14px; gap:5px; }
+  .app-shell.round-active .receiver-settings { margin:10px 0 0 auto; }
+  .app-shell.round-active .play-view { min-height:0; margin-top:13px; padding:24px 19px 18px; border-radius:14px; }
+  .app-shell.round-active .question-index { margin-top:27px; }
+  .app-shell.round-active .question-text { font-size:clamp(32px,7.4vw,44px); line-height:1.08; }
+  .app-shell.round-active .question-context { margin-bottom:19px; font-size:12px; }
+  .app-shell.round-active .answer-form { padding-top:16px; }
+  .app-shell.round-active .answer-control { flex-direction:column; }
+  .app-shell.round-active .answer-control input { min-height:54px; }
+  .app-shell.round-active .submit-button { width:100%; min-width:0; min-height:52px; }
+  .app-shell.round-active .side-column { opacity:.9; filter:none; }
+  .app-shell.phase-reveal .signal-result-view { padding-top:14px; }
+  .app-shell.phase-reveal .signal-result-card { padding:16px 14px; border-radius:13px; }
+  .app-shell.phase-reveal .signal-result-hero { gap:10px; }
+  .app-shell.phase-reveal .signal-result-score { min-width:112px; padding:9px 8px; }
+  .app-shell.phase-reveal .signal-result-screen { height:132px; }
+  .app-shell.phase-complete .complete-view { padding-top:25px; }
+  .app-shell.phase-complete .complete-view h1 { font-size:clamp(30px,8vw,43px); }
+  .app-shell.phase-complete .final-score strong { font-size:clamp(70px,18vw,92px); }
+}
+@media (max-width:420px) {
+  .app-shell.round-active .panel-topline { align-items:flex-start; }
+  .app-shell.round-active .round-count strong { font-size:26px; }
+  .app-shell.round-active .play-view { padding:21px 15px 16px; }
+  .app-shell.round-active .channel-label { font-size:8px; padding:0 7px; }
+  .app-shell.round-active .timer-pill { min-height:36px; padding:0 8px; }
+  .app-shell.round-active .timer-pill strong { font-size:24px; }
+  .app-shell.round-active .question-text { font-size:32px; }
+  .app-shell.phase-reveal .signal-result-hero { grid-template-columns:minmax(0,1fr) 108px; }
+  .app-shell.phase-reveal .signal-result-hero .signal-capture-copy h2 { font-size:26px; }
+  .app-shell.phase-reveal .signal-result-score > strong { font-size:49px; }
+  .app-shell.phase-reveal .signal-result-screen { height:116px; }
+  .app-shell.phase-reveal .signal-quality-row { grid-template-columns:1fr auto; gap:8px; }
+  .app-shell.phase-complete .complete-overline { line-height:1.6; }
+  .app-shell.phase-complete .complete-stat-strip { gap:4px; }
+  .app-shell.phase-complete .complete-stat-strip > span { font-size:7px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .mountain-signal-ray,.mountain-signal-node { animation:none !important; }
+  .mountain-signal-ray { stroke-dashoffset:0; }
+  .app-shell.round-active .progress-cell,.mountain-scene,.mountain-signal-beam { transition:none !important; }
+}
