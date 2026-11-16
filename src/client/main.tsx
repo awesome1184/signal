@@ -1475,27 +1475,32 @@ function App() {
                       data-wave-style={waveStyle}
                       style={tuningCaptureStyle}
                     >
-                      <div className="signal-screen" style={{ '--reticle-x': tuningSignalPaths.reticleX + '%', '--reticle-y': tuningSignalPaths.reticleY + '%' } as React.CSSProperties} aria-label="Your answer is being scanned">
-                        <div className="signal-screen-grid" />
-                        <div className="signal-bubble-field" aria-hidden="true" />
-                        <div className="signal-static" />
-                        <svg className="signal-traces" viewBox="0 0 720 180" preserveAspectRatio="none" aria-hidden="true">
-                          <path className="signal-centerline" d="M0 90H720" />
-                          <path className="signal-clean-trace" d={tuningSignalPaths.carrier} />
-                        </svg>
-                        <ReceiverModeOverlay mode={waveStyle} />
-                        <div className="signal-lock-reticle" aria-hidden="true">
-                          <i className="reticle-corner top-left" />
-                          <i className="reticle-corner top-right" />
-                          <i className="reticle-corner bottom-left" />
-                          <i className="reticle-corner bottom-right" />
-                          <b className="reticle-center" />
+                      <div className="signal-dive-hud">
+                        <div className="signal-dive-total">
+                          <span>RUN TOTAL</span>
+                          <strong>{total + (tuningPhase === 'locked' ? tuningDisplayScore : 0)}</strong>
                         </div>
-                        <div className="signal-answer-marker">{tuningAnswer.toUpperCase()}</div>
+                        <div className="signal-dive-progress">
+                          <div>{Array.from({ length: 7 }, (_, index) => <i key={index} className={index < game.index ? 'done' : index === game.index ? 'current' : ''} />)}</div>
+                          <span>TRANSMISSION {String(game.index + 1).padStart(2, '0')} / 07</span>
+                        </div>
+                        <div className="signal-dive-award">
+                          <span>ANSWER VALUE</span>
+                          <strong>{tuningPhase === 'locked' ? '+' + tuningDisplayScore : '—'}</strong>
+                        </div>
                       </div>
-                      <div className="signal-grade-reveal" data-phase={tuningPhase} aria-live="polite">
-                        <span>{tuningTier ? tuningTier.toUpperCase() : 'SCANNING'}</span>
-                        <strong>{tuningPhase === 'locked' ? '+' + tuningDisplayScore : tuningPhase === 'failed' ? '0' : '—'}<small> PTS</small></strong>
+                      <div className="signal-dive-scene" aria-label="Underwater sonar answer reveal">
+                        <div className="signal-dive-water" />
+                        <div className="signal-dive-plant signal-dive-plant-left"><i /><i /><i /><i /></div>
+                        <div className="signal-dive-plant signal-dive-plant-right"><i /><i /><i /><i /></div>
+                        <div className="signal-dive-bubbles" aria-hidden="true" />
+                        <div className="signal-dive-sonar-line" aria-hidden="true" />
+                        <div className="signal-answer-marker">{tuningAnswer.toUpperCase()}</div>
+                        <div className="signal-grade-reveal" data-phase={tuningPhase} aria-live="polite">
+                          <span>{tuningTier ? tuningTier.toUpperCase() : 'SCANNING'}</span>
+                          <em>{tuningAnswer}</em>
+                          <strong>{tuningPhase === 'locked' ? '+' + tuningDisplayScore : tuningPhase === 'failed' ? '0' : '—'}<small> POINTS</small></strong>
+                        </div>
                       </div>
                   </div>
                 )}
