@@ -730,6 +730,7 @@ function App() {
   const answerInputRef = useRef<HTMLInputElement>(null);
   const questionHeadingRef = useRef<HTMLHeadingElement>(null);
   const revealHeadingRef = useRef<HTMLHeadingElement>(null);
+  const completeHeadingRef = useRef<HTMLHeadingElement>(null);
   const [game, setGame] = useState<RunState>(() => DEMO_MODE ? loadRun(dayKey) : blankRun(dayKey));
   const [answer, setAnswer] = useState('');
   const [message, setMessage] = useState('');
@@ -893,6 +894,10 @@ function App() {
   }, [dayKey]);
 
   useEffect(() => {
+    if (game.phase === 'complete') {
+      completeHeadingRef.current?.focus({ preventScroll: true });
+      return;
+    }
     if (game.phase === 'reveal') {
       revealHeadingRef.current?.focus({ preventScroll: true });
       return;
@@ -1425,7 +1430,7 @@ function App() {
                 <div className="ready-copy">
                   <div className="section-label">A SIGNAL IS WAITING</div>
                   <h1>Can you hear<br />what others miss?</h1>
-                  <p>Answer seven open questions. Every accepted catalog answer earns its assigned rarity score; less familiar answers send a stronger signal.</p>
+                  <p>Answer seven open questions. You can retry up to 15 times while each 25-second timer is running. Any accepted catalog answer counts; less familiar answers earn more points.</p>
                   <div className="rule-strip">
                     <div><strong>07</strong><span>PROMPTS</span></div><div><strong>25s</strong><span>PER ROUND</span></div><div><strong>700</strong><span>MAX POINTS</span></div>
                   </div>
@@ -1692,7 +1697,7 @@ function App() {
             {game.phase === 'complete' && (
               <div className="complete-view">
                 <div className="complete-overline">DAILY SCAN COMPLETE <span>{game.entries.filter((entry) => entry.score > 0).length} SIGNALS RECOVERED · PLAYER {playerName}</span></div>
-                <h1>{scoreLabel(total)}</h1>
+                <h1 ref={completeHeadingRef} tabIndex={-1}>{scoreLabel(total)}</h1>
                 <div className="final-score" role="group" aria-label={'Final score ' + total + ' out of 700'}><strong>{total}</strong><span>/ 700</span></div>
                 <p className="complete-subtitle">{total >= 600 ? 'You found some remarkable signals in the noise.' : total >= 300 ? 'A good scan. You heard more than the obvious.' : 'The airwaves were crowded today. Tune in again tomorrow.'}</p>
                 <p className="scoring-explainer">Your score is based on the catalog rarity of your accepted answers. Maximum: 700 points.</p>
