@@ -1502,6 +1502,7 @@ function App() {
                           <strong>{tuningPhase === 'locked' ? '+' + tuningDisplayScore : tuningPhase === 'failed' ? '0' : '—'}<small> POINTS</small></strong>
                         </div>
                       </div>
+                    </div>
                   </div>
                 )}
                 {isTuning && (
