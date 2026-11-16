@@ -18,10 +18,10 @@ function Splash() {
         <div className="splash-tagline">FIND THE SIGNAL IN THE NOISE.</div>
         <div className="splash-divider" />
         <div className="splash-kicker"><i /> DAILY TRANSMISSION AVAILABLE</div>
-        <h1>Seven prompts.<br /><em>One uncommon answer.</em></h1>
-        <p>Listen past the obvious. Find the answers that stand out from the noise.</p>
+        <h1>Seven prompts.<br /><em>One answer each.</em></h1>
+        <p>Answer every question. Any accepted catalog answer counts, with less familiar answers earning more points. Your progress saves automatically.</p>
         <button className="splash-play" onClick={(event) => requestExpandedMode(event.nativeEvent, 'game')}>
-          OPEN TODAY'S SCAN <span>↗</span>
+          PLAY TODAY'S SCAN <span>↗</span>
         </button>
         <div className="splash-stats"><span><b>07</b> PROMPTS</span><span><b>25s</b> PER ROUND</span><span><b>700</b> MAX POINTS</span></div>
       </div>
