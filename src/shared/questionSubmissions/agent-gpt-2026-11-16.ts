@@ -36,9 +36,9 @@ export const QUESTION_SUBMISSIONS_BATCH_3: Prompt[] = [
   {
     id: 'swallowtail-species',
     channel: 'BUTTERFLY ARCHIVE',
-    prompt: 'Name a species of swallowtail butterfly.',
-    context: 'The answer must be an accepted species in the butterfly family Papilionidae (swallowtails), as recognized by Catalogue of Life. Use the scientific binomial or a recognized common name. Do not count subspecies, hybrids, or species from other butterfly families.',
-    hint: 'The family includes birdwings, birdwings’ relatives, parnassians, and familiar swallowtails.'
+    prompt: 'Name a species of butterfly.',
+    context: 'The answer must be a recognized living butterfly species (the butterfly group Rhopalocera), including swallowtails, monarchs, whites, admirals, and other butterfly families. Use a recognized common name or accepted scientific binomial. Moths, subspecies, and hybrids do not count as separate species.',
+    hint: 'Very familiar examples include monarchs and painted ladies; the database also includes swallowtails, birdwings, and many other families.'
   },
   {
     id: 'orchid-species',
@@ -50,9 +50,9 @@ export const QUESTION_SUBMISSIONS_BATCH_3: Prompt[] = [
   {
     id: 'coral-species',
     channel: 'REEF BIOLOGY',
-    prompt: 'Name a coral species listed in the Coral Trait Database.',
-    context: 'The answer must be a species-level coral taxon present in the Coral Trait Database species catalogue. Use its accepted scientific binomial. Do not submit a genus alone, a common name without an unambiguous species match, a synonym, or a non-coral reef organism.',
-    hint: 'The database includes reef-building stony corals and many other coral groups from around the world.'
+    prompt: 'Name a type or species of coral.'
+    context: 'The answer must be a recognized true coral type or species, including reef-building stony corals and other coral groups. Use a recognized common name or accepted scientific binomial. Do not submit unrelated reef animals or coral lookalikes such as fire corals.',
+    hint: 'Think of familiar reef forms such as brain coral, elkhorn coral, and staghorn coral.'
   },
   {
     id: 'ich-heritage-element',
@@ -66,14 +66,14 @@ export const QUESTION_SUBMISSIONS_BATCH_3: Prompt[] = [
     channel: 'BIOSPHERE NETWORK',
     prompt: 'Name a UNESCO biosphere reserve.',
     context: 'The answer must be a site currently designated within UNESCO’s World Network of Biosphere Reserves. Use the official reserve name or a recognized short form. Proposed sites, national parks without biosphere-reserve designation, and former or withdrawn reserves do not qualify.',
-    hint: 'The network spans terrestrial, coastal, marine, and transboundary landscapes in more than 140 countries.'
+    hint: 'Recognizable examples include Yellowstone–Grand Teton and the Galápagos.'
   },
   {
     id: 'unesco-creative-city',
     channel: 'CREATIVE CITIES',
     prompt: 'Name a city in UNESCO’s Creative Cities Network.',
     context: 'The answer must be a city currently listed as a member of UNESCO’s Creative Cities Network in one of its recognized creative fields: crafts and folk art, design, film, gastronomy, literature, media arts, music, or architecture. Use the city’s official listed name; applicants and non-member cities do not count.',
-    hint: 'Member cities are recognized for creativity in fields ranging from gastronomy and music to design and literature.'
+    hint: 'Familiar members include Paris, Edinburgh, Melbourne, and Glasgow, recognized for fields such as literature, music, and food.'
   },
   {
     id: 'confirmed-exoplanet',
