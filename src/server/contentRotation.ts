@@ -98,7 +98,7 @@ function chooseDailySelection(state: RotationState, dateKey: string): SavedDaily
 
   const remainingSlots = DAILY_PROMPT_COUNT - prompts.length;
   if (remainingSlots > 0) {
-    const allAnswers = getAnswerEntries();
+    const allAnswers = getAnswerEntries().filter((answer) => Boolean(getPromptById(answer.promptId)));
     const recentAnswerIds = new Set(
       Object.entries(state.usedAnswerIds)
         .filter(([, usedOn]) => {
