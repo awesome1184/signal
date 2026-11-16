@@ -77,7 +77,7 @@ export const QUESTION_SUBMISSIONS_BATCH_3: Prompt[] = [
   },
   {
     id: 'confirmed-exoplanet',
-    channel: 'EXOPLANET CATALOGUE',
+    channel: 'ASTRONOMY ATLAS',
     prompt: 'Name a well-known star or a confirmed exoplanet outside our Solar System.',
     context: 'The answer must be either a named star other than the Sun, using a recognized proper name or standard star designation, or a planet listed as confirmed in NASA’s Exoplanet Archive. Do not submit a planet candidate, false positive, star cluster, galaxy, or object inside our Solar System.',
     hint: 'Try familiar stars such as Sirius, Polaris, or Betelgeuse, or a famous exoplanet such as Proxima Centauri b.'
