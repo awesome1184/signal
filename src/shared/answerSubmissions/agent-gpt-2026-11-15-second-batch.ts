@@ -402,13 +402,12 @@ export const ANSWER_SUBMISSIONS_BATCH_2: Record<string, AnswerRecord[]> = {
       'Hope Mars Mission', 'Tianwen-1', 'Zhurong'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A lesser-known Mars exploration attempt or component mission.', names: [
-      'Mars 1960A', 'Mars 1960B', 'Sputnik 22', 'Sputnik 24',
+      ['Mars 1960A', 'Korabl 4', 'Marsnik 1'], ['Mars 1960B', 'Korabl 5', 'Marsnik 2'], ['Mars 1962B', 'Sputnik 24', 'Korabl 13'],
       'Mariner 3', 'Mariner 8', 'Mars 1969A', 'Mars 1969B',
-      ['Mars 1962B', 'Sputnik 24', 'Korabl 13'], 'Mars 1969A', 'Mars 1969B',
-      'Mars 1971C', 'Mars 1973A', 'Mars 1973B', 'Cosmos 419'
+      ['Mars 1971C', 'Cosmos 419'], 'Mars 1973A', 'Mars 1973B'
     ]},
     { score: 100, tier: 'SIGNAL FOUND', note: 'An obscure historic Mars mission attempt documented in the NASA chronology.', names: [
-      'Mars 1962A'
+      ['Mars 1962A', 'Sputnik 22', 'Korabl 11']
     ]}
   ),
 
