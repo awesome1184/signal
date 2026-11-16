@@ -54,7 +54,7 @@ export const ANSWER_SUBMISSIONS_CORE_EXPANSION: Record<string, AnswerRecord[]> =
       'Common poorwill', 'Australian owlet-nightjar', 'Night parrot'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A specialist-level nocturnal bird with a restricted range or unusual biology.', names: [
-      ['Kakapo', 'Kākāpō', 'Strigops habroptilus'],
+      ['Kakapo', 'Strigops habroptilus'],
       ['Short-eared owl', 'Asio flammeus']
     ]}
   ),
