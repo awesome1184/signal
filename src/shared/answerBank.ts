@@ -23,7 +23,7 @@ const BANK: Record<string, AnswerRecord[]> = {
   'blue-mineral': [
     { aliases: ['turquoise'], score: 10, tier: 'BACKGROUND', note: 'A familiar blue-green mineral.' },
     { aliases: ['aquamarine', 'blue beryl'], score: 15, tier: 'FAMILIAR', note: 'A blue variety of beryl.' },
-    { aliases: ['lapis lazuli', 'lapis'], score: 30, tier: 'UNCOMMON', note: 'A deep-blue rock prized since antiquity.' },
+    { aliases: ['lazurite', 'blue lazurite'], score: 30, tier: 'UNCOMMON', note: 'A naturally blue mineral that is a principal component of lapis lazuli.' },
     { aliases: ['sodalite', 'blue sodalite'], score: 60, tier: 'RARE', note: 'A rich blue mineral often used ornamentally.' },
     { aliases: ['azurite', 'blue azurite'], score: 85, tier: 'DEEP CUT', note: 'A vivid copper mineral with intense blue color.' },
     { aliases: ['vivianite', 'blue vivianite'], score: 100, tier: 'SIGNAL FOUND', note: 'A phosphate mineral that can form deep-blue crystals.' }
@@ -73,7 +73,7 @@ const BANK: Record<string, AnswerRecord[]> = {
     { aliases: ['glowworm', 'glow worm'], score: 15, tier: 'FAMILIAR', note: 'Several species use light to attract prey.' },
     { aliases: ['bioluminescent plankton'], score: 30, tier: 'UNCOMMON', note: 'Tiny organisms can make waves glow blue.' },
     { aliases: ['foxfire', 'fox fire'], score: 60, tier: 'RARE', note: 'A faint glow produced by fungi in decaying wood.' },
-    { aliases: ['will o the wisp', 'will-o-the-wisp'], score: 85, tier: 'DEEP CUT', note: 'A mysterious marsh light from folklore.' },
+    { aliases: ['atolla jellyfish', 'atolla', 'alarm jelly'], score: 85, tier: 'DEEP CUT', note: 'A deep-sea jellyfish that emits flashes of blue bioluminescence.' },
     { aliases: ['sea sparkle', 'sea sparkles', 'noctiluca scintillans'], score: 100, tier: 'SIGNAL FOUND', note: 'A plankton species that can make the sea sparkle.' }
   ],
   'faint-sound': [
