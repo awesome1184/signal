@@ -227,7 +227,7 @@ function getPreviewDailyPrompts(dateKey: string): Prompt[] {
       const chosen = [] as typeof fresh;
       for (const entry of fresh) {
         if (chosen.length >= slots) break;
-        if (usedSources.has(entry.promptId)) continue;
+        if (picked.has(entry.id) || usedSources.has(entry.promptId)) continue;
         chosen.push(entry);
         usedSources.add(entry.promptId);
         picked.add(entry.id);
