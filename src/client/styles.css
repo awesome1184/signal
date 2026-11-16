@@ -2671,7 +2671,7 @@ button:focus-visible,input:focus-visible {
   transform-box:fill-box; transform-origin:center;
   animation:signal-near-miss-carrier-settle 1.05s cubic-bezier(.18,.68,.22,1) both !important;
 }
-.perfect-capture .signal-capture[data-phase="recovering"] .signal-lock-reticle {
+.perfect-capture .signal-capture:not(.signal-live-capture)[data-phase="recovering"] .signal-lock-reticle {
   opacity:.88 !important; filter:none !important;
   animation:signal-near-miss-reticle-settle 1.05s cubic-bezier(.18,.68,.22,1) both !important;
 }
@@ -2728,7 +2728,7 @@ button:focus-visible,input:focus-visible {
   .perfect-capture .signal-capture[data-phase="slipping"] .signal-lock-reticle,
   .perfect-capture .signal-capture[data-phase="recovering"] .signal-static,
   .perfect-capture .signal-capture[data-phase="recovering"] .signal-clean-trace,
-  .perfect-capture .signal-capture[data-phase="recovering"] .signal-lock-reticle {
+  .perfect-capture .signal-capture:not(.signal-live-capture)[data-phase="recovering"] .signal-lock-reticle {
     animation:none !important; transition:none !important;
   }
 }
@@ -3297,11 +3297,11 @@ button { user-select:none; }
 
 
 /* The receiver visibly closes around the carrier as its live score rises. */
-.play-view.tuning-view .signal-lock-reticle {
+.play-view.tuning-view .signal-capture:not(.signal-live-capture) .signal-lock-reticle {
   animation:none !important;
   transition:transform .14s cubic-bezier(.2,.65,.25,1),opacity .14s ease,filter .14s ease !important;
 }
-.play-view.tuning-view .signal-capture:not([data-phase="slipping"]) .signal-lock-reticle {
+.play-view.tuning-view .signal-capture:not(.signal-live-capture):not([data-phase="slipping"]) .signal-lock-reticle {
   opacity:var(--reticle-opacity) !important;
   transform:translate(-50%,-50%) scale(var(--reticle-scale)) !important;
   filter:drop-shadow(0 0 4px rgba(111,230,226,var(--reticle-shadow-alpha))) !important;
@@ -3369,7 +3369,7 @@ button { user-select:none; }
 }
 /* When a near-miss begins to recover, the reticle opens with the slip,
    then closes again in step with the recovery counter. */
-.perfect-capture .signal-capture[data-phase="recovering"] .signal-lock-reticle {
+.perfect-capture .signal-capture:not(.signal-live-capture)[data-phase="recovering"] .signal-lock-reticle {
   animation:none !important;
   opacity:var(--reticle-opacity) !important;
   transform:translate(-50%,-50%) scale(var(--reticle-scale)) !important;
@@ -3396,7 +3396,7 @@ button { user-select:none; }
 .play-view.tuning-view .signal-lock-reticle {
   transition:transform .22s cubic-bezier(.2,.65,.25,1),opacity .22s ease,filter .22s ease !important;
 }
-.play-view.tuning-view .signal-capture:not([data-phase="slipping"]) .signal-lock-reticle {
+.play-view.tuning-view .signal-capture:not(.signal-live-capture):not([data-phase="slipping"]) .signal-lock-reticle {
   filter:drop-shadow(0 0 11px rgba(111,230,226,var(--reticle-shadow-alpha))) !important;
 }
 .play-view.tuning-view .signal-capture:not(.signal-live-capture) .reticle-corner {
