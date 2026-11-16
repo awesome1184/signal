@@ -1,5 +1,15 @@
-export type AnswerResult = { score: number; tier: string; note: string };
+export type AnswerResult = { score: number; tier: string; note: string; answerId?: string };
 type AnswerRecord = AnswerResult & { aliases: string[] };
+
+export type AnswerEntry = {
+  id: string;
+  promptId: string;
+  canonical: string;
+  aliases: string[];
+  score: number;
+  tier: string;
+  note: string;
+};
 
 const BANK: Record<string, AnswerRecord[]> = {
   'night-bird': [
@@ -183,16 +193,44 @@ export function normalizeAnswer(value: string): string {
     .trim();
 }
 
-export function evaluateAnswer(promptId: string, rawAnswer: string): AnswerResult | null {
+function answerRecordId(promptId: string, record: AnswerRecord): string {
+  return promptId + ':' + normalizeAnswer(record.aliases[0] ?? '');
+}
+
+/** Flatten the approved answer database for archive rotation and auditing. */
+export function getAnswerEntries(): AnswerEntry[] {
+  return Object.entries(BANK).flatMap(([promptId, records]) =>
+    records.map((record) => ({
+      id: answerRecordId(promptId, record),
+      promptId,
+      canonical: record.aliases[0] ?? '',
+      aliases: [...record.aliases],
+      score: record.score,
+      tier: record.tier,
+      note: record.note
+    }))
+  );
+}
+
+export function evaluateAnswer(promptId: string, rawAnswer: string, selectedAnswerId?: string): AnswerResult | null {
   const answer = normalizeAnswer(rawAnswer);
   if (!answer) return null;
   const match = (BANK[promptId] ?? []).find((record) =>
-    record.aliases.some((alias) => normalizeAnswer(alias) === answer)
+    (!selectedAnswerId || answerRecordId(promptId, record) === selectedAnswerId)
+    && record.aliases.some((alias) => normalizeAnswer(alias) === answer)
   );
-  return match ? { score: match.score, tier: match.tier, note: match.note } : null;
+  return match ? {
+    score: match.score,
+    tier: match.tier,
+    note: match.note,
+    answerId: answerRecordId(promptId, match)
+  } : null;
 }
 
-export function getTestAnswer(promptId: string, score: number): string | null {
-  const record = (BANK[promptId] ?? []).find((candidate) => candidate.score === score);
+export function getTestAnswer(promptId: string, score: number, selectedAnswerId?: string): string | null {
+  const record = (BANK[promptId] ?? []).find((candidate) =>
+    candidate.score === score
+    && (!selectedAnswerId || answerRecordId(promptId, candidate) === selectedAnswerId)
+  );
   return record?.aliases[0] ?? null;
 }
