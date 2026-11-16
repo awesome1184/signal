@@ -29,6 +29,7 @@ The current catalog contains 59 questions, 3,103 accepted answer records, and 3,
 2. Run `npm install`.
 3. Run `npm run web:dev`.
 4. Open the forwarded port 5173.
+5. Run `npm test` to execute the answer-catalog regression tests.
 
 The preview stores progress in the browser's local storage. It does not write Reddit scores.
 
