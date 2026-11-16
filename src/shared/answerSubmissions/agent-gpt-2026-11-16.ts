@@ -377,7 +377,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
   'biosphere-reserve': records(
     { score: 10, tier: 'BACKGROUND', note: 'A highly recognizable reserve in UNESCO’s World Network of Biosphere Reserves.', names: [
       'Yellowstone - Grand Teton',
-      ['Galápagos', 'Galapagos Islands']
+      'Galápagos'
     ]},
     { score: 15, tier: 'FAMILIAR', note: 'A prominent UNESCO-designated biosphere reserve.', names: [
       'Doñana',
