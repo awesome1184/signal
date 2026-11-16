@@ -166,7 +166,7 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
       'Crepitation', 'Purl'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'An uncommon literary or technical sound word.', names: [
-      'Murmuration', 'Susurration'
+      'Murmuration', 'Purl'
     ]}
   ),
 
@@ -359,7 +359,7 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A less commonly recalled officially named Saturnian moon.', names: [
       'Hyrrokkin', 'Skoll', 'Surtur', 'Jarnsaxa', 'Greip',
-      'Gridr', 'Angrboda', 'Angrboda', 'Skrymir',
+      'Gridr', 'Angrboda', 'Skrymir',
       'Gerd', 'Eggther', 'Beli', 'Gunnlod', 'Thiazzi',
       'Alvaldi', 'Geirrod'
     ]}
@@ -401,8 +401,7 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
       'Los Alerces National Park', 'Tipasa', 'Al Qal’a of Beni Hammad'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A less commonly named inscribed World Heritage property.', names: [
-      'Willandra Lakes Region', 'The English Lake District',
-      'Jodrell Bank Observatory', 'Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe',
+      'Willandra Lakes Region',
       'Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe'
     ]}
   ),
@@ -448,7 +447,7 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
     ]},
     { score: 30, tier: 'UNCOMMON', note: 'A recognized breed with a clear entry in the American Kennel Club register.', names: [
       'Pointer', 'Cocker Spaniel', 'English Setter', 'Irish Water Spaniel',
-      'Sussex Spaniel', 'Fox Terrier', 'Scottish Terrier',
+      'Sussex Spaniel', 'Smooth Fox Terrier', 'Wire Fox Terrier', 'Scottish Terrier',
       'Bull Terrier', 'Mastiff', 'Harrier', 'Irish Terrier',
       'English Springer Spaniel', 'German Shorthaired Pointer',
       'Flat-Coated Retriever', 'Chesapeake Bay Retriever'
@@ -495,10 +494,10 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
 
   'dinosaur-genus': records(
     { score: 15, tier: 'FAMILIAR', note: 'A recognizable non-avian dinosaur genus that is distinct from those already in the pool.', names: [
-      'Torvosaurus', 'Rinchenia'
+      'Rinchenia'
     ]},
     { score: 30, tier: 'UNCOMMON', note: 'A recognized dinosaur genus that is less likely to be an immediate answer.', names: [
-      'Nedoceratops', 'Kileskus'
+      'Fukuiraptor', 'Balaur'
     ]},
     { score: 60, tier: 'RARE', note: 'A documented but less commonly named non-avian dinosaur genus.', names: [
       'Mononykus', 'Othnielia', 'Hypsilophodon',
@@ -557,63 +556,32 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
       'Okavango River', 'Chari River'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A less familiar river basin shared by multiple countries.', names: [
-      'Gambia River', 'Cunene River', 'Ogooué River'
+      'Gambia River', 'Cunene River', 'Neretva'
     ]}
   ),
 
   'ich-heritage-element': records(
-    { score: 15, tier: 'FAMILIAR', note: 'A widely recognized practice or tradition inscribed on UNESCO’s Intangible Cultural Heritage lists.', names: [
-      'Peking opera', 'Chinese shadow puppetry', 'Noh theatre'
+    { score: 15, tier: 'FAMILIAR', note: 'A recognized performance or cultural practice inscribed by UNESCO.', names: [
+      'Gagaku', 'Tibetan opera'
     ]},
-    { score: 30, tier: 'UNCOMMON', note: 'A named cultural practice or performing art on a UNESCO intangible heritage list.', names: [
-      'Kabuki theatre', 'Gagaku', 'Tibetan opera',
-      'Kankurang', 'Jultagi'
-    ]},
-    { score: 60, tier: 'RARE', note: 'A less commonly named UNESCO-inscribed cultural element.', names: [
-      'Saman dance', 'Samba de Roda', 'Tbourida'
+    { score: 30, tier: 'UNCOMMON', note: 'A named cultural practice on a UNESCO intangible heritage list.', names: [
+      'Kankurang', 'Jultagi', 'Saman dance', 'Tbourida'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A specialist-level element documented on UNESCO’s lists.', names: [
-      'Traditional art of Azerbaijani tar and its craftsmanship',
-      'Traditional art of Azerbaijani carpet weaving'
-    ]}
-  )
-
-  'wine-grape-variety': records(
-    { score: 15, tier: 'FAMILIAR', note: 'A recognizable wine-grape cultivar used in established wine regions.', names: [
-      'Malbec', 'Cabernet Franc', 'Gamay', 'Garnacha'
-    ]},
-    { score: 30, tier: 'UNCOMMON', note: 'A distinct wine grape cultivar with an established wine-making tradition.', names: [
-      'Mencía', 'Godello', 'Verdejo', 'Palomino',
-      'Pedro Ximénez', 'Montepulciano', 'Touriga Franca'
-    ]},
-    { score: 60, tier: 'RARE', note: 'A less commonly named grape variety recorded in wine-grape catalogues.', names: [
-      'Falanghina', 'Nero d’Avola', 'Alicante Bouschet',
-      'Müller-Thurgau', 'Trousseau', 'Poulsard'
-    ]},
-    { score: 85, tier: 'DEEP CUT', note: 'A specialist grape cultivar with a more limited geographic footprint.', names: [
-      'Nerello Mascalese', 'Fetească Neagră', 'Baga',
-      'Listán Negro', 'Mavrud'
+      'Traditional art of Azerbaijani tar and its craftsmanship'
     ]}
   ),
-
   'protected-eu-cheese': records(
     { score: 15, tier: 'FAMILIAR', note: 'A well-known cheese with a registered EU geographical indication.', names: [
       'Stilton', 'Gouda Holland', 'Danbo'
     ]},
     { score: 30, tier: 'UNCOMMON', note: 'A recognized regional cheese protected under an EU PDO or PGI registration.', names: [
-      'Edam Holland', 'Queso de Mahón-Menorca',
-      'Asiago', 'Fontina', 'Bitto', 'Bra', 'Quartirolo Lombardo'
+      'Edam Holland', 'Queso de Mahón-Menorca'
     ]},
     { score: 60, tier: 'RARE', note: 'A less commonly named EU-protected cheese.', names: [
-      'Pecorino Romano', 'Provolone Valpadana',
-      'Montasio', 'Ricotta Romana', 'Queso de Murcia al Vino'
-    ]},
-    { score: 85, tier: 'DEEP CUT', note: 'A specialist regional cheese registered in the EU geographical indications register.', names: [
-      'Queijo Nisa', 'Queijo Rabaçal',
-      'Queso de l’Alt Urgell y la Cerdanya', 'Formaggio di Fossa di Sogliano'
+      'Queso de Murcia al Vino'
     ]}
   ),
-
   'roller-coaster': records(
     { score: 15, tier: 'FAMILIAR', note: 'A recognizable roller coaster with its own RCDB record.', names: [
       'Leviathan', 'Behemoth', 'Yukon Striker',
@@ -644,7 +612,7 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
       'Klei Entertainment', 'Frictional Games'
     ]},
     { score: 60, tier: 'RARE', note: 'A less commonly named studio that develops or publishes commercial games.', names: [
-      'Motion Twin', 'ConcernedApe', 'Coffee Stain Studios',
+      'Motion Twin', 'Studio MDHR', 'Coffee Stain Studios',
       'Double Fine Productions'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A smaller or more specialized studio with a released game.', names: [
