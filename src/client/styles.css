@@ -3912,6 +3912,35 @@ button { user-select:none; }
 .wave-style-heading { font-size:9px; }
 .wave-style-option small { font-size:8px; }
 
+.personal-rank {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:7px 12px;
+  width:min(460px,100%);
+  margin:12px auto 15px;
+  padding:10px 12px;
+  border:1px solid rgba(91,216,232,.22);
+  border-radius:6px;
+  background:rgba(7,27,39,.55);
+}
+.personal-rank span {
+  color:#83aab5;
+  font:8px var(--mono);
+  letter-spacing:.1em;
+}
+.personal-rank strong {
+  color:#ffd09b;
+  font:700 20px var(--display);
+  font-variant-numeric:tabular-nums;
+}
+.personal-rank small {
+  color:#718f9d;
+  font:7px var(--mono);
+  letter-spacing:.06em;
+}
+
 @media (max-width:720px) {
   .game-panel { min-height:0; }
   .ready-view { min-height:0; padding-top:26px; }

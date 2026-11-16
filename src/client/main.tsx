@@ -1183,11 +1183,22 @@ function App() {
     const shareText = [
       'SIGNAL // ' + formatDay(game.dateKey),
       total + '/700  ·  ' + scoreLabel(total),
+      !DEMO_MODE && playerRank !== null ? 'COMMUNITY PLACE // #' + playerRank + ' OF ' + playerCount : '',
       '',
       ...rows,
       '',
       'Find the signal in the noise.'
-    ].join('\n');
+    ].filter((line) => line !== '').join('\n');
+    try {
+      if (typeof navigator.share === 'function') {
+        await navigator.share({ title: 'SIGNAL // Daily scan', text: shareText });
+        setCopied(true);
+        window.setTimeout(() => setCopied(false), 2200);
+        return;
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') return;
+    }
     try {
       if (!navigator.clipboard?.writeText) throw new Error('Clipboard API unavailable');
       await navigator.clipboard.writeText(shareText);
@@ -1208,7 +1219,7 @@ function App() {
         setCopied(true);
         window.setTimeout(() => setCopied(false), 2200);
       } else {
-        setMessage('Clipboard access is unavailable in this browser.');
+        setMessage('Sharing and clipboard access are unavailable in this browser.');
       }
     }
   };
@@ -1573,6 +1584,13 @@ function App() {
                   <span><strong>{game.entries.filter((entry) => entry.score >= 85).length}</strong> DEEP CUTS</span>
                   <span><strong>{Math.round(total / Math.max(1, game.entries.length))}</strong> AVG / ROUND</span>
                 </div>
+                {!DEMO_MODE && (
+                  <div className="personal-rank">
+                    <span>YOUR COMMUNITY PLACE</span>
+                    <strong>{playerRank !== null ? '#' + playerRank : 'NOT RANKED'}</strong>
+                    <small>{playerRank !== null ? 'OF ' + playerCount + ' COMPLETED SCANS' : 'YOUR PLACE WILL APPEAR WHEN SAVED'}</small>
+                  </div>
+                )}
                 <div className="result-list">
                   {prompts.map((prompt, index) => {
                     const entry = game.entries[index] ?? { score: 0, tier: 'NO SIGNAL', answer: '' };
@@ -1586,7 +1604,7 @@ function App() {
                   })}
                 </div>
                 <div className="complete-actions">
-                  <button className="primary-button" onClick={() => void copyResult()} aria-label="Copy your complete daily result">{copied ? 'RESULT COPIED' : 'COPY FULL RESULT'} <span className="button-arrow">↗</span></button>
+                  <button className="primary-button" onClick={() => void copyResult()} aria-label="Share your complete daily result">{copied ? 'RESULT SHARED' : 'SHARE SCAN RESULT'} <span className="button-arrow">↗</span></button>
                   {DEMO_MODE && <button className="secondary-button" onClick={resetPreview}>RESET LOCAL PREVIEW</button>}
                 </div>
                 <p className="fine-print">{game.isTest ? 'TEST RUN · RESULTS ARE NOT SAVED TO THE COMMUNITY BOARD' : 'A new set of transmissions arrives at midnight Eastern.'}</p>

@@ -120,6 +120,14 @@ async function mutatePlayerRun<T>(
   throw new Error('The daily run changed too many times. Please retry.');
 }
 
+async function playerRank(day: string, userId: string): Promise<number | null> {
+  const [count, rank] = await Promise.all([
+    redis.zCard(boardKey(day)),
+    redis.zRank(boardKey(day), userId)
+  ]);
+  return typeof rank === 'number' && rank >= 0 ? count - rank : null;
+}
+
 async function leaderboard(day: string) {
   const key = boardKey(day);
   const count = await redis.zCard(key);
@@ -161,7 +169,10 @@ app.get('/api/bootstrap', async (c) => {
     try { result = JSON.parse(raw); }
     catch (error) { console.error('SIGNAL saved result could not be parsed:', error); }
   }
-  let run = userId ? parsePlayerRun(await redis.get(runKey(day, userId))) : null;
+  let run: PlayerRun | null = null;
+  if (userId !== null) {
+    run = parsePlayerRun(await redis.get(runKey(day, userId)));
+  }
   if (!result && run?.phase === 'complete' && userId) {
     result = await storeCompletedResult(day, userId, username, run);
   }
@@ -171,6 +182,7 @@ app.get('/api/bootstrap', async (c) => {
     dateKey: day,
     username,
     playerCount: await redis.zCard(boardKey(day)),
+    playerRank: userId ? await playerRank(day, userId) : null,
     leaderboard: await leaderboard(day),
     result,
     run: publicRun(run),
@@ -186,7 +198,7 @@ app.post('/api/start', async (c) => {
   const day = getNewYorkDateKey();
   const username = displayName(await reddit.getCurrentUsername());
   const saved = await redis.hGet(resultsKey(day), userId);
-  if (saved) return c.json({ ok: true, completed: true, result: JSON.parse(saved) });
+  if (saved) return c.json({ ok: true, completed: true, result: JSON.parse(saved), playerRank: await playerRank(day, userId) });
 
   const created = await mutatePlayerRun<'existing' | 'started'>(day, userId, (current) => {
     if (current) return { write: false, value: 'existing' as const };
@@ -394,6 +406,7 @@ app.post('/api/next', async (c) => {
       run: publicRun(outcome.run),
       result,
       playerCount: await redis.zCard(boardKey(day)),
+      playerRank: await playerRank(day, userId),
       leaderboard: await leaderboard(day)
     });
   }
@@ -401,9 +414,8 @@ app.post('/api/next', async (c) => {
 });
 
 app.post('/api/report-answer', async (c) => {
-  const userId = context.userId;
-  if (!userId) return c.json({ ok: false, message: 'Sign in to report a missing answer.' }, 401);
-  if (!userId) return c.json({ ok: false, message: 'Sign in to report a missing answer.' }, 401);
+  const userId = context.userId ?? null;
+  if (userId === null) return c.json({ ok: false, message: 'Sign in to report a missing answer.' }, 401);
   let body: { promptId?: string; answer?: string };
   try { body = await c.req.json(); }
   catch { return c.json({ ok: false, message: 'Malformed report.' }, 400); }
