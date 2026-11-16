@@ -99,6 +99,88 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Egyptian slit-faced bat', 'Nycteris thebaica'],
       ['Tube-nosed fruit bat', 'Nyctimene albiventer']
     ]},
+    { score: 85, tier: "DEEP CUT", note: "Additional verified entries from the referenced catalogue for this question.", names: [
+      [
+            "Black flying fox",
+            "Pteropus alecto"
+      ],
+      [
+            "Grey-headed flying fox",
+            "Pteropus poliocephalus"
+      ],
+      [
+            "Large flying fox",
+            "Pteropus vampyrus"
+      ],
+      [
+            "Common pipistrelle",
+            "Pipistrellus pipistrellus"
+      ],
+      [
+            "Soprano pipistrelle",
+            "Pipistrellus pygmaeus"
+      ],
+      [
+            "Nathusius's pipistrelle",
+            "Pipistrellus nathusii"
+      ],
+      [
+            "Serotine bat",
+            "Eptesicus serotinus"
+      ],
+      [
+            "Northern bat",
+            "Eptesicus nilssonii"
+      ],
+      [
+            "Leisler's bat",
+            "Nyctalus leisleri"
+      ],
+      [
+            "Common noctule",
+            "Nyctalus noctula"
+      ],
+      [
+            "Greater mouse-eared bat",
+            "Myotis myotis"
+      ],
+      [
+            "Long-fingered bat",
+            "Myotis capaccinii"
+      ],
+      [
+            "Indiana bat",
+            "Myotis sodalis"
+      ],
+      [
+            "Northern long-eared bat",
+            "Myotis septentrionalis"
+      ],
+      [
+            "Eastern red bat",
+            "Lasiurus borealis"
+      ],
+      [
+            "Big brown bat",
+            "Eptesicus fuscus"
+      ],
+      [
+            "Greater sac-winged bat",
+            "Saccopteryx bilineata"
+      ],
+      [
+            "Common blossom bat",
+            "Syconycteris australis"
+      ],
+      [
+            "Lesser dawn bat",
+            "Eonycteris spelaea"
+      ],
+      [
+            "Jamaican fruit bat",
+            "Artibeus jamaicensis"
+      ]
+] },
     { score: 100, tier: 'SIGNAL FOUND', note: 'An obscure, formally named tube-nosed bat species in the specialist taxonomy.', names: [
       'Nyctimene wrightae'
     ]}
@@ -144,6 +226,88 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Paradoxical frog', 'Pseudis paradoxa'],
       ['Common coquí', 'Eleutherodactylus coqui']
     ]},
+    { score: 85, tier: "DEEP CUT", note: "Additional verified entries from the referenced catalogue for this question.", names: [
+      [
+            "Green tree frog",
+            "Dryophytes cinereus"
+      ],
+      [
+            "Gray treefrog",
+            "Dryophytes versicolor"
+      ],
+      [
+            "Leopard frog",
+            "Lithobates pipiens"
+      ],
+      [
+            "Pickerel frog",
+            "Lithobates palustris"
+      ],
+      [
+            "Spring peeper",
+            "Pseudacris crucifer"
+      ],
+      [
+            "Boreal chorus frog",
+            "Pseudacris maculata"
+      ],
+      [
+            "European tree frog",
+            "Hyla arborea"
+      ],
+      [
+            "Common toad",
+            "Bufo bufo"
+      ],
+      [
+            "Natterjack toad",
+            "Epidalea calamita"
+      ],
+      [
+            "European green toad",
+            "Bufotes viridis"
+      ],
+      [
+            "Yellow-bellied toad",
+            "Bombina variegata"
+      ],
+      [
+            "Agile frog",
+            "Rana dalmatina"
+      ],
+      [
+            "Pool frog",
+            "Pelophylax lessonae"
+      ],
+      [
+            "Marsh frog",
+            "Pelophylax ridibundus"
+      ],
+      [
+            "African reed frog",
+            "Hyperolius viridiflavus"
+      ],
+      [
+            "Ornate narrow-mouthed frog",
+            "Microhyla ornata"
+      ],
+      [
+            "Indian bullfrog",
+            "Hoplobatrachus tigerinus"
+      ],
+      [
+            "Banded bullfrog",
+            "Kaloula pulchra"
+      ],
+      [
+            "Common rain frog",
+            "Breviceps adspersus"
+      ],
+      [
+            "Vermiculated tree frog",
+            "Leptopelis vermiculatus"
+      ]
+] },
     { score: 100, tier: 'SIGNAL FOUND', note: 'A highly threatened, narrowly distributed harlequin frog species.', names: [
       ['Jambato harlequin frog', 'Atelopus ignescens']
     ]}
@@ -189,6 +353,88 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Eastern indigo snake', 'Drymarchon couperi'],
       ['Smooth green snake', 'Opheodrys vernalis']
     ]},
+    { score: 85, tier: "DEEP CUT", note: "Additional verified entries from the referenced catalogue for this question.", names: [
+      [
+            "Burmese python",
+            "Python bivittatus"
+      ],
+      [
+            "Ball python",
+            "Python regius"
+      ],
+      [
+            "Green tree python",
+            "Morelia viridis"
+      ],
+      [
+            "Eastern brown snake",
+            "Pseudonaja textilis"
+      ],
+      [
+            "Tiger snake",
+            "Notechis scutatus"
+      ],
+      [
+            "Coastal taipan",
+            "Oxyuranus scutellatus"
+      ],
+      [
+            "Russell's viper",
+            "Daboia russelii"
+      ],
+      [
+            "Saw-scaled viper",
+            "Echis carinatus"
+      ],
+      [
+            "Indian cobra",
+            "Naja naja"
+      ],
+      [
+            "Egyptian cobra",
+            "Naja haje"
+      ],
+      [
+            "Eastern green mamba",
+            "Dendroaspis angusticeps"
+      ],
+      [
+            "Grass snake",
+            "Natrix natrix"
+      ],
+      [
+            "Dice snake",
+            "Natrix tessellata"
+      ],
+      [
+            "Smooth snake",
+            "Coronella austriaca"
+      ],
+      [
+            "Western hognose snake",
+            "Heterodon nasicus"
+      ],
+      [
+            "Eastern hognose snake",
+            "Heterodon platirhinos"
+      ],
+      [
+            "Eastern racer",
+            "Coluber constrictor"
+      ],
+      [
+            "Coachwhip",
+            "Masticophis flagellum"
+      ],
+      [
+            "California kingsnake",
+            "Lampropeltis californiae"
+      ],
+      [
+            "Milk snake",
+            "Lampropeltis triangulum"
+      ]
+] },
     { score: 100, tier: 'SIGNAL FOUND', note: 'An exceptionally obscure, formally described snake genus and species.', names: [
       'Xenophidion schaeferi'
     ]}
@@ -234,6 +480,28 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Rocky Mountain parnassian', 'Parnassius smintheus'],
       ['Scarce swallowtail', 'Iphiclides podalirius']
     ]},
+    { score: 85, tier: "DEEP CUT", note: "Additional verified entries from the referenced catalogue for this question.", names: [
+      "Papilio eurymedon",
+      "Papilio indra",
+      "Papilio zelicaon",
+      "Papilio aristodemus",
+      "Papilio thoas",
+      "Papilio anchisiades",
+      "Papilio torquatus",
+      "Papilio bianor",
+      "Papilio xuthus",
+      "Papilio helenus",
+      "Papilio protenor",
+      "Papilio rumanzovia",
+      "Papilio antimachus",
+      "Papilio zalmoxis",
+      "Ornithoptera priamus",
+      "Ornithoptera goliath",
+      "Troides rhadamantus",
+      "Graphium agamemnon",
+      "Graphium sarpedon",
+      "Graphium doson"
+] },
     { score: 100, tier: 'SIGNAL FOUND', note: 'A rare monotypic swallowtail lineage represented by one living species.', names: [
       ['Primitive swallowtail', 'Baronia brevicornis']
     ]}
@@ -279,6 +547,28 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Long-whiskered bulbophyllum', 'Bulbophyllum longissimum'],
       ['Kingianum dendrobium', 'Dendrobium kingianum']
     ]},
+    { score: 85, tier: "DEEP CUT", note: "Additional verified entries from the referenced catalogue for this question.", names: [
+      "Phalaenopsis aphrodite",
+      "Phalaenopsis equestris",
+      "Phalaenopsis schilleriana",
+      "Cattleya mossiae",
+      "Cattleya trianae",
+      "Cattleya dowiana",
+      "Dendrobium speciosum",
+      "Vanda tricolor",
+      "Vanda tessellata",
+      "Paphiopedilum insigne",
+      "Paphiopedilum micranthum",
+      "Paphiopedilum armeniacum",
+      "Ophrys insectifera",
+      "Orchis mascula",
+      "Orchis italica",
+      "Cypripedium calceolus",
+      "Cypripedium reginae",
+      "Platanthera bifolia",
+      "Vanilla pompona",
+      "Dracula vampira"
+] },
     { score: 100, tier: 'SIGNAL FOUND', note: 'A striking, narrowly distributed orchid species described from Colombia in the 2010s.', names: [
       ['Devil orchid', 'Telipogon diabolicus']
     ]}
@@ -324,6 +614,28 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Venus sea fan', 'Gorgonia ventalina'],
       'Acanthastrea regularis'
     ]},
+    { score: 85, tier: "DEEP CUT", note: "Additional verified entries from the referenced catalogue for this question.", names: [
+      "Acropora digitifera",
+      "Acropora valida",
+      "Acropora gemmifera",
+      "Acropora formosa",
+      "Acropora florida",
+      "Acropora nasuta",
+      "Acropora secale",
+      "Acropora loripes",
+      "Porites compressa",
+      "Porites cylindrica",
+      "Porites rus",
+      "Pocillopora eydouxi",
+      "Pocillopora meandrina",
+      "Montipora digitata",
+      "Montipora capricornis",
+      "Montipora foliosa",
+      "Favites abdita",
+      "Favites pentagona",
+      "Favia fragum",
+      "Dipsastraea speciosa"
+] },
     { score: 100, tier: 'SIGNAL FOUND', note: 'An obscure species-level coral entry visible in the database catalogue.', names: [
       'Acanthacis austera'
     ]}
@@ -369,6 +681,28 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Irish harping', 'Harping'],
       ['Yama, Hoko, Yatai, float festivals in Japan', 'Japanese float festivals']
     ]},
+    { score: 85, tier: "DEEP CUT", note: "Additional verified entries from the referenced catalogue for this question.", names: [
+      "Nowruz",
+      "Mediterranean diet",
+      "Chinese shadow puppetry",
+      "Traditional art of Azerbaijani carpet weaving",
+      "Kırkpınar oil wrestling festival",
+      "Carnival of Binche",
+      "Carnival of Oruro",
+      "Mazu belief and customs",
+      "Gion Matsuri float festival in Kyoto",
+      "Arabic calligraphy: knowledge, skills and practices",
+      "Chinese calligraphy",
+      "Qvevri wine-making method",
+      "Duduk and its music",
+      "Water puppetry in Viet Nam",
+      "Ssireum (Korean wrestling)",
+      "Talchum, mask dance drama in the Republic of Korea",
+      "Ramlila, the traditional performance of the Ramayana",
+      "Ramman, religious festival and ritual theatre of the Garhwal Himalayas",
+      "Chhau dance",
+      "Garba of Gujarat"
+] },
     { score: 100, tier: 'SIGNAL FOUND', note: 'A particularly obscure Cypriot oral-poetic practice inscribed by UNESCO.', names: [
       ['Tsiattista poetic duelling', 'Tsiattista']
     ]}
@@ -414,6 +748,28 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Urdaibai', 'Urdaibai Biosphere Reserve'],
       ['Clayoquot Sound', 'Clayoquot Sound Biosphere Reserve']
     ]},
+    { score: 85, tier: "DEEP CUT", note: "Additional verified entries from the referenced catalogue for this question.", names: [
+      "Shkodër Lake",
+      "Great Caucasus",
+      "Theniet el Had",
+      "Skadar Lake Watershed",
+      "Serra da Estrela",
+      "Nino Konis Santana",
+      "Tost, Toson Bumbiin Nuruu",
+      "Dalankuh-Qamishlou",
+      "Takamanda-Cross River Gorilla",
+      "Phong Nha - Ke Bang",
+      "Aruba Island",
+      "Québec City",
+      "Sur del Alto Paraná",
+      "Isla de Bioko",
+      "Romit",
+      "Ilha de São Tomé",
+      "Vjosa Valley",
+      "Storkriket",
+      "Ajloun",
+      "Mantadia"
+] },
     { score: 100, tier: 'SIGNAL FOUND', note: 'A recently designated, lesser-known biosphere reserve in the current UNESCO register.', names: [
       ['Anywaa Forest', 'Anywaa Forest Biosphere Reserve']
     ]}
@@ -459,6 +815,28 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Mannheim', 'Mannheim, City of Music'],
       ['Norrköping', 'Norrkoping, City of Music']
     ]},
+    { score: 85, tier: "DEEP CUT", note: "Additional verified entries from the referenced catalogue for this question.", names: [
+      "Aberystwyth",
+      "Abuja",
+      "Celje",
+      "Conakry",
+      "Dumaguete City",
+      "Gdańsk",
+      "Lund",
+      "San Luis Potosí",
+      "Tangier",
+      "Al-Madinah Al-Munawwarah",
+      "Cuenca",
+      "Kelowna",
+      "Lucknow",
+      "Manizales",
+      "Matosinhos",
+      "Quanzhou",
+      "San Javier de Loncomilla",
+      "Songkhla",
+      "Zaragoza",
+      "Rovaniemi"
+] },
     { score: 100, tier: 'SIGNAL FOUND', note: 'A newly designated and less widely known member of the 2025 UNESCO Creative Cities cohort.', names: [
       'Kahramanmaraş'
     ]}
@@ -504,6 +882,28 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['TOI-1452 b', 'TOI 1452b'],
       ['51 Eridani b', '51 Eri b']
     ]},
+    { score: 85, tier: "DEEP CUT", note: "Additional verified entries from the referenced catalogue for this question.", names: [
+      "TRAPPIST-1 b",
+      "TRAPPIST-1 c",
+      "TRAPPIST-1 d",
+      "TRAPPIST-1 f",
+      "TRAPPIST-1 g",
+      "TRAPPIST-1 h",
+      "Kepler-10 b",
+      "Kepler-20 e",
+      "Kepler-78 b",
+      "55 Cancri b",
+      "55 Cancri c",
+      "55 Cancri d",
+      "55 Cancri f",
+      "HD 189733 b",
+      "WASP-96 b",
+      "WASP-69 b",
+      "HAT-P-1 b",
+      "HAT-P-32 b",
+      "HAT-P-26 b",
+      "GJ 667 Cc"
+] },
     { score: 100, tier: 'SIGNAL FOUND', note: 'A confirmed microlensing planet with a specialist catalogue-style designation.', names: [
       'OGLE-2005-BLG-390L b'
     ]}
@@ -549,6 +949,28 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Shackleton', 'Shackleton crater'],
       ['Amundsen', 'Amundsen crater']
     ]},
+    { score: 85, tier: "DEEP CUT", note: "Additional verified entries from the referenced catalogue for this question.", names: [
+      "Atlas",
+      "Hercules",
+      "Macrobius",
+      "Aristoteles",
+      "Eudoxus",
+      "Cassini",
+      "Archytas",
+      "Wargentin",
+      "Schiller",
+      "Sirsalis",
+      "Reiner",
+      "Marius",
+      "Endymion",
+      "Hedin",
+      "Humboldt",
+      "Riccioli",
+      "Furnerius",
+      "Janssen",
+      "Huygens",
+      "Abulfeda"
+] },
     { score: 100, tier: 'SIGNAL FOUND', note: 'An obscure officially named crater near the lunar south pole.', names: [
       ['Faustini', 'Faustini crater']
     ]}
@@ -594,6 +1016,28 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Glera', 'Prosecco grape'],
       ['Corvina', 'Corvina Veronese']
     ]},
+    { score: 85, tier: "DEEP CUT", note: "Additional verified entries from the referenced catalogue for this question.", names: [
+      "Albariño",
+      "Chenin Blanc",
+      "Gewürztraminer",
+      "Sémillon",
+      "Viognier",
+      "Pinot Gris",
+      "Pinot Meunier",
+      "Grenache",
+      "Syrah",
+      "Zinfandel",
+      "Barbera",
+      "Dolcetto",
+      "Rondinella",
+      "Garganega",
+      "Vermentino",
+      "Arneis",
+      "Cortese",
+      "Verdicchio",
+      "Fiano",
+      "Greco"
+] },
     { score: 100, tier: 'SIGNAL FOUND', note: 'A rare wine-grape cultivar with a documented VIVC identity and limited international recognition.', names: [
       ['Krasnostop Zolotovsky', 'Krasnostop']
     ]}
@@ -640,6 +1084,28 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       'Époisses',
       ['Livarot', 'Livarot cheese']
     ]},
+    { score: 85, tier: "DEEP CUT", note: "Additional verified entries from the referenced catalogue for this question.", names: [
+      "Asiago",
+      "Pecorino Romano",
+      "Pecorino Sardo",
+      "Pecorino Toscano",
+      "Mozzarella di Bufala Campana",
+      "Provolone Valpadana",
+      "Taleggio",
+      "Fontina",
+      "Bitto",
+      "Montasio",
+      "Bra",
+      "Quartirolo Lombardo",
+      "Ricotta Romana",
+      "Queso de La Serena",
+      "Queso Palmero",
+      "Roncal",
+      "Queso de l'Alt Urgell y la Cerdanya",
+      "Queijo Nisa",
+      "Queijo Rabaçal",
+      "Halloumi"
+] },
     { score: 100, tier: 'SIGNAL FOUND', note: 'A particularly obscure registered regional cheese whose protected name appears in the EU register.', names: [
       ['Formaggella del Luinese', 'Luinese cheese']
     ]}
@@ -686,6 +1152,28 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['The Flying Dinosaur', 'Flying Dinosaur'],
       ['The Voyage', 'Voyage']
     ]},
+    { score: 85, tier: "DEEP CUT", note: "Additional verified entries from the referenced catalogue for this question.", names: [
+      "Top Thrill 2",
+      "Nitro",
+      "Lightning Rod",
+      "Hagrid's Magical Creatures Motorbike Adventure",
+      "Montu",
+      "Kumba",
+      "SheiKra",
+      "Mako",
+      "Kraken",
+      "The Incredible Hulk Coaster",
+      "Guardians of the Galaxy: Cosmic Rewind",
+      "Rock 'n' Roller Coaster",
+      "Nemesis Reborn",
+      "Oblivion",
+      "Wicker Man",
+      "Hyperia",
+      "Stealth",
+      "The Swarm",
+      "The Big One",
+      "Silver Star"
+] },
     { score: 100, tier: 'SIGNAL FOUND', note: 'A less widely known named coaster with a dedicated RCDB record.', names: [
       ['Anubis The Ride', 'Anubis']
     ]}
