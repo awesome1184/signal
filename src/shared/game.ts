@@ -4,6 +4,9 @@ export type Prompt = {
   prompt: string;
   context: string;
   hint: string;
+  /** Local-only metadata used by the standalone browser preview's archive fallback. */
+  sourcePromptId?: string;
+  fallbackAnswerId?: string;
 };
 
 export type PromptSelectionMode = 'question' | 'answer';
