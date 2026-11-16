@@ -222,7 +222,7 @@ function getPreviewDailyPrompts(dateKey: string): Prompt[] {
         .filter(([, usedOn]) => previewDayAge(dateKey, usedOn) >= 1 && previewDayAge(dateKey, usedOn) <= 7)
         .map(([id]) => id));
       const usedSources = new Set(prompts.map((prompt) => prompt.id));
-      const fresh = previewShuffle(getAnswerEntries().filter((entry) => !recent.has(entry.id)));
+      const fresh = previewShuffle(getAnswerEntries().filter((entry) => Boolean(getPromptById(entry.promptId)) && !recent.has(entry.id)));
       const picked = new Set<string>();
       const chosen = [] as typeof fresh;
       for (const entry of fresh) {
@@ -243,7 +243,7 @@ function getPreviewDailyPrompts(dateKey: string): Prompt[] {
       }
 
       if (chosen.length < slots) {
-        const stale = previewShuffle(getAnswerEntries().filter((entry) => !picked.has(entry.id)))
+        const stale = previewShuffle(getAnswerEntries().filter((entry) => Boolean(getPromptById(entry.promptId)) && !picked.has(entry.id)))
           .sort((left, right) => (state.usedAnswers[left.id] ?? '0000-00-00').localeCompare(state.usedAnswers[right.id] ?? '0000-00-00'));
         for (const entry of stale) {
           if (chosen.length >= slots) break;
