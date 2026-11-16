@@ -130,7 +130,7 @@ export const ANSWER_SUBMISSIONS_BATCH_2: Record<string, AnswerRecord[]> = {
     ]},
     { score: 30, tier: 'UNCOMMON', note: 'An established World Heritage property that is less frequently named.', names: [
       'Tassili nAjjer', 'Timgad', 'Djémila', 'Butrint', 'Madriu-Perafita-Claror Valley',
-      'Mbanza Kongo', 'Iguazu National Park', 'Los Glaciares National Park',
+      'Koutammakou', 'Iguazu National Park', 'Los Glaciares National Park',
       'Península Valdés', 'Ischigualasto Talampaya Natural Parks',
       'Quebrada de Humahuaca', 'Monastery of Geghard'
     ]},
@@ -169,7 +169,7 @@ export const ANSWER_SUBMISSIONS_BATCH_2: Record<string, AnswerRecord[]> = {
       'La Mauricie National Park'
     ]},
     { score: 30, tier: 'UNCOMMON', note: 'A formally designated Canadian national park or reserve.', names: [
-      'Forillon National Park', 'Grasslands National Park', 'Waterton Lakes National Park',
+      'Forillon National Park', 'Grasslands National Park',
       'Prince Albert National Park', 'Terra Nova National Park', 'Pukaskwa National Park',
       'Kouchibouguac National Park', 'Georgian Bay Islands National Park',
       'Auyuittuq National Park', 'Aulavik National Park'
@@ -201,7 +201,7 @@ export const ANSWER_SUBMISSIONS_BATCH_2: Record<string, AnswerRecord[]> = {
     { score: 15, tier: 'FAMILIAR', note: 'A widely recognized Pokémon species from the National Pokédex.', names: [
       'Blastoise', 'Venusaur', 'Vulpix', 'Ninetales', 'Arcanine',
       'Gyarados', 'Dragonite', 'Ditto', 'Vaporeon', 'Jolteon',
-      'Flareon', 'Espeon', 'Umbreon', 'Togepi', 'Snorlax'
+      'Flareon', 'Espeon', 'Umbreon', 'Togepi', 'Zorua'
     ]},
     { score: 30, tier: 'UNCOMMON', note: 'An official Pokémon species that is less commonly the first answer people think of.', names: [
       'Porygon', 'Omanyte', 'Kabuto', 'Aerodactyl', 'Chikorita',
@@ -211,7 +211,7 @@ export const ANSWER_SUBMISSIONS_BATCH_2: Record<string, AnswerRecord[]> = {
     ]},
     { score: 60, tier: 'RARE', note: 'A valid National Pokédex species with a less prominent profile.', names: [
       'Dunsparce', 'Qwilfish', 'Girafarig', 'Misdreavus', 'Corsola',
-      'Delibird', 'Surskit', 'Shuppet', 'Relicanth', 'Chimecho',
+      'Delibird', 'Tynamo', 'Shuppet', 'Relicanth', 'Chimecho',
       'Clamperl', 'Luvdisc', 'Tropius', 'Kecleon', 'Pachirisu',
       'Chatot', 'Carnivine', 'Lumineon', 'Maractus', 'Sigilyph'
     ]},
@@ -224,7 +224,7 @@ export const ANSWER_SUBMISSIONS_BATCH_2: Record<string, AnswerRecord[]> = {
       'Morelull', 'Shiinotic', 'Bruxish', 'Yungoos', 'Silicobra'
     ]},
     { score: 100, tier: 'SIGNAL FOUND', note: 'A genuine but relatively obscure National Pokédex species.', names: [
-      'Surskit'
+      'Dhelmise'
     ]}
   ),
 
@@ -314,7 +314,7 @@ export const ANSWER_SUBMISSIONS_BATCH_2: Record<string, AnswerRecord[]> = {
       'Wilhelm Röntgen', 'J. J. Thomson'
     ]},
     { score: 15, tier: 'FAMILIAR', note: 'A widely known Physics Nobel laureate.', names: [
-      'Stephen Hawking', 'Kip Thorne', 'Peter Higgs', 'Donna Strickland',
+      'Lawrence Bragg', 'Kip Thorne', 'Peter Higgs', 'Donna Strickland',
       'Andrea Ghez', 'Roger Penrose', 'Subrahmanyan Chandrasekhar',
       'Murray Gell-Mann', 'John Bardeen', 'William Shockley',
       'Leon Cooper', 'John Schrieffer'
@@ -326,22 +326,22 @@ export const ANSWER_SUBMISSIONS_BATCH_2: Record<string, AnswerRecord[]> = {
     ]},
     { score: 60, tier: 'RARE', note: 'A Physics Nobel laureate whose name is less commonly recalled outside science.', names: [
       'Manne Siegbahn', 'Owen Richardson', 'Jean Baptiste Perrin',
-      'Robert Millikan', 'C. T. R. Wilson', 'Frits Zernike',
+      'Robert Millikan', ['C. T. R. Wilson', 'Charles Thomson Rees Wilson'], 'Frits Zernike',
       'Patrick Blackett', 'Cecil Powell', 'Willis Lamb', 'Polykarp Kusch',
       'Emilio Segrè', 'Owen Chamberlain', 'Eugene Wigner',
       'Maria Goeppert Mayer', 'Lev Landau'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A less commonly named individual from the official Physics laureate list.', names: [
       'Charles Edouard Guillaume', 'Johannes Stark', 'Charles Glover Barkla',
-      'Gustaf Dalén', 'Heike Kamerlingh Onnes', 'Robert Andrews Millikan',
+      'Gustaf Dalén', 'Heike Kamerlingh Onnes', 'Ivar Giaever',
       'Walther Bothe', 'Max Born', 'Hideki Yukawa', 'Donald Glaser',
-      'Rudolf Mössbauer', 'Polykarp Kusch', 'Pyotr Kapitsa',
+      'Rudolf Mössbauer', 'Pyotr Kapitsa',
       'Kai Siegbahn', 'Cecil Frank Powell', 'Luis Alvarez',
       'Arthur Ashkin', 'Steven Chu', 'Nicolaas Bloembergen',
       'Jerome Isaac Friedman', 'Henry Way Kendall'
     ]},
     { score: 100, tier: 'SIGNAL FOUND', note: 'A real but particularly obscure name on the official Physics laureate roll.', names: [
-      'Charles Thomson Rees Wilson'
+      'Frederick Reines'
     ]}
   ),
 
@@ -404,8 +404,8 @@ export const ANSWER_SUBMISSIONS_BATCH_2: Record<string, AnswerRecord[]> = {
     { score: 85, tier: 'DEEP CUT', note: 'A lesser-known Mars exploration attempt or component mission.', names: [
       'Mars 1960A', 'Mars 1960B', 'Sputnik 22', 'Sputnik 24',
       'Mariner 3', 'Mariner 8', 'Mars 1969A', 'Mars 1969B',
-      'Mars 1971C', 'Mars 1973A', 'Mars 1973B', 'Mars 4NM',
-      'Mars 5M', 'Mars 5NM'
+      ['Mars 1962B', 'Sputnik 24', 'Korabl 13'], 'Mars 1969A', 'Mars 1969B',
+      'Mars 1971C', 'Mars 1973A', 'Mars 1973B', 'Cosmos 419'
     ]},
     { score: 100, tier: 'SIGNAL FOUND', note: 'An obscure historic Mars mission attempt documented in the NASA chronology.', names: [
       'Mars 1962A'
@@ -426,8 +426,8 @@ export const ANSWER_SUBMISSIONS_BATCH_2: Record<string, AnswerRecord[]> = {
     ]},
     { score: 30, tier: 'UNCOMMON', note: 'A recognized astronomical observatory that operated or operates in space.', names: [
       'COBE', 'ROSAT', 'Einstein Observatory', 'Uhuru',
-      'International Ultraviolet Explorer', 'Extreme Ultraviolet Explorer',
-      'GALEX', 'FUSE', 'INTEGRAL', 'BeppoSAX'
+      ['International Ultraviolet Explorer', 'IUE'], 'Extreme Ultraviolet Explorer',
+      'GALEX', 'FUSE', 'INTEGRAL', 'EXOSAT'
     ]},
     { score: 60, tier: 'RARE', note: 'A less commonly named space observatory or astronomy satellite.', names: [
       'Suzaku', 'Hitomi', 'ASCA', 'AKARI', 'AstroSat',
@@ -435,9 +435,9 @@ export const ANSWER_SUBMISSIONS_BATCH_2: Record<string, AnswerRecord[]> = {
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A specialist-level orbital observatory or astronomy mission.', names: [
       'NICER', 'IXPE', 'SPHEREx', 'Pandora Observatory',
-      'SPARCS', 'XRISM', 'Hipparcos', 'IUE',
+      'SPARCS', 'XRISM', 'Hipparcos',
       'High Energy Astronomy Observatory 1', 'HETE-2',
-      'BeppoSAX', 'WIND'
+      'BeppoSAX'
     ]},
     { score: 100, tier: 'SIGNAL FOUND', note: 'A particularly obscure space-based observatory with a documented astronomical mission.', names: [
       'EUVE'
@@ -485,7 +485,7 @@ export const ANSWER_SUBMISSIONS_BATCH_2: Record<string, AnswerRecord[]> = {
   'woodwind-instrument': records(
     { score: 10, tier: 'BACKGROUND', note: 'A familiar member of the woodwind family.', names: [
       'Flute', 'Clarinet', 'Oboe', 'Bassoon', 'Saxophone',
-      'Piccolo', 'Recorder', 'English horn', 'Bass clarinet', 'Harmonica'
+      'Piccolo', 'Recorder', 'English horn', 'Bass clarinet', 'Baroque oboe'
     ]},
     { score: 15, tier: 'FAMILIAR', note: 'A recognized orchestral or commonly taught woodwind instrument.', names: [
       'Contrabassoon', 'Alto flute', 'Bass flute', 'Soprano saxophone',
@@ -509,7 +509,7 @@ export const ANSWER_SUBMISSIONS_BATCH_2: Record<string, AnswerRecord[]> = {
       'Uilleann pipes', 'Great Highland bagpipes'
     ]},
     { score: 100, tier: 'SIGNAL FOUND', note: 'A particularly obscure regional double-reed woodwind.', names: [
-      'Surnay'
+      'Sipsi'
     ]}
   ),
 
@@ -537,7 +537,7 @@ export const ANSWER_SUBMISSIONS_BATCH_2: Record<string, AnswerRecord[]> = {
     { score: 85, tier: 'DEEP CUT', note: 'A specialist board game or historical tabletop game.', names: [
       'Hnefatafl', 'Nine Men’s Morris', 'Royal Game of Ur',
       'Senet', 'Agon', 'Halma', 'Pachisi', 'Ludo',
-      'Mancala', 'Tafl', 'Shogi', 'Xiangqi',
+      'Oware', 'Tafl', 'Shogi', 'Xiangqi',
       'Go-Moku', 'Yut', 'Fanorona', 'Surakarta',
       'Yote', 'Bao', 'Congkak', 'Myrmes',
       'Brass: Birmingham', 'Brass: Lancashire', 'Root',
