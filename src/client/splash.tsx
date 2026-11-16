@@ -1,4 +1,5 @@
 import './styles.css';
+import './player-experience.css';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { requestExpandedMode } from '@devvit/web/client';
