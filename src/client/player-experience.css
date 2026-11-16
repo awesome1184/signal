@@ -96,3 +96,15 @@
   .app-shell::before,
   .app-shell::after { animation-duration: 18s; }
 }
+
+/* Reduce ambient movement while a timed answer is in progress. */
+.round-active::before,
+.round-active::after {
+  opacity: .055;
+  animation-duration: 30s;
+}
+.active-round .panel-scanline {
+  opacity: .06;
+  animation-duration: 18s;
+}
+.active-round .progress-cell.active::after { opacity: .2; }
