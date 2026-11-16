@@ -1718,7 +1718,7 @@ function App() {
                       <div className="admin-report-heading">
                         <div>
                           <strong>MISSING ANSWER QUEUE</strong>
-                          <span>REVIEW COMMUNITY SUBMISSIONS · LAST 14 DAYS</span>
+                          <span>APPROVED ANSWERS JOIN FUTURE ARCHIVE DRAWS · LAST 14 DAYS</span>
                         </div>
                         <button type="button" onClick={() => void loadAdminReports()} disabled={adminReportsLoading || Boolean(adminReviewBusy)}>
                           {adminReportsLoading ? 'LOADING…' : adminReportsLoaded ? 'REFRESH QUEUE' : 'LOAD QUEUE'}
@@ -1742,30 +1742,26 @@ function App() {
                           </div>
                           {report.decision === 'pending' ? (
                             <div className="admin-report-actions">
-                              {report.selectionMode === 'question' ? (
-                                <>
-                                  <label>
-                                    RARITY
-                                    <select
-                                      value={adminReportScores[report.id] ?? 60}
-                                      onChange={(event) => setAdminReportScores((current) => ({ ...current, [report.id]: Number(event.target.value) }))}
-                                    >
-                                      {TEST_TIERS.map((tier) => <option key={tier.score} value={tier.score}>{tier.score} · {tier.label}</option>)}
-                                    </select>
-                                  </label>
-                                  <button type="button" className="approve-report" disabled={Boolean(adminReviewBusy)} onClick={() => void reviewAdminReport(report, 'approve')}>
-                                    {adminReviewBusy === report.id ? 'SAVING…' : 'APPROVE INTO LIVE BANK'}
-                                  </button>
-                                </>
-                              ) : (
-                                <span className="admin-report-legacy">Only reports from normal question rounds can be approved into the live answer bank.</span>
-                              )}
+                              <>
+                                <label>
+                                  RARITY
+                                  <select
+                                    value={adminReportScores[report.id] ?? 60}
+                                    onChange={(event) => setAdminReportScores((current) => ({ ...current, [report.id]: Number(event.target.value) }))}
+                                  >
+                                    {TEST_TIERS.map((tier) => <option key={tier.score} value={tier.score}>{tier.score} · {tier.label}</option>)}
+                                  </select>
+                                </label>
+                                <button type="button" className="approve-report" disabled={Boolean(adminReviewBusy)} onClick={() => void reviewAdminReport(report, 'approve')}>
+                                  {adminReviewBusy === report.id ? 'SAVING…' : 'APPROVE INTO ARCHIVE'}
+                                </button>
+                              </>
                               <button type="button" disabled={Boolean(adminReviewBusy)} onClick={() => void reviewAdminReport(report, 'reject')}>REJECT</button>
                               <button type="button" disabled={Boolean(adminReviewBusy)} onClick={() => void reviewAdminReport(report, 'duplicate')}>DUPLICATE</button>
                             </div>
                           ) : (
                             <div className="admin-report-reviewed">
-                              {report.decision === 'approved' ? 'ADDED TO LIVE ANSWER BANK' : report.decision === 'duplicate' ? 'MARKED AS DUPLICATE' : 'REJECTED'}
+                              {report.decision === 'approved' ? 'ADDED TO FUTURE ARCHIVE' : report.decision === 'duplicate' ? 'MARKED AS DUPLICATE' : 'REJECTED'}
                               {report.score ? ' · ' + report.score + ' PTS · ' + report.tier : ''}
                               {report.reviewedAt ? ' · ' + new Date(report.reviewedAt).toLocaleString() : ''}
                             </div>

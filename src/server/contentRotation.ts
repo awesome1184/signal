@@ -25,6 +25,7 @@ export type ResolvedDailySelection = {
 };
 
 const ROTATION_KEY = 'signal:v1:content-rotation';
+const APPROVED_ANSWER_KEY = 'signal:v1:approved-answer-aliases';
 const DAILY_PROMPT_COUNT = 7;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -79,9 +80,9 @@ function pruneHistory(state: RotationState, today: string): void {
   }
 }
 
-function chooseDailySelection(state: RotationState, dateKey: string): SavedDailySelection {
+function chooseDailySelection(state: RotationState, dateKey: string, answerEntries: AnswerEntry[]): SavedDailySelection {
   // Phase-A question commits stay inactive until Phase-B adds at least one approved answer.
-  const answerableQuestionIds = new Set(getAnswerEntries().map((answer) => answer.promptId));
+  const answerableQuestionIds = new Set(answerEntries.map((answer) => answer.promptId));
   const unusedQuestions = shuffle(
     getQuestionBank().filter((question) => answerableQuestionIds.has(question.id) && !state.usedQuestionIds[question.id])
   );
@@ -98,7 +99,7 @@ function chooseDailySelection(state: RotationState, dateKey: string): SavedDaily
 
   const remainingSlots = DAILY_PROMPT_COUNT - prompts.length;
   if (remainingSlots > 0) {
-    const allAnswers = getAnswerEntries().filter((answer) => Boolean(getPromptById(answer.promptId)));
+    const allAnswers = answerEntries.filter((answer) => Boolean(getPromptById(answer.promptId)));
     const recentAnswerIds = new Set(
       Object.entries(state.usedAnswerIds)
         .filter(([, usedOn]) => {
@@ -194,6 +195,32 @@ function hydrateSelection(selection: SavedDailySelection): ResolvedDailySelectio
  * only one concurrent request can publish and reserve the day's questions.
  */
 export async function getRotatedDailySelection(dateKey: string): Promise<ResolvedDailySelection> {
+  const approvedRaw = await redis.hGetAll(APPROVED_ANSWER_KEY);
+  const approvedEntries: AnswerEntry[] = [];
+  for (const raw of Object.values(approvedRaw ?? {})) {
+    try {
+      const value = JSON.parse(raw) as {
+        id?: string; promptId?: string; answer?: string; score?: number; tier?: string; note?: string;
+      };
+      if (typeof value.id !== 'string' || typeof value.promptId !== 'string'
+        || typeof value.answer !== 'string' || !Number.isInteger(value.score)
+        || typeof value.tier !== 'string' || typeof value.note !== 'string'
+        || !getPromptById(value.promptId)) continue;
+      approvedEntries.push({
+        id: value.id,
+        promptId: value.promptId,
+        canonical: value.answer,
+        aliases: [value.answer],
+        score: value.score as number,
+        tier: value.tier,
+        note: value.note
+      });
+    } catch {
+      // Ignore malformed admin-approved entries; they must never break daily rotation.
+    }
+  }
+  const answerEntries = [...getAnswerEntries(), ...approvedEntries];
+
   for (let attempt = 0; attempt < 8; attempt++) {
     const transaction = await redis.watch(ROTATION_KEY);
     const raw = await (transaction.get as unknown as (key: string) => Promise<string | null>)(ROTATION_KEY);
@@ -206,7 +233,7 @@ export async function getRotatedDailySelection(dateKey: string): Promise<Resolve
     }
 
     pruneHistory(state, dateKey);
-    const selection = chooseDailySelection(state, dateKey);
+    const selection = chooseDailySelection(state, dateKey, answerEntries);
     state.daily[dateKey] = selection;
 
     await transaction.multi();

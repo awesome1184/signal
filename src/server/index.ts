@@ -263,9 +263,10 @@ app.post('/api/check-answer', async (c) => {
   }
   if (!userId) return c.json({ ok: false, valid: false, message: 'Sign in to submit a daily answer.' }, 401);
 
-  // Admin-approved community aliases are server-owned and apply only to normal
-  // question rounds. Archive rounds remain restricted to their selected record.
-  if (!match && selected.mode === 'question') {
+  // Admin-approved submissions enter the rotating archive. They can also count
+  // immediately on a normal question round, but an archive round only accepts
+  // the specific approved entry selected for that transmission.
+  if (!match) {
     const normalized = normalizeAnswer(answer);
     const approvedRaw = normalized
       ? await redis.hGet(approvedAnswersKey(), selected.questionId + ':' + normalized)
@@ -273,9 +274,11 @@ app.post('/api/check-answer', async (c) => {
     if (approvedRaw) {
       try {
         const approved = JSON.parse(approvedRaw) as {
-          promptId?: string; normalizedAnswer?: string; score?: number; tier?: string; note?: string;
+          id?: string; promptId?: string; normalizedAnswer?: string; score?: number; tier?: string; note?: string;
         };
-        if (approved.promptId === selected.questionId
+        const selectedEntryMatches = selected.mode === 'question' || approved.id === selected.answerId;
+        if (selectedEntryMatches
+          && approved.promptId === selected.questionId
           && approved.normalizedAnswer === normalized
           && typeof approved.score === 'number'
           && Object.prototype.hasOwnProperty.call(APPROVED_SCORE_TIERS, approved.score)
@@ -603,9 +606,6 @@ app.post('/api/admin/review-answer-report', async (c) => {
   let approvedScore: number | null = null;
   let approvedTier: string | null = null;
   if (decision === 'approve') {
-    if (report.selectionMode !== 'question') {
-      return c.json({ ok: false, message: 'Only normal question rounds can add a new accepted answer.' }, 409);
-    }
     if (typeof report.promptId !== 'string' || typeof report.answer !== 'string') {
       return c.json({ ok: false, message: 'The report is missing its question or answer.' }, 409);
     }
@@ -619,21 +619,19 @@ app.post('/api/admin/review-answer-report', async (c) => {
       return c.json({ ok: false, message: 'That answer is already present in the curated bank.' }, 409);
     }
     const aliasKey = report.promptId + ':' + normalized;
-    if (await redis.hGet(approvedAnswersKey(), aliasKey)) {
-      return c.json({ ok: false, message: 'That answer has already been approved.' }, 409);
-    }
+    const answerId = 'community:' + report.promptId + ':' + normalized;
     approvedScore = score;
     approvedTier = tier;
-    await redis.hSet(approvedAnswersKey(), {
-      [aliasKey]: JSON.stringify({
-        promptId: report.promptId,
-        normalizedAnswer: normalized,
-        answer: report.answer,
-        score,
-        tier,
-        note: 'Community-approved answer.'
-      })
-    });
+    const inserted = await redis.hSetNX(approvedAnswersKey(), aliasKey, JSON.stringify({
+      id: answerId,
+      promptId: report.promptId,
+      normalizedAnswer: normalized,
+      answer: report.answer,
+      score,
+      tier,
+      note: 'Community-approved answer.'
+    }));
+    if (!inserted) return c.json({ ok: false, message: 'That answer has already been approved.' }, 409);
   }
 
   const review = {
