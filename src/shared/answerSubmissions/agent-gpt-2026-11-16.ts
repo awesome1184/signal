@@ -1158,7 +1158,9 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
   'roller-coaster': records(
     { score: 10, tier: 'BACKGROUND', note: 'A famous roller coaster with its own RCDB ride record.', names: [
       ['Steel Vengeance', 'Steel Vengeance coaster'],
-      ['Matterhorn Bobsleds', 'Matterhorn']
+      ['Matterhorn Bobsleds', 'Matterhorn'],
+      ['Space Mountain (Walt Disney World)', 'Space Mountain'],
+      ['Big Thunder Mountain Railroad (Walt Disney World)', 'Big Thunder Mountain Railroad', 'Big Thunder Mountain']
     ]},
     { score: 15, tier: 'FAMILIAR', note: 'A widely known roller coaster listed in RCDB.', names: [
       ['Millennium Force', 'Millennium Force coaster'],
