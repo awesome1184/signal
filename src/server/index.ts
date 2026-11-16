@@ -66,7 +66,7 @@ app.post('/api/check-answer', async (c) => {
     return c.json({ ok: false, valid: false, message: answer ? 'Answers must be 80 characters or fewer.' : 'Enter an answer first.' }, 400);
   }
   const daily = await getRotatedDailySelection(getNewYorkDateKey());
-  const selected = daily.prompts.find((prompt) => prompt.id === promptId);
+  const selected = daily.selections.find((prompt) => prompt.id === promptId);
   if (!selected) {
     return c.json({ ok: false, valid: false }, 400);
   }
@@ -114,7 +114,7 @@ app.post('/api/complete', async (c) => {
   const entries = prompts.map((prompt, index) => {
     const item = submitted[index];
     const answer = typeof item?.answer === 'string' ? item.answer.trim() : '';
-    const selected = daily.prompts[index];
+    const selected = daily.selections[index];
     const match = evaluateAnswer(selected.questionId, answer, selected.answerId);
     return {
       promptId: prompt.id,
