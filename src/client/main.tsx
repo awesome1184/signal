@@ -225,7 +225,7 @@ function getPreviewDailyPrompts(dateKey: string): Prompt[] {
         return {
           ...prompt,
           archiveSeedId: prompt.archiveSeedId ?? (prompt as Prompt & { fallbackAnswerId?: string }).fallbackAnswerId,
-          context: 'ARCHIVE ROUND — This is an open-answer question. Any accepted answer in this question’s catalog can earn its assigned rarity score. ' + (source?.context ?? prompt.context)
+          context: 'ARCHIVE ROUND — Any accepted answer in this question’s catalog counts. Points are based on that answer’s assigned rarity. ' + (source?.context ?? prompt.context)
         };
       });
       state.daily[dateKey] = refreshed;
@@ -288,7 +288,7 @@ function getPreviewDailyPrompts(dateKey: string): Prompt[] {
           ...source,
           id: 'archive-' + dateKey + '-' + (index + 1),
           channel: 'ARCHIVE // ' + source.channel,
-          context: 'ARCHIVE ROUND — This is an open-answer question. Any accepted answer in this question’s catalog can earn its assigned rarity score. The archive selection avoids source answers used in the previous seven days when enough fresh entries remain. ' + source.context,
+          context: 'ARCHIVE ROUND — Any accepted answer in this question’s catalog counts. Points are based on that answer’s assigned rarity. ' + source.context,
           sourcePromptId: entry.promptId,
           archiveSeedId: entry.id
         });
@@ -1355,7 +1355,7 @@ function App() {
   const dateLabel = formatDay(dayKey);
 
   return (
-    <div className="app-shell">
+    <div className={'app-shell ' + (game.phase === 'playing' ? 'round-active' : '')}>
       <MountainScene />
       <div className="screen-vignette" />
       <header className="topbar">
@@ -1390,7 +1390,7 @@ function App() {
             {!DEMO_MODE && serverReady && <span className="preview-chip connected">REDDIT LINK ACTIVE</span>}
           </div>
 
-          <section className="game-panel scan-hum">
+          <section className={'game-panel scan-hum ' + (game.phase === 'playing' ? 'active-round' : '')}>
             <div className="panel-scanline" aria-hidden="true" />
             <div className="panel-topline">
               <div><span className="eyebrow">INCOMING TRANSMISSION</span><div className="panel-title">Today's signal scan</div><span className="panel-subtitle">One answer. Seven chances to stand out.</span></div>
@@ -1571,13 +1571,13 @@ function App() {
                       spellCheck={false}
                       enterKeyHint="send"
                       aria-label="Your answer"
-                      aria-describedby="question-context answer-counter"
+                      aria-describedby="question-context answer-counter answer-footnote"
                       placeholder="Enter one answer..."
                       disabled={isTuning}
                     />
                     <button type="submit" className="primary-button submit-button" disabled={isTuning || attemptsRemaining <= 0}>SUBMIT ANSWER <span className="button-arrow">↗</span></button>
                   </div>
-                  <p className="answer-footnote">{attemptsRemaining < 15 ? (attemptsRemaining > 0 ? attemptsRemaining + (attemptsRemaining === 1 ? ' attempt' : ' attempts') + ' remaining. ' : 'No attempts left. Skip this question or let the timer expire. ') : 'Up to 15 attempts per question. '}One answer per question. Any accepted catalog answer counts; less familiar answers can carry a stronger signal.</p>
+                  <p id="answer-footnote" className="answer-footnote">{attemptsRemaining < 15 ? (attemptsRemaining > 0 ? attemptsRemaining + (attemptsRemaining === 1 ? ' attempt' : ' attempts') + ' remaining. ' : 'No attempts left. Skip this question or let the timer expire. ') : 'Up to 15 attempts per question. '}One answer per question. Any accepted catalog answer counts; less familiar answers can carry a stronger signal.</p>
                 </form>
                 <div className="play-footer"><span><span className="tiny-pulse" /> RECEIVER OPEN</span><button className="text-button" onClick={skipPrompt} disabled={isTuning}>SKIP QUESTION</button></div>
                 {message && <div className="inline-message" role="status" aria-live="polite">{message}</div>}
