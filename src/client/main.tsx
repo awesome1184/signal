@@ -282,7 +282,7 @@ function blankRun(dateKey: string): RunState {
 
 function loadRun(dateKey: string): RunState {
   try {
-    const raw = localStorage.getItem('signal:run:' + dateKey);
+    const raw = localStorage.getItem('signal:run:v2:' + dateKey);
     if (!raw) return blankRun(dateKey);
     const saved = JSON.parse(raw) as Partial<RunState>;
     if (saved.dateKey !== dateKey || !Array.isArray(saved.entries)) return blankRun(dateKey);
@@ -796,7 +796,7 @@ function App() {
   }, [waveStyle]);
 
   useEffect(() => {
-    try { localStorage.setItem('signal:run:' + dayKey, JSON.stringify(game)); } catch { /* local storage is optional */ }
+    try { localStorage.setItem('signal:run:v2:' + dayKey, JSON.stringify(game)); } catch { /* local storage is optional */ }
   }, [game, dayKey]);
 
   useEffect(() => {
@@ -1158,7 +1158,7 @@ function App() {
 
   const resetPreview = () => {
     if (!DEMO_MODE) return;
-    try { localStorage.removeItem('signal:run:' + dayKey); } catch { /* storage may be disabled */ }
+    try { localStorage.removeItem('signal:run:v2:' + dayKey); } catch { /* storage may be disabled */ }
     setGame(blankRun(dayKey));
     setAnswer('');
     setMessage('');
