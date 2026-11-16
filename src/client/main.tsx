@@ -279,6 +279,28 @@ function getPreviewDailyPrompts(dateKey: string): Prompt[] {
 function blankRun(dateKey: string): RunState {
   return { dateKey, phase: 'ready', index: 0, entries: [], deadline: null };
 }
+ 
+function serverRunToState(value: unknown, fallbackDate: string): RunState | null {
+  if (!value || typeof value !== 'object') return null;
+  const run = value as Partial<RunState>;
+  if (!['playing', 'reveal', 'complete'].includes(String(run.phase))
+    || !Array.isArray(run.entries) || !Number.isInteger(run.index)) return null;
+  const entries = run.entries.filter((entry): entry is Entry => Boolean(
+    entry && typeof entry.promptId === 'string' && typeof entry.answer === 'string'
+    && Number.isFinite(entry.score) && typeof entry.tier === 'string' && typeof entry.note === 'string'
+  )).slice(0, 7).map((entry) => ({
+    promptId: entry.promptId, answer: entry.answer,
+    score: Math.max(0, Math.min(100, Math.floor(entry.score))),
+    tier: entry.tier, note: entry.note
+  }));
+  const phase = run.phase as RunState['phase'];
+  const index = Math.max(0, Math.min(6, run.index as number));
+  const deadline = typeof run.deadline === 'number' && Number.isFinite(run.deadline) ? run.deadline : null;
+  if ((phase === 'playing' && deadline === null)
+    || (phase === 'reveal' && entries.length !== index + 1)
+    || (phase === 'complete' && entries.length !== 7)) return null;
+  return { dateKey: typeof run.dateKey === 'string' ? run.dateKey : fallbackDate, phase, index, entries, deadline };
+}
 
 function loadRun(dateKey: string): RunState {
   try {
@@ -662,8 +684,16 @@ function App() {
   const [dayKey, setDayKey] = useState(() => getNewYorkDateKey());
   const [prompts, setPrompts] = useState<Prompt[]>(() => DEMO_MODE ? getPreviewDailyPrompts(dayKey) : getDailyPrompts(dayKey));
   const [dailyPromptsReady, setDailyPromptsReady] = useState(DEMO_MODE);
+  const [bootstrapError, setBootstrapError] = useState('');
+  const [bootstrapAttempt, setBootstrapAttempt] = useState(0);
+  const [lastUnmatchedAnswer, setLastUnmatchedAnswer] = useState('');
+  const [reportBusy, setReportBusy] = useState(false);
+  const [reportSent, setReportSent] = useState(false);
+  const timeoutPendingRef = useRef(false);
+  const submittingRef = useRef(false);
+  const advancingRef = useRef(false);
   const answerInputRef = useRef<HTMLInputElement>(null);
-  const [game, setGame] = useState<RunState>(() => loadRun(dayKey));
+  const [game, setGame] = useState<RunState>(() => DEMO_MODE ? loadRun(dayKey) : blankRun(dayKey));
   const [answer, setAnswer] = useState('');
   const [message, setMessage] = useState('');
   const [now, setNow] = useState(Date.now());
@@ -671,6 +701,7 @@ function App() {
   const [playerCount, setPlayerCount] = useState(0);
   const [leaderboard, setLeaderboard] = useState<LeaderboardRow[]>([]);
   const [serverReady, setServerReady] = useState(false);
+  const [bootstrapping, setBootstrapping] = useState(!DEMO_MODE);
   const [copied, setCopied] = useState(false);
   const [waveStyle, setWaveStyle] = useState<ReceiverStyle>(() => loadReceiverStyle());
   const [soundEnabled, setSoundEnabled] = useState(() => {
@@ -699,7 +730,7 @@ function App() {
   const resultSignalPaths = useMemo(() => currentEntry ? buildReceiverPaths(currentEntry.signalSeed ?? 1, currentEntry.score) : null, [currentEntry]);
   const secondsLeft = game.deadline ? Math.max(0, Math.ceil((game.deadline - now) / 1000)) : ROUND_SECONDS;
   const completedPrompts = game.entries.length;
-  const shownBoard = DEMO_MODE || !serverReady ? MOCK_BOARD : leaderboard;
+  const shownBoard = DEMO_MODE ? MOCK_BOARD : serverReady ? leaderboard : [];
   const tuningGrade = tuningScore === null ? 'searching' : tuningScore >= 100 ? 'perfect' : tuningScore >= 85 ? 'deep' : tuningScore >= 60 ? 'clear' : tuningScore >= 30 ? 'faint' : 'background';
   const tuningHeading = tuningStatus.startsWith('NO MATCH') ? 'NO CARRIER'
     : tuningStatus.startsWith('RECEIVER OFFLINE') ? 'RECEIVER OFFLINE'
@@ -821,65 +852,86 @@ function App() {
   }, [game.phase, game.index, isTuning]);
 
   useEffect(() => {
+    if (DEMO_MODE) { setBootstrapping(false); return; }
     let active = true;
+    setBootstrapping(true);
+    setBootstrapError('');
+    setServerReady(false);
+    setDailyPromptsReady(false);
     fetch('/api/bootstrap')
-      .then((response) => { if (!response.ok) throw new Error('No Devvit server'); return response.json(); })
+      .then(async (response) => {
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data?.ok) throw new Error(data.message || 'Could not connect to SIGNAL.');
+        return data;
+      })
       .then((data) => {
-        if (!active || !data?.ok) return;
-        if (!Array.isArray(data.prompts) || data.prompts.length !== 7) {
-          throw new Error('The shared daily question set is unavailable.');
-        }
+        if (!active) return;
+        if (!Array.isArray(data.prompts) || data.prompts.length !== 7) throw new Error('Today’s shared question set is unavailable.');
         setPrompts(data.prompts as Prompt[]);
         setDailyPromptsReady(true);
         setServerReady(true);
         setCanTest(Boolean(data.canTest));
         setPlayerName(data.username ? String(data.username).toUpperCase() : 'REDDIT EXPLORER');
         setPlayerCount(Number(data.playerCount) || 0);
-        if (Array.isArray(data.leaderboard)) setLeaderboard(data.leaderboard);
+        setLeaderboard(Array.isArray(data.leaderboard) ? data.leaderboard : []);
         if (data.result && Array.isArray(data.result.entries)) {
           setGame({ dateKey: data.result.dateKey || dayKey, phase: 'complete', index: 6, entries: data.result.entries, deadline: null });
+        } else {
+          setGame(serverRunToState(data.run, dayKey) ?? blankRun(dayKey));
         }
+        timeoutPendingRef.current = false;
       })
-      .catch(() => { if (active) { setServerReady(false); setDailyPromptsReady(DEMO_MODE); } });
+      .catch((error) => {
+        if (!active) return;
+        setServerReady(false);
+        setDailyPromptsReady(false);
+        setBootstrapError(error instanceof Error ? error.message : 'SIGNAL could not connect.');
+      })
+      .finally(() => { if (active) setBootstrapping(false); });
     return () => { active = false; };
-  }, [dayKey]);
+  }, [dayKey, bootstrapAttempt]);
 
   useEffect(() => {
-    if (game.phase !== 'playing' || isTuning) return;
-    const timer = window.setInterval(() => {
+    if (game.phase !== 'playing' || isTuning) {
+      timeoutPendingRef.current = false;
+      return;
+    }
+    const timer = window.setInterval(async () => {
       const stamp = Date.now();
       setNow(stamp);
-      if (game.deadline !== null && stamp >= game.deadline) {
-        setGame((previous) => {
-          if (previous.phase !== 'playing' || previous.deadline === null || stamp < previous.deadline) return previous;
-          const prompt = prompts[previous.index];
-          const entry: Entry = { promptId: prompt.id, answer: '', score: 0, tier: 'NO SIGNAL', note: 'The transmission window closed before an answer arrived.' };
-          return { ...previous, phase: 'reveal', deadline: null, entries: [...previous.entries, entry] };
-        });
-        setMessage('The window closed. That round is logged as silence.');
+      if (game.deadline !== null && stamp >= game.deadline && !timeoutPendingRef.current) {
+        if (DEMO_MODE || game.isTest) {
+          const prompt = prompts[game.index];
+          setGame((previous) => {
+            if (previous.phase !== 'playing' || previous.deadline === null || Date.now() < previous.deadline) return previous;
+            const entry: Entry = { promptId: prompt.id, answer: '', score: 0, tier: 'NO SIGNAL', note: 'The transmission window closed before an answer arrived.' };
+            return { ...previous, phase: 'reveal', deadline: null, entries: [...previous.entries, entry] };
+          });
+          setMessage('The window closed. This round is logged as silence.');
+          return;
+        }
+        timeoutPendingRef.current = true;
+        try {
+          const response = await fetch('/api/skip', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ promptId: prompts[game.index]?.id, timeout: true })
+          });
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok || !data?.ok) throw new Error(data.message || 'Could not record the expired round.');
+          const next = serverRunToState(data.run, dayKey);
+          if (next) setGame(next);
+          setAnswer('');
+          setLastUnmatchedAnswer('');
+          setReportSent(false);
+          setMessage('The window closed. This round has been recorded as silence.');
+        } catch (error) {
+          setMessage(error instanceof Error ? error.message : 'Could not sync the expired round. Retrying…');
+        } finally { timeoutPendingRef.current = false; }
       }
-    }, 1000);
+    }, 750);
     return () => window.clearInterval(timer);
-  }, [game.phase, game.index, game.deadline, prompts, isTuning]);
-
-  useEffect(() => {
-    if (game.phase !== 'complete' || game.isTest || DEMO_MODE || !serverReady) return;
-    let active = true;
-    fetch('/api/complete', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ entries: game.entries.map((entry) => ({ promptId: entry.promptId, answer: entry.answer })) })
-    })
-      .then((response) => { if (!response.ok) throw new Error('Could not save result'); return response.json(); })
-      .then((data) => {
-        if (!active || !data?.ok) return;
-        setPlayerCount(Number(data.playerCount) || 0);
-        if (Array.isArray(data.leaderboard)) setLeaderboard(data.leaderboard);
-        if (data.result?.entries) setGame((previous) => ({ ...previous, entries: data.result.entries.map((entry: Entry, index: number) => ({ ...entry, signalSeed: previous.entries[index]?.signalSeed })) }));
-      })
-      .catch(() => setMessage('Result is visible locally. The community board is temporarily unavailable.'));
-    return () => { active = false; };
-  }, [game.phase, game.isTest, serverReady]);
+  }, [game.phase, game.index, game.deadline, game.isTest, prompts, isTuning, dayKey]);
 
   const setReceiverPhase = (phase: TuningPhase, score = 0) => {
     setTuningPhase(phase);
@@ -894,163 +946,121 @@ function App() {
     if (next) playSoftUiCue();
   };
 
-  const startGame = (isTest = false) => {
+  const startGame = async (isTest = false) => {
     if (soundEnabled) playSoftUiCue();
-    setMessage('');
-    setAnswer('');
-    setNow(Date.now());
-    setGame({ dateKey: dayKey, phase: 'playing', index: 0, entries: [], deadline: Date.now() + ROUND_SECONDS * 1000, isTest });
+    setMessage(''); setAnswer(''); setLastUnmatchedAnswer(''); setReportSent(false); setNow(Date.now());
+    if (DEMO_MODE || isTest) {
+      setGame({ dateKey: dayKey, phase: 'playing', index: 0, entries: [], deadline: Date.now() + ROUND_SECONDS * 1000, isTest });
+      return;
+    }
+    if (!serverReady) { setMessage('SIGNAL is not connected yet. Retry the connection before starting.'); return; }
+    try {
+      const response = await fetch('/api/start', { method: 'POST' });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data?.ok) throw new Error(data.message || 'Could not start today’s scan.');
+      if (data.completed && Array.isArray(data.result?.entries)) {
+        setGame({ dateKey: data.result.dateKey || dayKey, phase: 'complete', index: 6, entries: data.result.entries, deadline: null });
+        return;
+      }
+      const run = serverRunToState(data.run, dayKey);
+      if (!run) throw new Error('SIGNAL returned an invalid run. Refresh and retry.');
+      setGame(run);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Could not start the daily scan. Please retry.');
+    }
   };
 
   const validateAnswer = async (prompt: Prompt, raw: string) => {
     const clean = raw.trim();
     if (!clean) { setMessage('Enter an answer before transmitting.'); return; }
-    if (isTuning) return;
-
-    const tuningStartedAt = Date.now();
+    if (isTuning || submittingRef.current || game.phase !== 'playing') return;
+    submittingRef.current = true;
     const signalSeed = Math.floor(Math.random() * 0xffffffff) || 1;
-    setTuningSignalSeed(signalSeed);
-    setTuningAnswer(clean);
-    setTuningScore(null);
-    setTuningDisplayScore(0);
-    setTuningDuration(900);
-    setReceiverPhase('searching', 0);
-    setTuningStatus('CAPTURING INPUT // SCANNING NOISE');
-    setIsTuning(true);
-    setMessage('');
-
-    const resumeClock = () => {
-      const elapsed = Date.now() - tuningStartedAt;
-      setNow(Date.now());
-      setGame((previous) => previous.phase === 'playing' && previous.deadline !== null
-        ? { ...previous, deadline: previous.deadline + elapsed }
-        : previous);
-    };
-
+    setTuningSignalSeed(signalSeed); setTuningAnswer(clean); setTuningScore(null);
+    setTuningDisplayScore(0); setTuningDuration(900); setReceiverPhase('searching', 0);
+    setTuningStatus('CAPTURING INPUT // SCANNING NOISE'); setIsTuning(true); setMessage('');
     const wait = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
     const animateFailure = async (status: string) => {
-      setTuningScore(0);
-      setTuningDuration(900);
-      setReceiverPhase('failed', 0);
-      setTuningStatus(status);
-      await wait(1700);
+      setTuningScore(0); setTuningDisplayScore(0); setTuningDuration(450);
+      setReceiverPhase('failed', 0); setTuningStatus(status);
+      if (!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) await wait(450);
     };
     const animateCapture = async (score: number) => {
-      // Each score gets a deliberate sequence, with enough time to read every receiver event.
-      const duration = 1500 + Math.round(Math.max(0, Math.min(100, score)) * 30);
       setTuningScore(score);
-      setTuningDisplayScore(0);
-      setTuningDuration(duration);
-
-      const perfect = score === 100;
-      const nearMiss = score >= 85 && score < 100;
-      const animateScore = async (from: number, to: number, segmentMs: number) => {
-        const steps = Math.max(1, Math.ceil(segmentMs / 72));
+      if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+        setTuningDisplayScore(score); setReceiverPhase('locked', score);
+        setTuningStatus(score === 100 ? 'SIGNAL FOUND // PERFECT LOCK' : 'CARRIER ACQUIRED // RESULT CONFIRMED');
+        return;
+      }
+      setTuningDisplayScore(0); setTuningDuration(1750);
+      const animateScore = async (from: number, to: number, ms: number) => {
+        const steps = Math.max(1, Math.ceil(ms / 55));
         for (let step = 1; step <= steps; step++) {
-          await wait(segmentMs / steps);
+          await wait(ms / steps);
           setTuningDisplayScore(Math.round(from + (to - from) * (step / steps)));
         }
       };
-
-      const trackingTarget = Math.round(score * (perfect ? .34 : nearMiss ? .36 : .38));
-      const lockingTarget = Math.round(score * (perfect ? .86 : nearMiss ? .9 : .88));
-
-      // Let the raw static register before the first carrier event appears.
-      await wait(650);
-      setReceiverPhase('tracking', score);
-      setTuningStatus('CARRIER DETECTED // TRACKING FREQUENCY');
-      await wait(360);
-      await animateScore(0, trackingTarget, duration * .40);
-
+      const midpoint = Math.round(score * .56);
+      setReceiverPhase('tracking', score); setTuningStatus('CARRIER DETECTED // TRACKING FREQUENCY');
+      await animateScore(0, midpoint, 560);
       setReceiverPhase('locking', score);
-      setTuningStatus(score >= 100
-        ? 'FREQUENCY CENTERED // LOCKING CARRIER'
-        : score >= 85
-          ? 'FREQUENCY CENTERED // FINAL LOCK APPROACH'
-          : score >= 60
-            ? 'ALIGNING CARRIER // REDUCING INTERFERENCE'
-            : 'WEAK CARRIER // ATTEMPTING ACQUISITION');
-      await wait(430);
-      await animateScore(trackingTarget, lockingTarget, duration * .30);
-
-      if (perfect || nearMiss) {
-        setReceiverPhase('surging', score);
-        setTuningStatus(perfect
-          ? 'CARRIER SPIKE // BREAKTHROUGH IMMINENT'
-          : '100% CARRIER // LOCK CONFIRMED');
-        await wait(420);
-        await animateScore(lockingTarget, 100, duration * .12);
-
-        if (nearMiss) {
-          // Let the false-perfect reading sit long enough to feel convincing.
-          await wait(Math.max(1250, duration * .28));
-          setReceiverPhase('slipping', score);
-          setTuningStatus('PHASE ERROR // CARRIER OUT OF ALIGNMENT');
-          // Show the physical drift before the displayed score admits the miss.
-          await wait(720);
-          setReceiverPhase('recovering', score);
-          setTuningStatus('AUTO-CORRECTION // REACQUIRING CARRIER');
-          await animateScore(100, score, Math.max(1400, duration * .3));
-          setReceiverPhase('locked', score);
-          setTuningStatus('NEAR-PERFECT // RESIDUAL CARRIER DRIFT');
-          await wait(Math.max(900, duration * .18));
-        } else {
-          setReceiverPhase('locked', score);
-          setTuningStatus('100% CARRIER // SIGNAL FULLY ACQUIRED');
-          await wait(Math.max(1100, duration * .24));
-        }
-      } else {
-        setReceiverPhase(score > 0 ? 'locked' : 'failed', score);
-        setTuningStatus(score >= 60
-          ? 'PARTIAL LOCK // RESIDUAL NOISE'
-          : score > 0
-            ? 'WEAK LOCK // INTERFERENCE REMAINS'
-            : 'NO CARRIER // SIGNAL NOT RECOVERED');
-        await wait(450);
-        await animateScore(lockingTarget, score, duration * .24);
-        await wait(Math.max(850, duration * .18));
+      setTuningStatus(score >= 85 ? 'FREQUENCY CENTERED // FINAL LOCK' : 'ALIGNING CARRIER // REDUCING INTERFERENCE');
+      await animateScore(midpoint, score, 650);
+      if (score >= 85 && score < 100) {
+        setReceiverPhase('slipping', score); setTuningStatus('NEAR LOCK // A TRACE OF DRIFT REMAINS');
+        await wait(230); setReceiverPhase('recovering', score);
+        setTuningStatus('AUTO-CORRECTION // FINAL ALIGNMENT'); await wait(210);
       }
-      setTuningDisplayScore(score);
+      setReceiverPhase('locked', score);
+      setTuningStatus(score === 100 ? '100% CARRIER // PERFECT LOCK' : 'CARRIER ACQUIRED // RESULT CONFIRMED');
+      setTuningDisplayScore(score); await wait(180);
     };
-
     try {
       let result: { score: number; tier: string; note: string } | null = null;
+      let updatedRun: RunState | null = null;
       if (DEMO_MODE) {
         const module = await import('../shared/answerBank');
         result = module.evaluateAnswer(prompt.sourcePromptId ?? prompt.id, clean, prompt.fallbackAnswerId);
       } else {
         const response = await fetch('/api/check-answer', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ promptId: prompt.id, answer: clean })
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ promptId: prompt.id, answer: clean, testMode: Boolean(game.isTest) })
         });
-        if (!response.ok) throw new Error('Signal service unavailable');
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
+        if (response.status === 429) { setMessage(data.message || 'Please slow down before trying another answer.'); return; }
+        if (!response.ok) throw new Error(data.message || 'The receiver could not verify that answer.');
+        if (data.expired && data.run) {
+          updatedRun = serverRunToState(data.run, dayKey);
+          if (updatedRun) setGame(updatedRun);
+          await animateFailure('TRANSMISSION WINDOW CLOSED');
+          setMessage(data.message || 'The window closed. This round is recorded as silence.');
+          return;
+        }
         result = data.valid ? data.result : null;
+        updatedRun = serverRunToState(data.run, dayKey);
       }
-
       if (!result) {
         await animateFailure('NO MATCH // TRY A DIFFERENT FREQUENCY');
-        resumeClock();
-        setMessage('No match in today’s field catalog. Try another answer while the window is open.');
+        setLastUnmatchedAnswer(clean); setReportSent(false);
+        setMessage('No match in today’s field catalog. Try another answer, or report it if you believe it should count.');
         return;
       }
-
+      setLastUnmatchedAnswer(''); setReportSent(false);
       await animateCapture(result.score);
-
       const entry: Entry = { promptId: prompt.id, answer: clean, score: result.score, tier: result.tier, note: result.note, signalSeed };
-      setGame((previous) => previous.phase === 'playing'
-        ? { ...previous, phase: 'reveal', deadline: null, entries: [...previous.entries, entry] }
-        : previous);
-      setAnswer('');
-      setMessage('');
-    } catch {
+      if (DEMO_MODE || game.isTest) {
+        setGame((previous) => previous.phase === 'playing'
+          ? { ...previous, phase: 'reveal', deadline: null, entries: [...previous.entries, entry] } : previous);
+      } else if (updatedRun) {
+        setGame(updatedRun);
+      } else {
+        throw new Error('The answer was checked but the run state was not returned. Refresh to sync.');
+      }
+      setAnswer(''); setMessage('');
+    } catch (error) {
       await animateFailure('RECEIVER OFFLINE // TRY AGAIN');
-      resumeClock();
-      setMessage('Could not reach the signal receiver. Check the connection and try again.');
-    } finally {
-      setIsTuning(false);
-    }
+      setMessage(error instanceof Error ? error.message : 'Could not reach the signal receiver. Check the connection and try again.');
+    } finally { setIsTuning(false); submittingRef.current = false; }
   };
 
   const triggerTestAnswer = async (score: number) => {
@@ -1082,38 +1092,85 @@ function App() {
 
   const forceTimeout = () => {
     if (!game.isTest || game.phase !== 'playing' || isTuning) return;
-    const entry: Entry = {
-      promptId: currentPrompt.id,
-      answer: '',
-      score: 0,
-      tier: 'NO SIGNAL',
-      note: 'Test bench forced the transmission window to close.'
-    };
+    const entry: Entry = { promptId: currentPrompt.id, answer: '', score: 0, tier: 'NO SIGNAL', note: 'Test bench forced the transmission window to close.' };
     setGame((previous) => ({ ...previous, phase: 'reveal', deadline: null, entries: [...previous.entries, entry] }));
-    setAnswer('');
-    setMessage('');
+    setAnswer(''); setMessage('');
   };
 
-  const skipPrompt = () => {
+  const skipPrompt = async () => {
     if (game.phase !== 'playing' || isTuning) return;
-    const entry: Entry = { promptId: currentPrompt.id, answer: '', score: 0, tier: 'NO SIGNAL', note: 'You moved on without transmitting an answer.' };
-    setGame((previous) => ({ ...previous, phase: 'reveal', deadline: null, entries: [...previous.entries, entry] }));
-    setAnswer('');
-    setMessage('');
-  };
-
-  const nextPrompt = () => {
-    if (game.phase !== 'reveal') return;
-    const nextIndex = game.index + 1;
-    setAnswer('');
-    setMessage('');
-    if (nextIndex >= prompts.length) {
-      setGame((previous) => ({ ...previous, phase: 'complete', index: prompts.length - 1, deadline: null }));
+    if (DEMO_MODE || game.isTest) {
+      const entry: Entry = { promptId: currentPrompt.id, answer: '', score: 0, tier: 'NO SIGNAL', note: 'You moved on without transmitting an answer.' };
+      setGame((previous) => ({ ...previous, phase: 'reveal', deadline: null, entries: [...previous.entries, entry] }));
+      setAnswer(''); setLastUnmatchedAnswer(''); setMessage('');
       return;
     }
-    setNow(Date.now());
-    setGame((previous) => ({ ...previous, phase: 'playing', index: nextIndex, deadline: Date.now() + ROUND_SECONDS * 1000 }));
+    try {
+      const response = await fetch('/api/skip', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ promptId: currentPrompt.id })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data?.ok) throw new Error(data.message || 'Could not skip this transmission.');
+      const next = serverRunToState(data.run, dayKey);
+      if (next) setGame(next);
+      setAnswer(''); setLastUnmatchedAnswer(''); setReportSent(false); setMessage('');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Could not sync the skipped transmission. Please retry.');
+    }
   };
+
+  const nextPrompt = async () => {
+    if (game.phase !== 'reveal' || advancingRef.current) return;
+    advancingRef.current = true;
+    setAnswer(''); setLastUnmatchedAnswer(''); setReportSent(false); setMessage('');
+    if (DEMO_MODE || game.isTest) {
+      const nextIndex = game.index + 1;
+      if (nextIndex >= prompts.length) {
+        setGame((previous) => ({ ...previous, phase: 'complete', index: prompts.length - 1, deadline: null }));
+        advancingRef.current = false;
+        return;
+      }
+      setNow(Date.now());
+      setGame((previous) => ({ ...previous, phase: 'playing', index: nextIndex, deadline: Date.now() + ROUND_SECONDS * 1000 }));
+      advancingRef.current = false;
+      return;
+    }
+    try {
+      const response = await fetch('/api/next', { method: 'POST' });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data?.ok) throw new Error(data.message || 'Could not advance the daily scan.');
+      const next = serverRunToState(data.run, dayKey);
+      if (!next) throw new Error('The server returned an invalid run state. Refresh to sync.');
+      setGame(next);
+      if (data.result) {
+        setPlayerCount(Number(data.playerCount) || 0);
+        if (Array.isArray(data.leaderboard)) setLeaderboard(data.leaderboard);
+      }
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Could not save the daily scan. Press the button to retry.');
+    } finally {
+      advancingRef.current = false;
+    }
+  };
+
+  const reportMissingAnswer = async () => {
+    if (!lastUnmatchedAnswer || reportBusy || reportSent) return;
+    setReportBusy(true);
+    try {
+      const response = await fetch('/api/report-answer', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ promptId: currentPrompt.id, answer: lastUnmatchedAnswer })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data?.ok) throw new Error(data.message || 'Could not send the report.');
+      setReportSent(true); setMessage('Thanks. Your missing-answer report has been saved for review.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Could not send the report. Please retry.');
+    } finally { setReportBusy(false); }
+  };
+
+  const retryBootstrap = () => setBootstrapAttempt((attempt) => attempt + 1);
 
   const copyResult = async () => {
     const rows = prompts.map((prompt, index) => {
@@ -1130,7 +1187,7 @@ function App() {
       ...rows,
       '',
       'Find the signal in the noise.'
-    ].join('\\n');
+    ].join('\n');
     try {
       if (!navigator.clipboard?.writeText) throw new Error('Clipboard API unavailable');
       await navigator.clipboard.writeText(shareText);
@@ -1192,7 +1249,7 @@ function App() {
         <div className="top-stats">
           <div className="top-stat date-stat"><span className="eyebrow">TODAY'S TRANSMISSION</span><strong>{dateLabel}</strong></div>
           <div className="top-stat"><span className="stat-icon flame" aria-hidden="true">✦</span><strong>07</strong><span className="eyebrow">PROMPTS</span></div>
-          <div className="top-stat"><span className="stat-icon bars">▮▮▮</span><strong>{serverReady ? playerCount.toLocaleString() : '—'}</strong><span className="eyebrow">ON FREQUENCY</span></div>
+          <div className="top-stat"><span className="stat-icon bars">▮▮▮</span><strong>{serverReady ? playerCount.toLocaleString() : '—'}</strong><span className="eyebrow">SCANS COMPLETED</span></div>
         </div>
       </header>
 
@@ -1224,7 +1281,10 @@ function App() {
               ))}
             </div>
 
-            <WaveStylePicker value={waveStyle} onChange={setWaveStyle} />
+            <details className="receiver-settings">
+              <summary><span>RECEIVER SETTINGS</span><span className="hint-mark" aria-hidden="true">+</span></summary>
+              <WaveStylePicker value={waveStyle} onChange={setWaveStyle} />
+            </details>
 
             {game.phase === 'ready' && (
               <div className="ready-view">
@@ -1240,7 +1300,21 @@ function App() {
                   <div className="rule-strip">
                     <div><strong>07</strong><span>PROMPTS</span></div><div><strong>25s</strong><span>PER ROUND</span></div><div><strong>700</strong><span>MAX POINTS</span></div>
                   </div>
-                  <button className="primary-button" onClick={startGame} disabled={!dailyPromptsReady}><span>{dailyPromptsReady ? 'BEGIN DAILY SCAN' : 'SYNCING DAILY TRANSMISSION'}</span><span className="button-arrow">↗</span></button>
+                  <div className="score-guide" aria-label="Accepted-answer point tiers">
+                    <span><b>10</b> BACKGROUND</span><span><b>15</b> FAMILIAR</span><span><b>30</b> UNCOMMON</span>
+                    <span><b>60</b> RARE</span><span><b>85</b> DEEP CUT</span><span><b>100</b> SIGNAL FOUND</span>
+                  </div>
+                  <p className="scoring-explainer">Points reflect the rarity assigned to an accepted answer in SIGNAL’s catalog, not an objective measure of correctness.</p>
+                  {!DEMO_MODE && bootstrapError && (
+                    <div className="connection-error" role="alert">
+                      <strong>RECEIVER OFFLINE</strong><span>{bootstrapError}</span>
+                      <button type="button" className="secondary-button" onClick={retryBootstrap}>RETRY CONNECTION</button>
+                    </div>
+                  )}
+                  {!DEMO_MODE && bootstrapping && <p className="connection-status" role="status">CONNECTING TO TODAY’S TRANSMISSION…</p>}
+                  <button className="primary-button" onClick={() => void startGame()} disabled={!dailyPromptsReady || bootstrapping}>
+                    <span>{bootstrapping ? 'CONNECTING…' : dailyPromptsReady ? 'BEGIN DAILY SCAN' : 'CONNECTION REQUIRED'}</span><span className="button-arrow">↗</span>
+                  </button>
                   <p className="fine-print">One daily attempt · Resets at midnight Eastern</p>
                 </div>
               </div>
@@ -1249,7 +1323,7 @@ function App() {
             {game.phase === 'playing' && (
               <div className={'play-view ' + (isTuning ? 'tuning-view' : '')}>
                 {isTuning && (
-                  <div className={'signal-capture-overlay ' + ((tuningScore ?? 0) >= 85 ? 'perfect-capture' : '')} role="status" aria-live="polite">
+                  <div className={'signal-capture-overlay ' + ((tuningScore ?? 0) >= 85 ? 'perfect-capture' : '')}>
                     <div
                       className="signal-capture"
                       key={tuningScore === null ? 'searching' : 'score-' + tuningScore}
@@ -1325,6 +1399,13 @@ function App() {
                     </div>
                   </div>
                 )}
+                {isTuning && (
+                  <span className="sr-only" role="status" aria-live="polite">
+                    {tuningPhase === 'locked' ? tuningAnswer + ' accepted for ' + (tuningScore ?? 0) + ' points.'
+                      : tuningPhase === 'failed' ? tuningStatus + '.'
+                      : ''}
+                  </span>
+                )}
                 {!isTuning && <>
                 <div className="question-meta">
                   <span className="channel-label">{currentPrompt.channel}</span>
@@ -1354,7 +1435,7 @@ function App() {
                       ref={answerInputRef}
                       id="signal-answer"
                       value={answer}
-                      onChange={(event) => { setAnswer(event.target.value); if (message) setMessage(''); }}
+                      onChange={(event) => { setAnswer(event.target.value); setLastUnmatchedAnswer(''); setReportSent(false); if (message) setMessage(''); }}
                       maxLength={80}
                       autoComplete="off"
                       autoCapitalize="off"
@@ -1372,6 +1453,14 @@ function App() {
                 </form>
                 <div className="play-footer"><span><span className="tiny-pulse" /> RECEIVER OPEN</span><button className="text-button" onClick={skipPrompt} disabled={isTuning}>SKIP THIS FREQUENCY</button></div>
                 {message && <div className="inline-message" role="status" aria-live="polite">{message}</div>}
+                {message && !lastUnmatchedAnswer && !DEMO_MODE && /(offline|could not|retry|refresh|sync)/i.test(message) && (
+                  <button type="button" className="text-button sync-game-button" onClick={retryBootstrap}>SYNC DAILY RUN</button>
+                )}
+                {lastUnmatchedAnswer && !game.isTest && (
+                  <button type="button" className="report-answer-button" onClick={() => void reportMissingAnswer()} disabled={reportBusy || reportSent}>
+                    {reportSent ? 'MISSING ANSWER REPORTED' : reportBusy ? 'SENDING REPORT…' : 'REPORT MISSING ANSWER'}
+                  </button>
+                )}
                 </>}
               </div>
             )}
@@ -1471,10 +1560,11 @@ function App() {
 
             {game.phase === 'complete' && (
               <div className="complete-view">
-                <div className="complete-overline">DAILY SCAN COMPLETE <span>{game.entries.filter((entry) => entry.score > 0).length} SIGNALS RECOVERED</span></div>
+                <div className="complete-overline">DAILY SCAN COMPLETE <span>{game.entries.filter((entry) => entry.score > 0).length} SIGNALS RECOVERED · PLAYER {playerName}</span></div>
                 <h1>{scoreLabel(total)}</h1>
                 <div className="final-score" role="group" aria-label={'Final score ' + total + ' out of 700'}><strong>{total}</strong><span>/ 700</span></div>
                 <p className="complete-subtitle">{total >= 600 ? 'You found some remarkable signals in the noise.' : total >= 300 ? 'A good scan. You heard more than the obvious.' : 'The airwaves were crowded today. Tune in again tomorrow.'}</p>
+                <p className="scoring-explainer">Your score is based on the catalog rarity of your accepted answers. Maximum: 700 points.</p>
                 <div className="complete-stat-strip">
                   <span><strong>{game.entries.filter((entry) => entry.score > 0).length}</strong> SIGNALS FOUND</span>
                   <span><strong>{game.entries.filter((entry) => entry.score >= 85).length}</strong> DEEP CUTS</span>
@@ -1561,14 +1651,14 @@ function App() {
               {shownBoard.slice(0,5).map((row,index) => <div className="leaderboard-row" key={row.name + index}>
                 <span className="rank">{String(index + 1).padStart(2,'0')}</span><span className="listener-name">{row.name}</span><strong>{row.score}</strong>
               </div>)}
-            </div> : <div className="empty-board">No completed scans yet. Be the first on frequency.</div>}
-            <div className="leaderboard-foot"><span>{DEMO_MODE || !serverReady ? 'PREVIEW SCORES' : playerCount + ' LISTENERS'}</span><span>{DEMO_MODE || !serverReady ? 'SAMPLE DATA' : 'UPDATED LIVE'}</span></div>
+            </div> : <div className="empty-board">{!DEMO_MODE && !serverReady ? 'Community scores are unavailable until the receiver reconnects.' : 'No completed scans yet. Be the first on frequency.'}</div>}
+            <div className="leaderboard-foot"><span>{DEMO_MODE ? 'PREVIEW SCORES' : playerCount + ' SCANS'}</span><span>{DEMO_MODE ? 'SAMPLE DATA' : 'TODAY'}</span></div>
           </section>
 
           <section className="instrument-card station-log-card">
             <div className="card-heading"><span className="eyebrow">STATION LOG</span><span className="card-index">03 / 03</span></div>
-            <div className="log-entry"><span className="log-time">00:00 ET</span><div><strong>DAILY TRANSMISSION ROTATED</strong><p>Fresh prompts are now moving across all seven channels.</p></div></div>
-            <div className="log-entry"><span className="log-time">SYSTEM</span><div><strong>FIELD CATALOG ONLINE</strong><p>Valid answers are checked against today's catalog.</p></div></div>
+            <div className="log-entry"><span className="log-time">DAILY</span><div><strong>SHARED TRANSMISSION</strong><p>Every player receives the same seven prompts. A new set arrives at midnight Eastern.</p></div></div>
+            <div className="log-entry"><span className="log-time">SCORING</span><div><strong>CATALOG RARITY</strong><p>Accepted answers receive points based on their assigned rarity tier.</p></div></div>
           </section>
           <div className="side-footer"><span>LISTENING POST A-17</span><span>EST. 1987 · MT. AURORA</span></div>
         </aside>

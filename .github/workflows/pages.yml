@@ -9,7 +9,9 @@ on:
       - "package.json"
       - "vite.pages.config.ts"
       - "src/client/**"
+      - "src/server/**"
       - "src/shared/**"
+      - "tsconfig.json"
   workflow_dispatch:
 
 permissions:
@@ -33,6 +35,8 @@ jobs:
           node-version: 24
       - name: Install dependencies
         run: npm install
+      - name: Typecheck client and server
+        run: npm run typecheck
       - name: Build browser preview
         run: npm run build:pages
       - name: Upload Pages artifact
