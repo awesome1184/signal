@@ -115,7 +115,7 @@ function chooseDailySelection(state: RotationState, dateKey: string): SavedDaily
     // Prefer archive answers from question categories not already appearing today.
     for (const answer of freshAnswers) {
       if (selectedAnswers.length >= remainingSlots) break;
-      if (usedSourceQuestionIds.has(answer.promptId)) continue;
+      if (selectedAnswerIds.has(answer.id) || usedSourceQuestionIds.has(answer.promptId)) continue;
       selectedAnswers.push(answer);
       selectedAnswerIds.add(answer.id);
       usedSourceQuestionIds.add(answer.promptId);
