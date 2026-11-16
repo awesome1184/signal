@@ -438,7 +438,7 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
       'Torkoal', 'Claydol', 'Shuckle', 'Tinkaton',
       'Porygon-Z', 'Dusknoir'
     ]}
-  )
+  ),
 
   'akc-dog-breed': records(
     { score: 15, tier: 'FAMILIAR', note: 'A familiar AKC-recognized breed that was missing from the current pool.', names: [
@@ -469,7 +469,7 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
       'Basset Fauve de Bretagne', 'Russian Tsvetnaya Bolonka',
       'Teddy Roosevelt Terrier'
     ]}
-  )
+  ),
 
   'nobel-physics-laureate': records(
     { score: 15, tier: 'FAMILIAR', note: 'A Nobel Prize in Physics laureate with a well-known contribution to modern science.', names: [
@@ -490,7 +490,7 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
       'Nikolay Basov', 'Alexander Prokhorov',
       'Pavel Cherenkov', 'Ilja Frank', 'Igor Tamm'
     ]}
-  )
+  ),
 
   'dinosaur-genus': records(
     { score: 15, tier: 'FAMILIAR', note: 'A recognizable non-avian dinosaur genus that is distinct from those already in the pool.', names: [
@@ -507,7 +507,7 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
       'Kulindadromeus', 'Miragaia', 'Sauropelta',
       'Edmontonia', 'Prenocephale', 'Thescelosaurus'
     ]}
-  )
+  ),
 
   'board-game': records(
     { score: 15, tier: 'FAMILIAR', note: 'A popular modern board game that many casual tabletop players recognize.', names: [
@@ -600,7 +600,7 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
       'Kärnan', 'Joris en de Draak',
       'T Express', 'Riddler’s Revenge'
     ]}
-  )
+  ),
 
   'video-game-company': records(
     { score: 15, tier: 'FAMILIAR', note: 'A recognizable video-game developer or publisher with released games.', names: [
