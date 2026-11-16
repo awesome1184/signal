@@ -782,7 +782,7 @@ function App() {
   const attemptsRemaining = Math.max(0, Math.min(15, game.attemptsRemaining ?? 15));
   const total = game.entries.reduce((sum, entry) => sum + entry.score, 0);
   const currentEntry = game.entries[game.entries.length - 1];
-  const tuningSignalPaths = useMemo(() => buildReceiverPaths(tuningSignalSeed, tuningDisplayScore), [tuningSignalSeed, tuningDisplayScore]);
+  const tuningSignalPaths = useMemo(() => buildReceiverPaths(tuningSignalSeed, tuningProgress), [tuningSignalSeed, tuningProgress]);
   const resultSignalPaths = useMemo(() => currentEntry ? buildReceiverPaths(currentEntry.signalSeed ?? 1, currentEntry.score) : null, [currentEntry]);
   const secondsLeft = game.deadline ? Math.max(0, Math.ceil((game.deadline - now) / 1000)) : ROUND_SECONDS;
   const completedPrompts = game.entries.length;
