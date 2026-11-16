@@ -17,8 +17,11 @@ type RotationState = {
   daily: Record<string, SavedDailySelection>;
 };
 
-export type ResolvedDailySelection = SavedDailySelection & {
+export type ResolvedDailySelection = {
+  mode: SavedDailySelection['mode'];
   prompts: Prompt[];
+  // Private server-side mapping; never serialize this array to the browser.
+  selections: DailyPromptSelection[];
 };
 
 const ROTATION_KEY = 'signal:v1:content-rotation';
@@ -183,7 +186,7 @@ function hydrateSelection(selection: SavedDailySelection): ResolvedDailySelectio
       context: 'Archive fallback: this transmission has one randomly selected answer that has not appeared in the previous seven days. ' + source.context
     };
   });
-  return { ...selection, prompts };
+  return { mode: selection.mode, prompts, selections: selection.prompts };
 }
 
 /**
