@@ -105,7 +105,8 @@ function publicRun(run: PlayerRun | null) {
     phase: run.phase,
     index: run.index,
     entries: run.entries,
-    deadline: run.deadline
+    deadline: run.deadline,
+    attemptsRemaining: Math.max(0, MAX_ATTEMPTS_PER_ROUND - run.attempts)
   };
 }
 
@@ -254,7 +255,7 @@ app.post('/api/check-answer', async (c) => {
   const selectedIndex = daily.prompts.findIndex((prompt) => prompt.id === promptId);
   if (selectedIndex < 0) return c.json({ ok: false, valid: false, message: 'That transmission is not part of today’s scan.' }, 400);
   const selected = daily.selections[selectedIndex];
-  let match = evaluateAnswer(selected.questionId, answer, selected.answerId);
+  let match = evaluateAnswer(selected.questionId, answer);
 
   if (body.testMode) {
     const username = await reddit.getCurrentUsername();
@@ -276,9 +277,7 @@ app.post('/api/check-answer', async (c) => {
         const approved = JSON.parse(approvedRaw) as {
           id?: string; promptId?: string; normalizedAnswer?: string; score?: number; tier?: string; note?: string;
         };
-        const selectedEntryMatches = selected.mode === 'question' || approved.id === selected.answerId;
-        if (selectedEntryMatches
-          && approved.promptId === selected.questionId
+        if (approved.promptId === selected.questionId
           && approved.normalizedAnswer === normalized
           && typeof approved.score === 'number'
           && Object.prototype.hasOwnProperty.call(APPROVED_SCORE_TIERS, approved.score)
@@ -367,10 +366,31 @@ app.post('/api/check-answer', async (c) => {
     return c.json({ ok: true, valid: false, expired: true, run: publicRun(outcome.run), message: 'The window closed. This round has been recorded as silence.' });
   }
   if (outcome.value.kind === 'limit') {
-    return c.json({ ok: false, valid: false, message: 'You have used all 15 attempts for this transmission.', attemptsRemaining: 0 }, 429);
+    return c.json({
+      ok: false,
+      valid: false,
+      message: 'You have used all 15 attempts for this transmission.',
+      attemptsRemaining: 0,
+      run: publicRun(outcome.run)
+    }, 429);
   }
   if (outcome.value.kind === 'fast') {
-    return c.json({ ok: false, valid: false, message: 'Give the receiver a moment before trying again.', attemptsRemaining: outcome.value.attemptsRemaining }, 429);
+    return c.json({
+      ok: false,
+      valid: false,
+      message: 'Give the receiver a moment before trying again.',
+      attemptsRemaining: outcome.value.attemptsRemaining,
+      run: publicRun(outcome.run)
+    }, 429);
+  }
+  if (outcome.value.kind === 'rejected') {
+    return c.json({
+      ok: true,
+      valid: false,
+      message: 'That answer is not in the catalog for this question.',
+      attemptsRemaining: outcome.value.attemptsRemaining,
+      run: publicRun(outcome.run)
+    });
   }
   return c.json({ ok: false, valid: false, message: 'This transmission is no longer active. Refresh to sync your scan.' }, 409);
 });
@@ -485,7 +505,8 @@ app.post('/api/report-answer', async (c) => {
     [field]: JSON.stringify({
       dateKey: day,
       userId,
-      promptId,
+      promptId: selected.questionId,
+      displayPromptId: promptId,
       answer,
       selectionMode: selected.mode,
       createdAt: new Date().toISOString()
