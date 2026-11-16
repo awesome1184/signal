@@ -6,6 +6,15 @@ export type Prompt = {
   hint: string;
 };
 
+export type PromptSelectionMode = 'question' | 'answer';
+
+export type DailyPromptSelection = {
+  id: string;
+  questionId: string;
+  mode: PromptSelectionMode;
+  answerId?: string;
+};
+
 const PACKS: Prompt[][] = [
   [
     { id: 'night-bird', channel: 'FIELD BIOLOGY', prompt: 'Name a bird that is active at night.', context: 'Think beyond the first bird that comes to mind. The answer must be a real bird species.', hint: 'Listen for the unusual calls of the night.' },
@@ -36,6 +45,20 @@ const PACKS: Prompt[][] = [
   ]
 ];
 
+/** All approved questions available to the server-side daily rotation. */
+export function getQuestionBank(): Prompt[] {
+  return PACKS.flat();
+}
+
+/** Resolve a stable question ID without relying on its daily pack position. */
+export function getPromptById(id: string): Prompt | undefined {
+  return getQuestionBank().find((prompt) => prompt.id === id);
+}
+
+/**
+ * Static local-preview fallback. The Devvit game replaces this with the
+ * Redis-backed, shared daily selection returned by /api/bootstrap.
+ */
 export function getDailyPrompts(dateKey: string): Prompt[] {
   const timestamp = Date.parse(dateKey + 'T00:00:00Z');
   const dayNumber = Number.isFinite(timestamp) ? Math.floor(timestamp / 86400000) : 0;
