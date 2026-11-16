@@ -12,10 +12,20 @@ import type { AnswerRecord } from '../answerBank.js';
  *   https://www.reptile-database.org/
  * - University of Florida BioCosmos / Catalogue of Life, Papilionidae:
  *   https://biocosmos.rc.ufl.edu/family/papilionidae
+ * - U.S. Fish & Wildlife Service, Monarch butterfly (Danaus plexippus):
+ *   https://www.fws.gov/species/monarch-danaus-plexippus
+ * - Illinois Department of Natural Resources, Painted Lady (Vanessa cardui):
+ *   https://dnr.illinois.gov/education/wildaboutpages/wildaboutinvertebrates/wildaboutbutterflies/family-nymphalidae/wambpaintedlady.html
+ * - North American Butterfly Association, Swallowtails (Papilionidae):
+ *   https://naba.org/butterflies/swallowtails/
  * - World Orchids, synonymic checklist:
  *   https://www.worldplants.de/world-orchids/orchid-list
  * - Coral Trait Database species catalogue:
  *   https://www.coraltraits.org/species
+ * - University of Florida IFAS, Guide to Common Stony Corals of Florida:
+ *   https://ask.ifas.ufl.edu/publication/fa210
+ * - U.S. Fish & Wildlife Service, Elkhorn Coral (Acropora palmata):
+ *   https://www.fws.gov/species/elkhorn-coral-acropora-palmata
  * - UNESCO Intangible Cultural Heritage lists:
  *   https://ich.unesco.org/en/lists
  * - UNESCO Man and the Biosphere Programme current reserve list:
@@ -441,11 +451,14 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
   ),
 
   'swallowtail-species': records(
-    { score: 10, tier: 'BACKGROUND', note: 'A familiar swallowtail species in the family Papilionidae.', names: [
+    { score: 10, tier: 'BACKGROUND', note: 'A highly recognizable butterfly species or a familiar swallowtail.', names: [
+      ['Monarch butterfly', 'Monarch', 'Danaus plexippus'],
+      ['Painted lady', 'Vanessa cardui'],
       ['Old World swallowtail', 'Papilio machaon'],
       ['Black swallowtail', 'Papilio polyxenes']
     ]},
-    { score: 15, tier: 'FAMILIAR', note: 'A widely recognized swallowtail or birdwing species.', names: [
+    { score: 15, tier: 'FAMILIAR', note: 'A widely recognized butterfly or swallowtail species.', names: [
+      ['Red admiral', 'Vanessa atalanta'],
       ['Eastern tiger swallowtail', 'Papilio glaucus'],
       ['Giant swallowtail', 'Papilio cresphontes'],
       ['Pipevine swallowtail', 'Battus philenor']
@@ -575,16 +588,19 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
   ),
 
   'coral-species': records(
-    { score: 10, tier: 'BACKGROUND', note: 'A familiar reef-building coral species recorded in the Coral Trait Database.', names: [
+    { score: 10, tier: 'BACKGROUND', note: 'A familiar coral type or species with an established common name.', names: [
       ['Elkhorn coral', 'Acropora palmata'],
-      ['Staghorn coral', 'Acropora cervicornis']
+      ['Staghorn coral', 'Acropora cervicornis'],
+      ['Brain coral', 'Pseudodiploria strigosa'],
+      ['Pillar coral', 'Dendrogyra cylindrus']
     ]},
-    { score: 15, tier: 'FAMILIAR', note: 'A recognizable coral species with a well-established scientific name.', names: [
+    { score: 15, tier: 'FAMILIAR', note: 'A recognizable coral type or species with a well-established common name.', names: [
       ['Cauliflower coral', 'Pocillopora damicornis'],
+      ['Grooved brain coral', 'Diploria labyrinthiformis'],
       ['Lobe coral', 'Porites lobata'],
       ['Great star coral', 'Montastraea cavernosa']
     ]},
-    { score: 30, tier: 'UNCOMMON', note: 'A distinct species-level coral taxon in the database.', names: [
+    { score: 30, tier: 'UNCOMMON', note: 'A distinct coral type or species with a recognized common name.', names: [
       ['Mountainous star coral', 'Orbicella faveolata'],
       ['Massive starlet coral', 'Siderastrea siderea'],
       ['Galaxy coral', 'Galaxea fascicularis'],
