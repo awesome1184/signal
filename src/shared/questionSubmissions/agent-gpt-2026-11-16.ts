@@ -78,16 +78,16 @@ export const QUESTION_SUBMISSIONS_BATCH_3: Prompt[] = [
   {
     id: 'confirmed-exoplanet',
     channel: 'EXOPLANET CATALOGUE',
-    prompt: 'Name a confirmed exoplanet in NASA’s Exoplanet Archive.',
-    context: 'The answer must be a planet listed as confirmed in the NASA Exoplanet Archive’s Planetary Systems data, not a candidate, false positive, or unconfirmed signal. Use the archive’s planet name exactly or a recognized official proper name. A host star alone does not count.',
-    hint: 'The archive contains thousands of confirmed planets, many with catalogue-style names such as Kepler- or TOI-designations.'
+    prompt: 'Name a well-known star or a confirmed exoplanet outside our Solar System.',
+    context: 'The answer must be either a named star other than the Sun, using a recognized proper name or standard star designation, or a planet listed as confirmed in NASA’s Exoplanet Archive. Do not submit a planet candidate, false positive, star cluster, galaxy, or object inside our Solar System.',
+    hint: 'Try familiar stars such as Sirius, Polaris, or Betelgeuse, or a famous exoplanet such as Proxima Centauri b.'
   },
   {
     id: 'lunar-crater',
     channel: 'LUNAR NOMENCLATURE',
-    prompt: 'Name an officially named crater on the Moon.',
-    context: 'The answer must be a lunar crater whose name is currently approved by the International Astronomical Union and recorded in the USGS Gazetteer of Planetary Nomenclature. Use the official crater name, including a letter suffix where required. Craters on other worlds, informal names, and non-crater lunar features do not qualify.',
-    hint: 'The Moon has thousands of officially named impact craters, from prominent basins to small satellite craters.'
+    prompt: 'Name a named surface feature on the Moon.',
+    context: 'The answer must be a named lunar surface feature recorded in the IAU/USGS Gazetteer of Planetary Nomenclature. Craters, maria (lunar seas), mountains, valleys, and rilles count. Use the official name or a recognized English name; features on other worlds do not qualify.'
+    hint: 'Familiar examples include the Sea of Tranquility, Tycho Crater, and the Sea of Serenity.'
   },
   {
     id: 'wine-grape-variety',
