@@ -121,7 +121,7 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
       'Direct-conversion receiver', 'Superregenerative receiver', 'RTL-SDR receiver'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A specialist receiver or early radio detector.', names: [
-      ' coherer detector'
+      'Coherer detector'
     ]}
   ),
 
@@ -142,13 +142,13 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
 
   'natural-glow': records(
     { score: 15, tier: 'FAMILIAR', note: 'A recognizable organism or natural phenomenon that produces visible light.', names: [
-      'Jack-o-lantern mushroom', 'St. Elmos fire'
+      'Jack-o-lantern mushroom', 'St. Elmo’s fire'
     ]},
     { score: 30, tier: 'UNCOMMON', note: 'A documented light-producing organism or natural event.', names: [
       'Honey fungus', 'Railroad worm', 'Ostracod'
     ]},
     { score: 60, tier: 'RARE', note: 'A less commonly named example of bioluminescence or natural light emission.', names: [
-      'Crystal jellyfish', 'Atolla wyvillei', 'Lanternfish'
+      'Crystal jellyfish', 'Lanternfish'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A specialized bioluminescent organism or natural phenomenon.', names: [
       'Cookiecutter shark', 'Tomopteris'
@@ -172,13 +172,13 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
 
   'distant-view': records(
     { score: 15, tier: 'FAMILIAR', note: 'A familiar optical instrument or viewing device for distant subjects.', names: [
-      'Telescope lens', 'Astronomical telescope'
+      'Astronomical telescope'
     ]},
     { score: 30, tier: 'UNCOMMON', note: 'A specialized optical instrument for viewing distant objects.', names: [
       'Refracting telescope', 'Reflecting telescope', 'Terrestrial telescope'
     ]},
     { score: 60, tier: 'RARE', note: 'A less commonly named viewing instrument or optical scope.', names: [
-      'Theodolite telescope', 'Transit instrument'
+      'Transit instrument'
     ]}
   ),
 
@@ -331,7 +331,7 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
       'Ring current', 'Circumstellar disk'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A specialist ring-shaped astronomical structure.', names: [
-      'Einstein-Chwolson ring'
+      'Accretion ring'
     ]}
   ),
 
@@ -432,15 +432,14 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
     { score: 60, tier: 'RARE', note: 'A legitimate Pokémon species that is less often named by casual players.', names: [
       'Horsea', 'Seadra', 'Goldeen', 'Seaking', 'Staryu',
       'Starmie', 'Mr. Mime', 'Scyther', 'Jynx', 'Electabuzz',
-      'Magmar', 'Pinsir', 'Tauros', 'Porygon2', 'Qwilfish',
-      'Octillery', 'Miltank', 'Sableye', 'Mawile', 'Relicanth'
+      'Magmar', 'Pinsir', 'Tauros', 'Porygon2', 'Octillery',
+      'Miltank', 'Sableye', 'Mawile', 'Relicanth'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A more obscure but official National Pokédex species.', names: [
-      'Chimecho', 'Luvdisc', 'Torkoal', 'Tropius', 'Claydol',
-      'Shuckle', 'Shedinja', 'Kecleon', 'Spinda', 'Lumineon',
-      'Sigilyph', 'Maractus', 'Cryogonal', 'Klefki', 'Bruxish'
+      'Torkoal', 'Claydol', 'Shuckle', 'Bruxish',
+      'Porygon-Z', 'Dusknoir'
     ]}
-  ),
+  )
 
   'akc-dog-breed': records(
     { score: 15, tier: 'FAMILIAR', note: 'A familiar AKC-recognized breed that was missing from the current pool.', names: [
@@ -457,21 +456,21 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
     { score: 60, tier: 'RARE', note: 'A less commonly named AKC-recognized breed.', names: [
       'Irish Wolfhound', 'Saluki', 'Afghan Hound', 'Brittany',
       'Lakeland Terrier', 'Welsh Corgi (Cardigan)', 'Lhasa Apso',
-      'Norwegian Elkhound', 'Bouvier des Flandres',
-      'Rhodesian Ridgeback', 'Black and Tan Coonhound',
-      'Belgian Malinois', 'Belgian Sheepdog', 'Australian Cattle Dog'
+      'Norwegian Elkhound', 'Rhodesian Ridgeback',
+      'Black and Tan Coonhound', 'Belgian Malinois',
+      'Belgian Sheepdog', 'Australian Cattle Dog'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A specialist or less frequently encountered AKC-recognized breed.', names: [
       'Schipperke', 'Pekingese', 'West Highland White Terrier',
       'Welsh Terrier', 'Field Spaniel', 'Curly-Coated Retriever',
       'Miniature Pinscher', 'Giant Schnauzer', 'Border Terrier',
-      'Bouvier des Flandres'
+      'Bouvier des Flandres', 'Wirehaired Pointing Griffon'
     ]},
     { score: 100, tier: 'SIGNAL FOUND', note: 'A newly recognized or comparatively uncommon AKC breed.', names: [
       'Basset Fauve de Bretagne', 'Russian Tsvetnaya Bolonka',
       'Teddy Roosevelt Terrier'
     ]}
-  ),
+  )
 
   'nobel-physics-laureate': records(
     { score: 15, tier: 'FAMILIAR', note: 'A Nobel Prize in Physics laureate with a well-known contribution to modern science.', names: [
@@ -489,30 +488,27 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
       'François Englert', 'Peter Grünberg'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A specialist-level Nobel Physics laureate from an earlier award year.', names: [
-      'Ivar Waller', 'Pavel Cherenkov', 'Ilja Frank',
-      'Igor Tamm', 'Mstislav Keldysh'
+      'Nikolay Basov', 'Alexander Prokhorov',
+      'Pavel Cherenkov', 'Ilja Frank', 'Igor Tamm'
     ]}
-  ),
+  )
 
   'dinosaur-genus': records(
     { score: 15, tier: 'FAMILIAR', note: 'A recognizable non-avian dinosaur genus that is distinct from those already in the pool.', names: [
-      'Baryonyx', 'Suchomimus', 'Irritator', 'Torvosaurus'
+      'Irritator', 'Torvosaurus'
     ]},
     { score: 30, tier: 'UNCOMMON', note: 'A recognized dinosaur genus that is less likely to be an immediate answer.', names: [
-      'Acrocanthosaurus', 'Einiosaurus', 'Leptoceratops',
-      'Nedoceratops', 'Anzu', 'Nqwebasaurus',
-      'Saurornitholestes', 'Richardoestesia'
+      'Leptoceratops', 'Nedoceratops', 'Rinchenia'
     ]},
     { score: 60, tier: 'RARE', note: 'A documented but less commonly named non-avian dinosaur genus.', names: [
-      'Dreadnoughtus', 'Patagotitan', 'Argentinosaurus',
-      'Kileskus', 'Mononykus', 'Othnielia',
-      'Hypsilophodon', 'Rugops', 'Erlikosaurus'
+      'Mononykus', 'Othnielia', 'Hypsilophodon',
+      'Rugops', 'Erlikosaurus'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A specialist-level dinosaur genus from the fossil record.', names: [
       'Kulindadromeus', 'Miragaia', 'Sauropelta',
       'Edmontonia', 'Prenocephale', 'Thescelosaurus'
     ]}
-  ),
+  )
 
   'board-game': records(
     { score: 15, tier: 'FAMILIAR', note: 'A popular modern board game that many casual tabletop players recognize.', names: [
@@ -538,10 +534,10 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
 
   'woodwind-instrument': records(
     { score: 30, tier: 'UNCOMMON', note: 'A recognized regional or orchestral woodwind instrument.', names: [
-      'Fujara', 'Kèn bầu', 'Sarrusophone', 'Contrabass flute'
+      'Fujara', 'Kèn bầu', 'Contrabass flute'
     ]},
     { score: 60, tier: 'RARE', note: 'A less familiar reed or flute-family woodwind instrument.', names: [
-      'Sopranino flute', 'Bass recorder', 'Rauschpfeife'
+      'Sopranino flute', 'Bass recorder', 'Bawu'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A specialist woodwind instrument from a distinct musical tradition.', names: [
       'Arghul', 'Launeddas', 'Alboka'
@@ -561,29 +557,26 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
       'Okavango River', 'Chari River'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A less familiar river basin shared by multiple countries.', names: [
-      'Gambia River', 'Kavango River', 'Ogooué River'
+      'Gambia River', 'Cunene River', 'Ogooué River'
     ]}
   ),
 
   'ich-heritage-element': records(
     { score: 15, tier: 'FAMILIAR', note: 'A widely recognized practice or tradition inscribed on UNESCO’s Intangible Cultural Heritage lists.', names: [
-      'Traditional Mexican cuisine', 'Chinese calligraphy',
-      'Peking opera', 'Noh theatre'
+      'Peking opera', 'Chinese calligraphy', 'Noh theatre'
     ]},
     { score: 30, tier: 'UNCOMMON', note: 'A named cultural practice or performing art on a UNESCO intangible heritage list.', names: [
-      'Kabuki theatre', 'Fado', 'Duduk and its music',
-      'Water puppetry in Viet Nam', 'Garba of Gujarat',
-      'Chhau dance', 'Nowruz'
+      'Kabuki theatre', 'Water puppetry in Viet Nam',
+      'Garba of Gujarat', 'Chhau dance', 'Gagaku'
     ]},
     { score: 60, tier: 'RARE', note: 'A less commonly named UNESCO-inscribed cultural element.', names: [
-      'Ramlila', 'Ramman', 'Ssireum', 'Talchum',
-      'Kırkpınar oil wrestling festival', 'Carnival of Binche'
+      'Kankurang', 'Jultagi', 'Saman dance', 'Samba de Roda'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A specialist-level element documented on UNESCO’s lists.', names: [
-      'Yama, Hoko, Yatai float festivals', 'Mazu belief and customs',
-      'Traditional art of Azerbaijani carpet weaving'
+      'Traditional art of Azerbaijani tar and its craftsmanship',
+      'Kankurang, Manding initiatory rite'
     ]}
-  ),
+  )
 
   'wine-grape-variety': records(
     { score: 15, tier: 'FAMILIAR', note: 'A recognizable wine-grape cultivar used in established wine regions.', names: [
@@ -638,10 +631,10 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
       'Mystery Mine', 'Flying Aces', 'Gold Striker'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A less familiar coaster with a distinct RCDB ride listing.', names: [
-      'Kärnan', 'Untamed (Walibi Holland)', 'Joris en de Draak',
-      'T Express', 'Balder (Liseberg)'
+      'Kärnan', 'Joris en de Draak',
+      'T Express', 'Riddler’s Revenge'
     ]}
-  ),
+  )
 
   'video-game-company': records(
     { score: 15, tier: 'FAMILIAR', note: 'A recognizable video-game developer or publisher with released games.', names: [
@@ -681,7 +674,7 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
 
   'time-travel-film': records(
     { score: 15, tier: 'FAMILIAR', note: 'A recognizable feature film in which time travel is central to the story.', names: [
-      'Time After Time', 'The Time Travelers Wife', 'Déjà Vu'
+      'Time After Time', 'The Time Traveler’s Wife', 'Déjà Vu'
     ]},
     { score: 30, tier: 'UNCOMMON', note: 'A released film built around time travel or a time-loop mechanism.', names: [
       'The Philadelphia Experiment', 'A Sound of Thunder',
