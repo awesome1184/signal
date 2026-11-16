@@ -2030,7 +2030,7 @@ button:focus-visible,input:focus-visible {
   transform:translateX(-100%);
   animation:signal-spectral-sweep 2.8s ease-in-out infinite;
 }
-.play-view.tuning-view .signal-motion-trace {
+.play-view.tuning-view .signal-capture:not(.signal-live-capture) .signal-motion-trace {
   fill:none;
   stroke:#c5ffff;
   stroke-width:1.2;
@@ -2040,11 +2040,11 @@ button:focus-visible,input:focus-visible {
   filter:drop-shadow(0 0 5px rgba(120,255,245,.75));
   animation:signal-motion-travel 1.15s linear infinite;
 }
-.play-view.tuning-view .signal-capture[data-phase="tracking"] .signal-motion-trace { opacity:.36; }
-.play-view.tuning-view .signal-capture[data-phase="locking"] .signal-motion-trace { opacity:.58; }
-.play-view.tuning-view .signal-capture[data-phase="surging"] .signal-motion-trace,
-.play-view.tuning-view .signal-capture[data-phase="locked"] .signal-motion-trace { opacity:.88; }
-.play-view.tuning-view .signal-lock-reticle {
+.play-view.tuning-view .signal-capture:not(.signal-live-capture)[data-phase="tracking"] .signal-motion-trace { opacity:.36; }
+.play-view.tuning-view .signal-capture:not(.signal-live-capture)[data-phase="locking"] .signal-motion-trace { opacity:.58; }
+.play-view.tuning-view .signal-capture:not(.signal-live-capture)[data-phase="surging"] .signal-motion-trace,
+.play-view.tuning-view .signal-capture:not(.signal-live-capture)[data-phase="locked"] .signal-motion-trace { opacity:.88; }
+.play-view.tuning-view .signal-capture:not(.signal-live-capture) .signal-lock-reticle {
   animation:signal-reticle-search 3.6s ease-in-out infinite alternate;
 }
 .play-view.tuning-view .signal-capture:not(.signal-live-capture)[data-phase="locking"] .signal-lock-reticle {
