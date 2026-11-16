@@ -100,7 +100,7 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
       'Lute', 'Zither', 'Lyre'
     ]},
     { score: 30, tier: 'UNCOMMON', note: 'A traditional or less commonly named plucked or bowed string instrument.', names: [
-      'Autoharp', 'Balalaika', 'Charango', 'Kantele'
+      'Autoharp', 'Charango', 'Kantele', 'Kora'
     ]},
     { score: 60, tier: 'RARE', note: 'A regional or historical string instrument that is less familiar to casual players.', names: [
       'Cittern', 'Theorbo', 'Rebec', 'Gusli'
@@ -166,7 +166,7 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
       'Crepitation', 'Purl'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'An uncommon literary or technical sound word.', names: [
-      'Sibilance', 'Murmuration'
+      'Murmuration', 'Susurration'
     ]}
   ),
 
@@ -253,7 +253,7 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
       'Merrillite', 'Oldhamite', 'Diamond'
     ]},
     { score: 60, tier: 'RARE', note: 'A less commonly named mineral or structure recorded in meteorite samples.', names: [
-      'Schreibersite', 'Taenite grain'
+      'Taenite grain', 'Pallasite structure'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A specialist mineral or inclusion associated with meteorite classification.', names: [
       'Chondrule rim', 'Calcium phosphate'
@@ -355,11 +355,11 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
       'Dia', 'Eirene', 'Philophrosyne', 'Eupheme', 'Valetudo'
     ]},
     { score: 60, tier: 'RARE', note: 'A named irregular moon confirmed in the IAU/JPL planetary satellite catalog.', names: [
-      'Ersa', 'Kore', 'Herse', 'Aegir', 'Bergelmir'
+      'Ersa', 'Kore', 'Herse', 'Aegir', 'Tarqeq'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A less commonly recalled officially named Saturnian moon.', names: [
       'Hyrrokkin', 'Skoll', 'Surtur', 'Jarnsaxa', 'Greip',
-      'Tarqeq', 'Aegaeon', 'Gridr', 'Angrboda', 'Skrymir',
+      'Gridr', 'Angrboda', 'Angrboda', 'Skrymir',
       'Gerd', 'Eggther', 'Beli', 'Gunnlod', 'Thiazzi',
       'Alvaldi', 'Geirrod'
     ]}
@@ -401,8 +401,8 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
       'Los Alerces National Park', 'Tipasa', 'Al Qal’a of Beni Hammad'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A less commonly named inscribed World Heritage property.', names: [
-      'Willandra Lakes Region', 'Morne Trois Pitons National Park',
-      'Kondoa Rock-Art Sites', 'Cidade Velha',
+      'Willandra Lakes Region', 'The English Lake District',
+      'Jodrell Bank Observatory', 'Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe',
       'Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe'
     ]}
   ),
@@ -433,10 +433,10 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
       'Horsea', 'Seadra', 'Goldeen', 'Seaking', 'Staryu',
       'Starmie', 'Mr. Mime', 'Scyther', 'Jynx', 'Electabuzz',
       'Magmar', 'Pinsir', 'Tauros', 'Porygon2', 'Octillery',
-      'Miltank', 'Sableye', 'Mawile', 'Relicanth'
+      'Miltank', 'Sableye', 'Mawile', 'Bidoof'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A more obscure but official National Pokédex species.', names: [
-      'Torkoal', 'Claydol', 'Shuckle', 'Bruxish',
+      'Torkoal', 'Claydol', 'Shuckle', 'Tinkaton',
       'Porygon-Z', 'Dusknoir'
     ]}
   )
@@ -484,7 +484,7 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
     ]},
     { score: 60, tier: 'RARE', note: 'A less commonly named individual who received the Nobel Prize in Physics.', names: [
       'Claude Cohen-Tannoudji', 'William D. Phillips',
-      'Steven Chu', 'Serge Haroche', 'David Wineland',
+      'Serge Haroche', 'David Wineland',
       'François Englert', 'Peter Grünberg'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A specialist-level Nobel Physics laureate from an earlier award year.', names: [
@@ -495,10 +495,10 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
 
   'dinosaur-genus': records(
     { score: 15, tier: 'FAMILIAR', note: 'A recognizable non-avian dinosaur genus that is distinct from those already in the pool.', names: [
-      'Irritator', 'Torvosaurus'
+      'Torvosaurus', 'Rinchenia'
     ]},
     { score: 30, tier: 'UNCOMMON', note: 'A recognized dinosaur genus that is less likely to be an immediate answer.', names: [
-      'Leptoceratops', 'Nedoceratops', 'Rinchenia'
+      'Nedoceratops', 'Kileskus'
     ]},
     { score: 60, tier: 'RARE', note: 'A documented but less commonly named non-avian dinosaur genus.', names: [
       'Mononykus', 'Othnielia', 'Hypsilophodon',
@@ -512,7 +512,7 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
 
   'board-game': records(
     { score: 15, tier: 'FAMILIAR', note: 'A popular modern board game that many casual tabletop players recognize.', names: [
-      'Splendor', 'Dominion', 'Hive', 'Everdell',
+      'Splendor', 'Hive', 'Everdell',
       'Codenames', 'Kingdomino'
     ]},
     { score: 30, tier: 'UNCOMMON', note: 'A recognizable hobby board game beyond the best-known family titles.', names: [
@@ -563,18 +563,18 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
 
   'ich-heritage-element': records(
     { score: 15, tier: 'FAMILIAR', note: 'A widely recognized practice or tradition inscribed on UNESCO’s Intangible Cultural Heritage lists.', names: [
-      'Peking opera', 'Chinese calligraphy', 'Noh theatre'
+      'Peking opera', 'Chinese shadow puppetry', 'Noh theatre'
     ]},
     { score: 30, tier: 'UNCOMMON', note: 'A named cultural practice or performing art on a UNESCO intangible heritage list.', names: [
-      'Kabuki theatre', 'Water puppetry in Viet Nam',
-      'Garba of Gujarat', 'Chhau dance', 'Gagaku'
+      'Kabuki theatre', 'Gagaku', 'Tibetan opera',
+      'Kankurang', 'Jultagi'
     ]},
     { score: 60, tier: 'RARE', note: 'A less commonly named UNESCO-inscribed cultural element.', names: [
-      'Kankurang', 'Jultagi', 'Saman dance', 'Samba de Roda'
+      'Saman dance', 'Samba de Roda', 'Tbourida'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A specialist-level element documented on UNESCO’s lists.', names: [
       'Traditional art of Azerbaijani tar and its craftsmanship',
-      'Kankurang, Manding initiatory rite'
+      'Traditional art of Azerbaijani carpet weaving'
     ]}
   )
 
@@ -598,21 +598,19 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
 
   'protected-eu-cheese': records(
     { score: 15, tier: 'FAMILIAR', note: 'A well-known cheese with a registered EU geographical indication.', names: [
-      'Stilton', 'Halloumi', 'Gouda Holland'
+      'Stilton', 'Gouda Holland', 'Danbo'
     ]},
     { score: 30, tier: 'UNCOMMON', note: 'A recognized regional cheese protected under an EU PDO or PGI registration.', names: [
-      'Edam Holland', 'Danablu', 'Queso de Mahón-Menorca',
-      'Queso de La Serena', 'Queso de Valdeón',
-      'Queso Tetilla', 'Morbier'
+      'Edam Holland', 'Queso de Mahón-Menorca',
+      'Asiago', 'Fontina', 'Bitto', 'Bra', 'Quartirolo Lombardo'
     ]},
     { score: 60, tier: 'RARE', note: 'A less commonly named EU-protected cheese.', names: [
-      'Livarot', 'Époisses', 'Pecorino Sardo',
-      'Pecorino Toscano', 'Mozzarella di Bufala Campana',
-      'Taleggio'
+      'Pecorino Romano', 'Provolone Valpadana',
+      'Montasio', 'Ricotta Romana', 'Queso de Murcia al Vino'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A specialist regional cheese registered in the EU geographical indications register.', names: [
-      'Canestrato Pugliese', 'Queijo de Azeitão',
-      'Queijo de Serpa', 'Queso Palmero'
+      'Queijo Nisa', 'Queijo Rabaçal',
+      'Queso de l’Alt Urgell y la Cerdanya', 'Formaggio di Fossa di Sogliano'
     ]}
   ),
 
