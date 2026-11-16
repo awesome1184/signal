@@ -1,4 +1,5 @@
 import { ANSWER_SUBMISSIONS_BATCH_2 } from './answerSubmissions/agent-gpt-2026-11-15-second-batch.js';
+import { ANSWER_SUBMISSIONS_BATCH_3 } from './answerSubmissions/agent-gpt-2026-11-16.js';
 
 export type AnswerResult = { score: number; tier: string; note: string; answerId?: string };
 export type AnswerRecord = AnswerResult & { aliases: string[] };
@@ -15,6 +16,7 @@ export type AnswerEntry = {
 
 const BANK: Record<string, AnswerRecord[]> = {
   ...ANSWER_SUBMISSIONS_BATCH_2,
+  ...ANSWER_SUBMISSIONS_BATCH_3,
   'night-bird': [
     { aliases: ['owl'], score: 10, tier: 'BACKGROUND', note: 'A familiar night hunter.' },
     { aliases: ['barn owl', 'western barn owl'], score: 15, tier: 'FAMILIAR', note: 'A specific species, though widely known.' },
