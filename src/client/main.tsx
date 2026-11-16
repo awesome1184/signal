@@ -551,7 +551,8 @@ function scoreLabel(score: number): string {
 
 function App() {
   const [dayKey, setDayKey] = useState(() => getNewYorkDateKey());
-  const prompts = useMemo(() => getDailyPrompts(dayKey), [dayKey]);
+  const [prompts, setPrompts] = useState<Prompt[]>(() => getDailyPrompts(dayKey));
+  const [dailyPromptsReady, setDailyPromptsReady] = useState(DEMO_MODE);
   const answerInputRef = useRef<HTMLInputElement>(null);
   const [game, setGame] = useState<RunState>(() => loadRun(dayKey));
   const [answer, setAnswer] = useState('');
@@ -694,6 +695,8 @@ function App() {
       const nextDay = getNewYorkDateKey();
       if (nextDay === dayKey) return;
       setDayKey(nextDay);
+      setPrompts(getDailyPrompts(nextDay));
+      setDailyPromptsReady(DEMO_MODE);
       setGame(blankRun(nextDay));
       setAnswer('');
       setMessage('A new daily transmission has arrived.');
@@ -714,6 +717,11 @@ function App() {
       .then((response) => { if (!response.ok) throw new Error('No Devvit server'); return response.json(); })
       .then((data) => {
         if (!active || !data?.ok) return;
+        if (!Array.isArray(data.prompts) || data.prompts.length !== 7) {
+          throw new Error('The shared daily question set is unavailable.');
+        }
+        setPrompts(data.prompts as Prompt[]);
+        setDailyPromptsReady(true);
         setServerReady(true);
         setCanTest(Boolean(data.canTest));
         setPlayerName(data.username ? String(data.username).toUpperCase() : 'REDDIT EXPLORER');
@@ -723,7 +731,7 @@ function App() {
           setGame({ dateKey: data.result.dateKey || dayKey, phase: 'complete', index: 6, entries: data.result.entries, deadline: null });
         }
       })
-      .catch(() => { if (active) setServerReady(false); });
+      .catch(() => { if (active) { setServerReady(false); setDailyPromptsReady(DEMO_MODE); } });
     return () => { active = false; };
   }, [dayKey]);
 
@@ -1123,7 +1131,7 @@ function App() {
                   <div className="rule-strip">
                     <div><strong>07</strong><span>PROMPTS</span></div><div><strong>25s</strong><span>PER ROUND</span></div><div><strong>700</strong><span>MAX POINTS</span></div>
                   </div>
-                  <button className="primary-button" onClick={startGame}><span>BEGIN DAILY SCAN</span><span className="button-arrow">↗</span></button>
+                  <button className="primary-button" onClick={startGame} disabled={!dailyPromptsReady}><span>{dailyPromptsReady ? 'BEGIN DAILY SCAN' : 'SYNCING DAILY TRANSMISSION'}</span><span className="button-arrow">↗</span></button>
                   <p className="fine-print">One daily attempt · Resets at midnight Eastern</p>
                 </div>
               </div>
