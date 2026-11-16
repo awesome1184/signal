@@ -8,7 +8,7 @@ export type Prompt = {
   prompt: string;
   context: string;
   hint: string;
-  /** Local-only metadata used by the standalone browser preview's archive fallback. */
+  /** Local preview metadata; archiveSeedId never restricts accepted answers. */
   sourcePromptId?: string;
   archiveSeedId?: string;
 };
@@ -19,6 +19,7 @@ export type DailyPromptSelection = {
   id: string;
   questionId: string;
   mode: PromptSelectionMode;
+  /** Random rotation seed only. All accepted catalog answers remain valid. */
   archiveSeedId?: string;
 };
 
