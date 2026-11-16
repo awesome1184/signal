@@ -193,15 +193,12 @@ const BASE_BANK: Record<string, AnswerRecord[]> = {
 
 // Merge supplemental entries into the original pools after their base arrays,
 // so existing question records are extended rather than overwritten.
-const BANK: Record<string, AnswerRecord[]> = {
-  ...BASE_BANK,
-  ...Object.fromEntries(
-    Object.entries(ANSWER_SUBMISSIONS_CORE_EXPANSION).map(([promptId, additions]) => [
-      promptId,
-      [...(BASE_BANK[promptId] ?? []), ...additions]
-    ])
-  )
-};
+const BANK: Record<string, AnswerRecord[]> = Object.entries(
+  ANSWER_SUBMISSIONS_CORE_EXPANSION
+).reduce<Record<string, AnswerRecord[]>>((merged, [promptId, additions]) => {
+  merged[promptId] = [...(BASE_BANK[promptId] ?? []), ...additions];
+  return merged;
+}, { ...BASE_BANK });
 
 export function normalizeAnswer(value: string): string {
   return value.normalize('NFD')
