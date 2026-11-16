@@ -150,6 +150,20 @@ type RunState = {
   isTest?: boolean;
 };
 type LeaderboardRow = { name: string; score: number };
+type AdminAnswerReport = {
+  id: string;
+  dateKey: string;
+  promptId: string;
+  prompt: string;
+  channel: string;
+  answer: string;
+  createdAt: string;
+  selectionMode: 'question' | 'answer' | 'legacy';
+  decision: 'pending' | 'approved' | 'rejected' | 'duplicate';
+  score?: number;
+  tier?: string;
+  reviewedAt?: string;
+};
 
 const MOCK_BOARD: LeaderboardRow[] = [
   { name: 'northstar', score: 612 },
@@ -712,6 +726,12 @@ function App() {
     return enabled;
   });
   const [canTest, setCanTest] = useState(DEMO_MODE);
+  const [adminReports, setAdminReports] = useState<AdminAnswerReport[]>([]);
+  const [adminReportsLoaded, setAdminReportsLoaded] = useState(false);
+  const [adminReportsLoading, setAdminReportsLoading] = useState(false);
+  const [adminReportsError, setAdminReportsError] = useState('');
+  const [adminReviewBusy, setAdminReviewBusy] = useState('');
+  const [adminReportScores, setAdminReportScores] = useState<Record<string, number>>({});
   const [testPanelOpen, setTestPanelOpen] = useState(DEMO_MODE);
   const [isTuning, setIsTuning] = useState(false);
   const [tuningAnswer, setTuningAnswer] = useState('');
@@ -1177,6 +1197,50 @@ function App() {
   };
 
   const retryBootstrap = () => setBootstrapAttempt((attempt) => attempt + 1);
+
+  const loadAdminReports = async () => {
+    if (DEMO_MODE || !canTest || adminReportsLoading) return;
+    setAdminReportsLoading(true);
+    setAdminReportsError('');
+    try {
+      const response = await fetch('/api/admin/answer-reports');
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data?.ok || !Array.isArray(data.reports)) {
+        throw new Error(data.message || 'Could not load the missing-answer queue.');
+      }
+      setAdminReports(data.reports as AdminAnswerReport[]);
+      setAdminReportsLoaded(true);
+    } catch (error) {
+      setAdminReportsError(error instanceof Error ? error.message : 'Could not load the missing-answer queue.');
+    } finally {
+      setAdminReportsLoading(false);
+    }
+  };
+
+  const reviewAdminReport = async (report: AdminAnswerReport, decision: 'approve' | 'reject' | 'duplicate') => {
+    if (adminReviewBusy) return;
+    setAdminReviewBusy(report.id);
+    setAdminReportsError('');
+    try {
+      const response = await fetch('/api/admin/review-answer-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          dateKey: report.dateKey,
+          reportId: report.id,
+          decision,
+          score: adminReportScores[report.id] ?? 60
+        })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data?.ok) throw new Error(data.message || 'Could not save the review decision.');
+      await loadAdminReports();
+    } catch (error) {
+      setAdminReportsError(error instanceof Error ? error.message : 'Could not save the review decision.');
+    } finally {
+      setAdminReviewBusy('');
+    }
+  };
 
   const copyResult = async () => {
     const rows = prompts.map((prompt, index) => {
@@ -1649,6 +1713,67 @@ function App() {
                       <button disabled={isTuning} onClick={() => { setGame(blankRun(dayKey)); setMessage(''); setAnswer(''); }}>RESET GAME</button>
                     </div>
                   </div>
+                  {!DEMO_MODE && (
+                    <section className="admin-report-review" aria-label="Missing answer review queue">
+                      <div className="admin-report-heading">
+                        <div>
+                          <strong>MISSING ANSWER QUEUE</strong>
+                          <span>REVIEW COMMUNITY SUBMISSIONS · LAST 14 DAYS</span>
+                        </div>
+                        <button type="button" onClick={() => void loadAdminReports()} disabled={adminReportsLoading || Boolean(adminReviewBusy)}>
+                          {adminReportsLoading ? 'LOADING…' : adminReportsLoaded ? 'REFRESH QUEUE' : 'LOAD QUEUE'}
+                        </button>
+                      </div>
+                      {adminReportsError && <p className="admin-report-error" role="alert">{adminReportsError}</p>}
+                      {!adminReportsLoaded && !adminReportsLoading && <p className="admin-report-empty">Load the queue to review answers players reported as missing.</p>}
+                      {adminReportsLoading && <p className="admin-report-empty">Reading stored reports…</p>}
+                      {adminReportsLoaded && !adminReports.length && <p className="admin-report-empty">No reports found in the last 14 days.</p>}
+                      {adminReports.map((report) => (
+                        <article className="admin-report-card" key={report.id}>
+                          <div className="admin-report-meta">
+                            <span>{report.channel}</span>
+                            <span>{report.dateKey} · {report.selectionMode.toUpperCase()} ROUND</span>
+                          </div>
+                          <strong className="admin-report-question">{report.prompt}</strong>
+                          <div className="admin-report-answer">“{report.answer}”</div>
+                          <div className="admin-report-meta">
+                            <span>SUBMITTED {Number.isNaN(Date.parse(report.createdAt)) ? report.dateKey : new Date(report.createdAt).toLocaleString()}</span>
+                            <span className={'admin-report-status status-' + report.decision}>{report.decision.toUpperCase()}</span>
+                          </div>
+                          {report.decision === 'pending' ? (
+                            <div className="admin-report-actions">
+                              {report.selectionMode === 'question' ? (
+                                <>
+                                  <label>
+                                    RARITY
+                                    <select
+                                      value={adminReportScores[report.id] ?? 60}
+                                      onChange={(event) => setAdminReportScores((current) => ({ ...current, [report.id]: Number(event.target.value) }))}
+                                    >
+                                      {TEST_TIERS.map((tier) => <option key={tier.score} value={tier.score}>{tier.score} · {tier.label}</option>)}
+                                    </select>
+                                  </label>
+                                  <button type="button" className="approve-report" disabled={Boolean(adminReviewBusy)} onClick={() => void reviewAdminReport(report, 'approve')}>
+                                    {adminReviewBusy === report.id ? 'SAVING…' : 'APPROVE INTO LIVE BANK'}
+                                  </button>
+                                </>
+                              ) : (
+                                <span className="admin-report-legacy">Only reports from normal question rounds can be approved into the live answer bank.</span>
+                              )}
+                              <button type="button" disabled={Boolean(adminReviewBusy)} onClick={() => void reviewAdminReport(report, 'reject')}>REJECT</button>
+                              <button type="button" disabled={Boolean(adminReviewBusy)} onClick={() => void reviewAdminReport(report, 'duplicate')}>DUPLICATE</button>
+                            </div>
+                          ) : (
+                            <div className="admin-report-reviewed">
+                              {report.decision === 'approved' ? 'ADDED TO LIVE ANSWER BANK' : report.decision === 'duplicate' ? 'MARKED AS DUPLICATE' : 'REJECTED'}
+                              {report.score ? ' · ' + report.score + ' PTS · ' + report.tier : ''}
+                              {report.reviewedAt ? ' · ' + new Date(report.reviewedAt).toLocaleString() : ''}
+                            </div>
+                          )}
+                        </article>
+                      ))}
+                    </section>
+                  )}
                 </div>
               )}
             </section>

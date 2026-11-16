@@ -4029,3 +4029,120 @@ button { user-select:none; }
   font-size:8px;
 }
 .sync-game-button:hover { color:#d4f5f6; }
+
+
+/* Admin-only missing-answer review queue. */
+.admin-report-review {
+  margin-top: 18px;
+  padding: 13px;
+  border: 1px solid rgba(91,216,232,.2);
+  border-radius: 7px;
+  background: rgba(3,15,23,.48);
+}
+.admin-report-heading {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:10px;
+}
+.admin-report-heading > div { display:grid; gap:4px; }
+.admin-report-heading strong {
+  color:#c6e4e8;
+  font:700 10px var(--mono);
+  letter-spacing:.12em;
+}
+.admin-report-heading span {
+  color:#7898a5;
+  font:7px var(--mono);
+  letter-spacing:.08em;
+}
+.admin-report-heading button,
+.admin-report-actions button {
+  min-height:31px;
+  padding:0 9px;
+  border:1px solid rgba(91,216,232,.24);
+  border-radius:4px;
+  background:rgba(10,38,48,.52);
+  color:#aed7dc;
+  font:7px var(--mono);
+  letter-spacing:.06em;
+}
+.admin-report-heading button:disabled,
+.admin-report-actions button:disabled { opacity:.5; cursor:wait; }
+.admin-report-empty,
+.admin-report-error {
+  margin:8px 0 2px;
+  color:#819eaa;
+  font:9px/1.5 var(--mono);
+}
+.admin-report-error { color:#ffb49a; }
+.admin-report-card {
+  display:grid;
+  gap:8px;
+  padding:11px 0;
+  border-top:1px solid rgba(91,216,232,.12);
+}
+.admin-report-meta {
+  display:flex;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:5px 10px;
+  color:#7898a5;
+  font:7px var(--mono);
+  letter-spacing:.04em;
+}
+.admin-report-question {
+  color:#d6eaed;
+  font-size:11px;
+  line-height:1.4;
+}
+.admin-report-answer {
+  padding:8px 10px;
+  border-left:2px solid rgba(245,163,75,.5);
+  background:rgba(59,42,26,.22);
+  color:#ffd9ad;
+  font:11px/1.45 var(--mono);
+  overflow-wrap:anywhere;
+}
+.admin-report-status { color:#d2c39f; }
+.admin-report-status.status-approved { color:#8fe0b2; }
+.admin-report-status.status-rejected,
+.admin-report-status.status-duplicate { color:#9baeb5; }
+.admin-report-actions {
+  display:flex;
+  align-items:end;
+  flex-wrap:wrap;
+  gap:7px;
+}
+.admin-report-actions label {
+  display:grid;
+  gap:4px;
+  color:#8caab4;
+  font:7px var(--mono);
+  letter-spacing:.08em;
+}
+.admin-report-actions select {
+  min-height:31px;
+  padding:0 8px;
+  border:1px solid rgba(91,216,232,.2);
+  border-radius:4px;
+  background:#071720;
+  color:#d7e8eb;
+  font:8px var(--mono);
+}
+.admin-report-actions .approve-report {
+  border-color:rgba(106,220,156,.32);
+  color:#a7ebc3;
+}
+.admin-report-legacy { color:#c3a88d; font:8px/1.4 var(--mono); }
+.admin-report-reviewed { color:#9bb5bc; font:8px/1.45 var(--mono); }
+@media (max-width:520px) {
+  .admin-report-review { padding:10px; }
+  .admin-report-heading { align-items:flex-start; }
+  .admin-report-heading button { flex:0 0 auto; }
+  .admin-report-actions { align-items:stretch; }
+  .admin-report-actions label { flex:1 1 100%; }
+  .admin-report-actions select { width:100%; }
+  .admin-report-actions button { flex:1 1 auto; min-height:36px; }
+}

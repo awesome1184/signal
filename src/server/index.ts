@@ -1,8 +1,8 @@
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
 import { createServer, getServerPort, context, redis, reddit } from '@devvit/web/server';
-import { getNewYorkDateKey, MAX_SCORE, ROUND_SECONDS } from '../shared/game';
-import { evaluateAnswer, getTestAnswer } from '../shared/answerBank';
+import { getNewYorkDateKey, getPromptById, MAX_SCORE, ROUND_SECONDS } from '../shared/game';
+import { evaluateAnswer, getTestAnswer, normalizeAnswer } from '../shared/answerBank';
 import { getRotatedDailySelection } from './contentRotation';
 
 const app = new Hono();
@@ -10,6 +10,8 @@ const boardKey = (day: string) => 'signal:v1:board:' + day;
 const resultsKey = (day: string) => 'signal:v1:results:' + day;
 const namesKey = (day: string) => 'signal:v1:names:' + day;
 const reportsKey = (day: string) => 'signal:v1:answer-reports:' + day;
+const reportReviewsKey = (day: string) => 'signal:v1:answer-report-reviews:' + day;
+const approvedAnswersKey = () => 'signal:v1:approved-answer-aliases';
 const runKey = (day: string, userId: string) => 'signal:v1:run:' + day + ':' + userId;
 const MAX_ATTEMPTS_PER_ROUND = 15;
 const MIN_ATTEMPT_INTERVAL_MS = 350;
@@ -21,6 +23,20 @@ const displayName = (value: unknown) => {
   return clean || 'Explorer';
 };
 const isTestUser = (value: unknown) => displayName(value).toLowerCase() === 'shadow_fen';
+const APPROVED_SCORE_TIERS: Record<number, string> = {
+  10: 'BACKGROUND',
+  15: 'FAMILIAR',
+  30: 'UNCOMMON',
+  60: 'RARE',
+  85: 'DEEP CUT',
+  100: 'SIGNAL FOUND'
+};
+
+function shiftDayKey(dayKey: string, daysBack: number): string {
+  const date = new Date(dayKey + 'T00:00:00.000Z');
+  date.setUTCDate(date.getUTCDate() - daysBack);
+  return date.toISOString().slice(0, 10);
+}
 
 type StoredEntry = {
   promptId: string;
@@ -238,7 +254,7 @@ app.post('/api/check-answer', async (c) => {
   const selectedIndex = daily.prompts.findIndex((prompt) => prompt.id === promptId);
   if (selectedIndex < 0) return c.json({ ok: false, valid: false, message: 'That transmission is not part of today’s scan.' }, 400);
   const selected = daily.selections[selectedIndex];
-  const match = evaluateAnswer(selected.questionId, answer, selected.answerId);
+  let match = evaluateAnswer(selected.questionId, answer, selected.answerId);
 
   if (body.testMode) {
     const username = await reddit.getCurrentUsername();
@@ -246,6 +262,35 @@ app.post('/api/check-answer', async (c) => {
     return c.json({ ok: true, valid: Boolean(match), result: match });
   }
   if (!userId) return c.json({ ok: false, valid: false, message: 'Sign in to submit a daily answer.' }, 401);
+
+  // Admin-approved community aliases are server-owned and apply only to normal
+  // question rounds. Archive rounds remain restricted to their selected record.
+  if (!match && selected.mode === 'question') {
+    const normalized = normalizeAnswer(answer);
+    const approvedRaw = normalized
+      ? await redis.hGet(approvedAnswersKey(), selected.questionId + ':' + normalized)
+      : null;
+    if (approvedRaw) {
+      try {
+        const approved = JSON.parse(approvedRaw) as {
+          promptId?: string; normalizedAnswer?: string; score?: number; tier?: string; note?: string;
+        };
+        if (approved.promptId === selected.questionId
+          && approved.normalizedAnswer === normalized
+          && typeof approved.score === 'number'
+          && Object.prototype.hasOwnProperty.call(APPROVED_SCORE_TIERS, approved.score)
+          && typeof approved.tier === 'string') {
+          match = {
+            score: approved.score,
+            tier: approved.tier,
+            note: typeof approved.note === 'string' ? approved.note : 'Community-approved answer.'
+          };
+        }
+      } catch (error) {
+        console.error('SIGNAL approved answer alias could not be parsed:', error);
+      }
+    }
+  }
 
   type CheckOutcome =
     | { kind: 'stale' }
@@ -434,9 +479,172 @@ app.post('/api/report-answer', async (c) => {
   const fingerprint = answer.toLowerCase().replace(/\s+/g, ' ').slice(0, 80);
   const field = userId + ':' + promptId + ':' + fingerprint;
   await redis.hSet(reportsKey(day), {
-    [field]: JSON.stringify({ dateKey: day, userId, promptId, answer, createdAt: new Date().toISOString() })
+    [field]: JSON.stringify({
+      dateKey: day,
+      userId,
+      promptId,
+      answer,
+      selectionMode: selected.mode,
+      createdAt: new Date().toISOString()
+    })
   });
+  await redis.expire(reportsKey(day), 60 * 60 * 24 * 30);
   return c.json({ ok: true });
+});
+
+app.get('/api/admin/answer-reports', async (c) => {
+  const userId = context.userId ?? null;
+  const username = await reddit.getCurrentUsername();
+  if (userId === null || !isTestUser(username)) {
+    return c.json({ ok: false, message: 'Admin access is restricted.' }, 403);
+  }
+
+  const today = getNewYorkDateKey();
+  const days = Array.from({ length: 14 }, (_, age) => shiftDayKey(today, age));
+  const snapshots = await Promise.all(days.map(async (dateKey) => {
+    const [reportFields, reviewFields] = await Promise.all([
+      redis.hGetAll(reportsKey(dateKey)),
+      redis.hGetAll(reportReviewsKey(dateKey))
+    ]);
+    return { dateKey, reportFields: reportFields ?? {}, reviewFields: reviewFields ?? {} };
+  }));
+
+  const reports: Array<{
+    id: string;
+    dateKey: string;
+    promptId: string;
+    prompt: string;
+    channel: string;
+    answer: string;
+    createdAt: string;
+    selectionMode: 'question' | 'answer' | 'legacy';
+    decision: 'pending' | 'approved' | 'rejected' | 'duplicate';
+    score?: number;
+    tier?: string;
+    reviewedAt?: string;
+  }> = [];
+
+  for (const snapshot of snapshots) {
+    for (const [id, raw] of Object.entries(snapshot.reportFields)) {
+      try {
+        const report = JSON.parse(raw) as {
+          promptId?: string; answer?: string; createdAt?: string; selectionMode?: string;
+        };
+        if (typeof report.promptId !== 'string' || typeof report.answer !== 'string') continue;
+        const reviewRaw = snapshot.reviewFields[id];
+        let review: {
+          decision?: string; score?: number; tier?: string; reviewedAt?: string;
+        } | null = null;
+        try { review = reviewRaw ? JSON.parse(reviewRaw) : null; } catch { review = null; }
+        const prompt = getPromptById(report.promptId);
+        const decision = review?.decision === 'approved' || review?.decision === 'rejected' || review?.decision === 'duplicate'
+          ? review.decision
+          : 'pending';
+        reports.push({
+          id,
+          dateKey: snapshot.dateKey,
+          promptId: report.promptId,
+          prompt: prompt?.prompt ?? report.promptId,
+          channel: prompt?.channel ?? 'UNKNOWN CHANNEL',
+          answer: report.answer,
+          createdAt: typeof report.createdAt === 'string' ? report.createdAt : snapshot.dateKey,
+          selectionMode: report.selectionMode === 'question' || report.selectionMode === 'answer' ? report.selectionMode : 'legacy',
+          decision,
+          ...(typeof review?.score === 'number' ? { score: review.score } : {}),
+          ...(typeof review?.tier === 'string' ? { tier: review.tier } : {}),
+          ...(typeof review?.reviewedAt === 'string' ? { reviewedAt: review.reviewedAt } : {})
+        });
+      } catch {
+        // Ignore malformed historical reports and keep the rest of the queue usable.
+      }
+    }
+  }
+
+  reports.sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+  return c.json({
+    ok: true,
+    reports: reports.slice(0, 100),
+    pendingCount: reports.filter((report) => report.decision === 'pending').length
+  });
+});
+
+app.post('/api/admin/review-answer-report', async (c) => {
+  const userId = context.userId ?? null;
+  const username = await reddit.getCurrentUsername();
+  if (userId === null || !isTestUser(username)) {
+    return c.json({ ok: false, message: 'Admin access is restricted.' }, 403);
+  }
+
+  let body: { dateKey?: unknown; reportId?: unknown; decision?: unknown; score?: unknown };
+  try { body = await c.req.json(); }
+  catch { return c.json({ ok: false, message: 'Malformed review request.' }, 400); }
+
+  const dateKey = typeof body.dateKey === 'string' ? body.dateKey : '';
+  const reportId = typeof body.reportId === 'string' ? body.reportId : '';
+  const decision = body.decision;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey) || !reportId || reportId.length > 240
+    || !['approve', 'reject', 'duplicate'].includes(String(decision))) {
+    return c.json({ ok: false, message: 'Invalid report review details.' }, 400);
+  }
+  const age = Math.floor((Date.parse(getNewYorkDateKey() + 'T00:00:00Z') - Date.parse(dateKey + 'T00:00:00Z')) / 86400000);
+  if (!Number.isFinite(age) || age < 0 || age > 13) {
+    return c.json({ ok: false, message: 'Reports can only be reviewed during their 14-day retention window.' }, 400);
+  }
+
+  const reportRaw = await redis.hGet(reportsKey(dateKey), reportId);
+  if (!reportRaw) return c.json({ ok: false, message: 'That report is no longer available.' }, 404);
+  let report: { promptId?: string; answer?: string; selectionMode?: string };
+  try { report = JSON.parse(reportRaw); }
+  catch { return c.json({ ok: false, message: 'That report could not be read.' }, 409); }
+
+  const priorReview = await redis.hGet(reportReviewsKey(dateKey), reportId);
+  if (priorReview) return c.json({ ok: false, message: 'That report has already been reviewed.' }, 409);
+
+  let approvedScore: number | null = null;
+  let approvedTier: string | null = null;
+  if (decision === 'approve') {
+    if (report.selectionMode !== 'question') {
+      return c.json({ ok: false, message: 'Only normal question rounds can add a new accepted answer.' }, 409);
+    }
+    if (typeof report.promptId !== 'string' || typeof report.answer !== 'string') {
+      return c.json({ ok: false, message: 'The report is missing its question or answer.' }, 409);
+    }
+    const score = typeof body.score === 'number' ? body.score : Number(body.score);
+    const tier = APPROVED_SCORE_TIERS[score];
+    if (!tier) return c.json({ ok: false, message: 'Choose one of the six catalog rarity tiers.' }, 400);
+    const normalized = normalizeAnswer(report.answer);
+    if (!normalized) return c.json({ ok: false, message: 'That answer cannot be normalized.' }, 400);
+    if (!getPromptById(report.promptId)) return c.json({ ok: false, message: 'The source question no longer exists.' }, 409);
+    if (evaluateAnswer(report.promptId, report.answer)) {
+      return c.json({ ok: false, message: 'That answer is already present in the curated bank.' }, 409);
+    }
+    const aliasKey = report.promptId + ':' + normalized;
+    if (await redis.hGet(approvedAnswersKey(), aliasKey)) {
+      return c.json({ ok: false, message: 'That answer has already been approved.' }, 409);
+    }
+    approvedScore = score;
+    approvedTier = tier;
+    await redis.hSet(approvedAnswersKey(), {
+      [aliasKey]: JSON.stringify({
+        promptId: report.promptId,
+        normalizedAnswer: normalized,
+        answer: report.answer,
+        score,
+        tier,
+        note: 'Community-approved answer.'
+      })
+    });
+  }
+
+  const review = {
+    decision: decision === 'approve' ? 'approved' : decision === 'reject' ? 'rejected' : 'duplicate',
+    reviewer: displayName(username),
+    reviewedAt: new Date().toISOString(),
+    ...(approvedScore !== null ? { score: approvedScore, tier: approvedTier } : {})
+  };
+  await redis.hSet(reportReviewsKey(dateKey), { [reportId]: JSON.stringify(review) });
+  await redis.expire(reportReviewsKey(dateKey), 60 * 60 * 24 * 30);
+  return c.json({ ok: true, review });
 });
 
 app.post('/api/test-answer', async (c) => {
