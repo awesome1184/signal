@@ -1,4 +1,5 @@
 import './styles.css';
+import './player-experience.css';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { getDailyPrompts, getQuestionBank, getPromptById, getNewYorkDateKey, formatDay, ROUND_SECONDS, MAX_SCORE, type Prompt } from '../shared/game';
@@ -1573,9 +1574,9 @@ function App() {
                       placeholder="Enter one answer..."
                       disabled={isTuning}
                     />
-                    <button type="submit" className="primary-button submit-button" disabled={isTuning}>SUBMIT ANSWER <span className="button-arrow">↗</span></button>
+                    <button type="submit" className="primary-button submit-button" disabled={isTuning || attemptsRemaining <= 0}>SUBMIT ANSWER <span className="button-arrow">↗</span></button>
                   </div>
-                  <p className="answer-footnote">{attemptsRemaining < 15 ? attemptsRemaining + (attemptsRemaining === 1 ? ' attempt' : ' attempts') + ' remaining. ' : ''}One answer per question. Any accepted catalog answer counts; more specific, less familiar answers can carry a stronger signal.</p>
+                  <p className="answer-footnote">{attemptsRemaining < 15 ? (attemptsRemaining > 0 ? attemptsRemaining + (attemptsRemaining === 1 ? ' attempt' : ' attempts') + ' remaining. ' : 'No attempts left. Skip this question or let the timer expire. ') : 'Up to 15 attempts per question. '}One answer per question. Any accepted catalog answer counts; less familiar answers can carry a stronger signal.</p>
                 </form>
                 <div className="play-footer"><span><span className="tiny-pulse" /> RECEIVER OPEN</span><button className="text-button" onClick={skipPrompt} disabled={isTuning}>SKIP QUESTION</button></div>
                 {message && <div className="inline-message" role="status" aria-live="polite">{message}</div>}
