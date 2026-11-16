@@ -1,3 +1,5 @@
+import { QUESTION_SUBMISSIONS } from './questionSubmissions/agent-gpt-2026-11-15.js';
+
 export type Prompt = {
   id: string;
   channel: string;
@@ -50,7 +52,7 @@ const PACKS: Prompt[][] = [
 
 /** All approved questions available to the server-side daily rotation. */
 export function getQuestionBank(): Prompt[] {
-  return PACKS.flat();
+  return [...PACKS.flat(), ...QUESTION_SUBMISSIONS];
 }
 
 /** Resolve a stable question ID without relying on its daily pack position. */
