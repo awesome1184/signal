@@ -60,3 +60,12 @@ test('test-bench answers are drawn from the whole question catalog', () => {
     assert.equal(evaluateAnswer(entry.promptId, answer)?.score, score);
   }
 });
+
+
+test('expanded non-exoplanet catalogs accept source-backed long-tail additions', () => {
+  assert.equal(evaluateAnswer('pokemon-species', 'Snom')?.score, 100);
+  assert.equal(evaluateAnswer('pokemon-species', 'Nidoran male')?.score, 30);
+  assert.equal(evaluateAnswer('lunar-crater', 'Aitken')?.score, 85);
+  assert.equal(evaluateAnswer('shark-species', 'Bluntnose sixgill shark')?.score, 85);
+  assert.ok(evaluateAnswer('ich-heritage-element', 'Yoga'));
+});
