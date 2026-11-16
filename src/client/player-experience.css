@@ -410,3 +410,82 @@
   .mountain-signal-ray { stroke-dashoffset:0; }
   .app-shell.round-active .progress-cell,.mountain-scene,.mountain-signal-beam { transition:none !important; }
 }
+
+
+/* SLOWER MOTION: longer, calmer movement across the observatory and reveals. */
+.app-shell::before { animation-duration:14s !important; }
+.app-shell::after { animation-duration:32s !important; }
+.topbar::after { animation-duration:14s !important; }
+.mountain-scene { animation-duration:46s !important; }
+.mountain-scene > circle { animation-duration:18s !important; }
+.mountain-scene g:first-of-type circle { animation-duration:9s !important; }
+.mountain-signal-ray { animation-duration:36s !important; }
+.mountain-signal-ray:nth-child(2) { animation-duration:43s !important; }
+.mountain-signal-ray:nth-child(3) { animation-duration:50s !important; }
+.mountain-signal-node { animation-duration:7.5s !important; }
+.mountain-signal-beam { transition-duration:1.8s !important; }
+
+.brand-symbol { animation-duration:8s !important; }
+.brand-symbol::after { animation-duration:9s !important; }
+.stat-icon { animation-duration:6s !important; }
+.station-kicker .live-dot,.test-led { animation-duration:4s !important; }
+.game-panel { animation-duration:1.2s,20s !important; }
+.panel-scanline { animation-duration:18s !important; }
+.progress-cell.active::after { animation-duration:3s !important; }
+.ready-view,.play-view,.reveal-view,.complete-view { animation-duration:1s !important; }
+.question-index { animation-duration:8s !important; }
+.question-text { animation-duration:1s,10s !important; }
+.primary-button { animation-duration:10s !important; }
+.primary-button::after { animation-duration:11s !important; }
+.timer-pill.urgent { animation-duration:1.2s !important; }
+.timer-pill.urgent strong { animation-duration:1.1s !important; }
+.timer-ring,.timer-ring span { animation-duration:5s !important; }
+.timer-track i::after { animation-duration:5s !important; }
+.submit-button { animation-duration:6s !important; }
+.inline-message { animation-duration:.5s !important; }
+
+.receiver-graphic { animation-duration:10s,8s !important; }
+.receiver-graphic::before { animation-duration:32s,8s !important; }
+.receiver-graphic::after { animation-duration:38s !important; }
+.orbit-one { animation-duration:42s !important; }
+.orbit-two { animation-duration:34s !important; }
+.receiver-core { animation-duration:6s !important; }
+.receiver-core svg { animation-duration:8s !important; }
+.receiver-sweep { animation-duration:17s !important; }
+.receiver-caption { animation-duration:8s !important; }
+.game-panel::after { animation-duration:24s !important; }
+.play-view::before { animation-duration:16s !important; }
+.reveal-orb::before { animation-duration:18s !important; }
+.reveal-orb::after { animation-duration:6s !important; }
+.reveal-orb.strong::after { animation-duration:6s !important; }
+.reveal-answer { animation-duration:1.1s !important; }
+.reveal-total strong { animation-duration:1.2s !important; }
+.next-button { animation-duration:9s !important; }
+.complete-view h1 { animation-duration:1.5s,9s !important; }
+.final-score strong { animation-duration:1.4s !important; }
+.result-list::after { animation-duration:10s !important; }
+.result-row { animation-duration:.8s !important; }
+.bottom-note { animation-duration:12s !important; }
+.bottom-note::after { animation-duration:14s !important; }
+.bottom-note-icon { animation-duration:8s,12s !important; }
+.signal-wave path { animation-duration:8s,5s !important; }
+.bottom-wave i { animation-duration:2s !important; }
+.strength-number { animation-duration:8s !important; }
+.strength-meter i.hot { animation-duration:1.5s !important; }
+.trophy { animation-duration:10s !important; }
+.test-bench { animation-duration:8s !important; }
+.test-start b { animation-duration:3s !important; }
+.splash-stars { animation-duration:8s !important; }
+.splash-mountain { animation-duration:24s !important; }
+.splash-dish { animation-duration:20s !important; }
+.splash-dish span { animation-duration:4s,7s !important; }
+
+/* Keep the result reveal deliberate and readable rather than snappy. */
+.signal-result-view { animation-duration:1.1s !important; }
+.signal-result-card { animation-duration:1.2s !important; }
+.signal-result-score > strong { animation-duration:1.25s !important; }
+.signal-result-tier { animation-duration:1.1s !important; }
+.signal-result-note { display:none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .mountain-signal-ray,.mountain-signal-node { animation:none !important; }
+}
