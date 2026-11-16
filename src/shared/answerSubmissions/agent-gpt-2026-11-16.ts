@@ -156,7 +156,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
     ]},
     { score: 15, tier: 'FAMILIAR', note: 'A well-known snake species with a distinctive common name.', names: [
       ['Black mamba', 'Dendroaspis polylepis'],
-      ['Boa constrictor', 'Boa constrictor'],
+      'Boa constrictor',
       ['Green anaconda', 'Eunectes murinus']
     ]},
     { score: 30, tier: 'UNCOMMON', note: 'A recognized living species in the Serpentes database.', names: [
@@ -268,7 +268,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Echinolabium bulbophyllum', 'Bulbophyllum echinolabium'],
       ['Phalaenopsis bulbophyllum', 'Bulbophyllum phalaenopsis'],
       ['Bucket orchid', 'Coryanthes speciosa'],
-      ['Catasetum macrocarpum', 'Catasetum macrocarpum'],
+      'Catasetum macrocarpum',
       ['Kovach slipper orchid', 'Phragmipedium kovachii'],
       ['Veitch masdevallia', 'Masdevallia veitchiana'],
       ['Spectabilis miltonia', 'Miltonia spectabilis'],
@@ -303,24 +303,24 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
     { score: 60, tier: 'RARE', note: 'A less commonly named coral species with a documented database record.', names: [
       'Acanthastrea echinata',
       'Acanthastrea hemprichii',
-      ['Heliofungia actiniformis', 'Heliofungia actiniformis'],
+      'Heliofungia actiniformis',
       ["Jardine's bush coral", 'Catalaphyllia jardinei'],
       ['Cactus coral', 'Pavona cactus'],
-      ['Leptastrea transversa', 'Leptastrea transversa']
+      'Leptastrea transversa'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A specialist-level coral species in the Coral Trait Database, including deep-water and less familiar taxa.', names: [
-      ['Acropora millepora', 'Acropora millepora'],
-      ['Acropora hyacinthus', 'Acropora hyacinthus'],
-      ['Acropora tenuis', 'Acropora tenuis'],
-      ['Porites lutea', 'Porites lutea'],
-      ['Porites astreoides', 'Porites astreoides'],
-      ['Pocillopora verrucosa', 'Pocillopora verrucosa'],
-      ['Goniopora stokesi', 'Goniopora stokesi'],
-      ['Fimbriaphyllia paradivisa', 'Fimbriaphyllia paradivisa'],
-      ['Desmophyllum dianthus', 'Desmophyllum dianthus'],
+      'Acropora millepora',
+      'Acropora hyacinthus',
+      'Acropora tenuis',
+      'Porites lutea',
+      'Porites astreoides',
+      'Pocillopora verrucosa',
+      'Goniopora stokesi',
+      'Fimbriaphyllia paradivisa',
+      'Desmophyllum dianthus',
       ['Red coral', 'Corallium rubrum'],
       ['Bubblegum coral', 'Paragorgia arborea'],
-      ['Primnoa resedaeformis', 'Primnoa resedaeformis'],
+      'Primnoa resedaeformis',
       ['Venus sea fan', 'Gorgonia ventalina'],
       'Acanthastrea regularis'
     ]},
@@ -336,7 +336,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
     ]},
     { score: 15, tier: 'FAMILIAR', note: 'A widely known UNESCO-inscribed cultural practice or tradition.', names: [
       'Kumbh Mela',
-      ['Yoga', 'Yoga'],
+      'Yoga',
       ['Washoku, traditional dietary cultures of the Japanese', 'Washoku']
     ]},
     { score: 30, tier: 'UNCOMMON', note: 'A formally inscribed living tradition with an established UNESCO element title.', names: [
@@ -376,7 +376,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
 
   'biosphere-reserve': records(
     { score: 10, tier: 'BACKGROUND', note: 'A highly recognizable reserve in UNESCO’s World Network of Biosphere Reserves.', names: [
-      ['Yellowstone - Grand Teton', 'Yellowstone-Grand Teton'],
+      'Yellowstone - Grand Teton',
       ['Galápagos', 'Galapagos Islands']
     ]},
     { score: 15, tier: 'FAMILIAR', note: 'A prominent UNESCO-designated biosphere reserve.', names: [
@@ -386,8 +386,8 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
     ]},
     { score: 30, tier: 'UNCOMMON', note: 'A current biosphere reserve listed by UNESCO’s Man and the Biosphere Programme.', names: [
       ['Maya', 'Maya Biosphere Reserve'],
-      ['Bosawas', 'Bosawás'],
-      ['Darién', 'Darien'],
+      'Bosawás',
+      'Darién',
       ['Mata Atlântica', 'Atlantic Forest']
     ]},
     { score: 60, tier: 'RARE', note: 'A less commonly named reserve in the official UNESCO MAB list.', names: [
@@ -438,7 +438,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
     { score: 60, tier: 'RARE', note: 'A less commonly named UNESCO Creative City with a designated creative field.', names: [
       ['Bradford', 'Bradford, City of Film'],
       ['Graz', 'Graz, City of Design'],
-      ['Chiang Mai', 'Chiang Mai, City of Crafts and Folk Art'],
+      ['Paducah', 'Paducah, City of Crafts and Folk Art'],
       ['Jaipur', 'Jaipur, City of Crafts and Folk Art'],
       ['Hamamatsu', 'Hamamatsu, City of Music'],
       ['Bergen', 'Bergen, City of Gastronomy']
@@ -505,7 +505,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['51 Eridani b', '51 Eri b']
     ]},
     { score: 100, tier: 'SIGNAL FOUND', note: 'A confirmed microlensing planet with a specialist catalogue-style designation.', names: [
-      ['OGLE-2005-BLG-390L b', 'OGLE 2005 BLG 390L b']
+      'OGLE-2005-BLG-390L b'
     ]}
   ),
 
@@ -620,7 +620,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Queijo São Jorge', 'Sao Jorge cheese'],
       ['Torta del Casar', 'Torta del Casar cheese'],
       ['Queso de Murcia', 'Murcia cheese'],
-      ['Ossau-Iraty', 'Ossau Iraty'],
+      'Ossau-Iraty',
       ['Beaufort', 'Beaufort cheese']
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A specialist-level cheese name registered as an EU PDO or PGI.', names: [
