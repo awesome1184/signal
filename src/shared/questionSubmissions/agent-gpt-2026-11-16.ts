@@ -50,7 +50,7 @@ export const QUESTION_SUBMISSIONS_BATCH_3: Prompt[] = [
   {
     id: 'coral-species',
     channel: 'REEF BIOLOGY',
-    prompt: 'Name a type or species of coral.'
+    prompt: 'Name a type or species of coral.',
     context: 'The answer must be a recognized true coral type or species, including reef-building stony corals and other coral groups. Use a recognized common name or accepted scientific binomial. Do not submit unrelated reef animals or coral lookalikes such as fire corals.',
     hint: 'Think of familiar reef forms such as brain coral, elkhorn coral, and staghorn coral.'
   },
