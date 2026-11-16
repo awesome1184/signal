@@ -236,7 +236,7 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
       'Murujuga Cultural Landscape', 'Shark Bay, Western Australia',
       'Los Alerces National Park', 'Tipasa', 'Al Qal’a of Beni Hammad'
     ]},
-    { score: 85, tier: 'DEEP CUT', note: 'A less commonly named inscribed World Heritage property.', names: ['Willandra Lakes Region', 'The English Lake District', 'Jodrell Bank Observatory', 'Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe']}
+    { score: 85, tier: 'DEEP CUT', note: 'A less commonly named inscribed World Heritage property.', names: ['Willandra Lakes Region', 'Ancient and Primeval Beech Forests of the Carpathians and Other Regions of Europe']}
   ),
 
   'pokemon-species': records(
@@ -276,7 +276,7 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
   'dinosaur-genus': records(
     { score: 15, tier: 'FAMILIAR', note: 'A recognizable non-avian dinosaur genus that is distinct from those already in the pool.', names: []      'Torvosaurus', 'Rinchenia'
     ]},
-    { score: 30, tier: 'UNCOMMON', note: 'A recognized dinosaur genus that is less likely to be an immediate answer.', names: ['Nedoceratops', 'Kileskus']},
+    { score: 30, tier: 'UNCOMMON', note: 'A recognized dinosaur genus that is less likely to be an immediate answer.', names: []},
     { score: 60, tier: 'RARE', note: 'A documented but less commonly named non-avian dinosaur genus.', names: ['Mononykus', 'Othnielia', 'Hypsilophodon', 'Rugops', 'Erlikosaurus']},
     { score: 85, tier: 'DEEP CUT', note: 'A specialist-level dinosaur genus from the fossil record.', names: ['Kulindadromeus', 'Miragaia', 'Sauropelta', 'Edmontonia', 'Prenocephale', 'Thescelosaurus']}
   )
@@ -308,8 +308,8 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
   'ich-heritage-element': records(
     { score: 15, tier: 'FAMILIAR', note: 'A widely recognized practice or tradition inscribed on UNESCO’s Intangible Cultural Heritage lists.', names: []      'Peking opera', 'Chinese shadow puppetry', 'Noh theatre'
     ]},
-    { score: 30, tier: 'UNCOMMON', note: 'A named cultural practice or performing art on a UNESCO intangible heritage list.', names: ['Kabuki theatre', 'Gagaku', 'Tibetan opera', 'Kankurang', 'Jultagi']},
-    { score: 60, tier: 'RARE', note: 'A less commonly named UNESCO-inscribed cultural element.', names: ['Saman dance', 'Samba de Roda', 'Tbourida']},
+    { score: 30, tier: 'UNCOMMON', note: 'A named cultural practice or performing art on a UNESCO intangible heritage list.', names: ['Gagaku', 'Tibetan opera', 'Kankurang', 'Jultagi']},
+    { score: 60, tier: 'RARE', note: 'A less commonly named UNESCO-inscribed cultural element.', names: ['Saman dance', 'Tbourida']},
     { score: 85, tier: 'DEEP CUT', note: 'A specialist-level element documented on UNESCO’s lists.', names: []      'Traditional art of Azerbaijani tar and its craftsmanship',
       'Traditional art of Azerbaijani carpet weaving'
     ]}
@@ -324,12 +324,9 @@ export const ANSWER_SUBMISSIONS_THIRD_EXPANSION: Record<string, AnswerRecord[]> 
 
   'protected-eu-cheese': records(
     { score: 15, tier: 'FAMILIAR', note: 'A well-known cheese with a registered EU geographical indication.', names: ['Stilton', 'Gouda Holland', 'Danbo']},
-    { score: 30, tier: 'UNCOMMON', note: 'A recognized regional cheese protected under an EU PDO or PGI registration.', names: ['Edam Holland', 'Queso de Mahón-Menorca', 'Asiago', 'Fontina', 'Bitto', 'Bra', 'Quartirolo Lombardo']},
-    { score: 60, tier: 'RARE', note: 'A less commonly named EU-protected cheese.', names: ['Pecorino Romano', 'Provolone Valpadana', 'Montasio', 'Ricotta Romana', 'Queso de Murcia al Vino']},
-    { score: 85, tier: 'DEEP CUT', note: 'A specialist regional cheese registered in the EU geographical indications register.', names: [
-      'Queijo Nisa', 'Queijo Rabaçal',
-      'Queso de l’Alt Urgell y la Cerdanya', 'Formaggio di Fossa di Sogliano'
-    ]}
+    { score: 30, tier: 'UNCOMMON', note: 'A recognized regional cheese protected under an EU PDO or PGI registration.', names: ['Edam Holland', 'Queso de Mahón-Menorca']},
+    { score: 60, tier: 'RARE', note: 'A less commonly named EU-protected cheese.', names: ['Queso de Murcia al Vino']},
+    { score: 85, tier: 'DEEP CUT', note: 'A specialist regional cheese registered in the EU geographical indications register.', names: []}
   ),
 
   'roller-coaster': records(
