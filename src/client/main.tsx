@@ -770,6 +770,7 @@ function App() {
   const [tuningScore, setTuningScore] = useState<number | null>(null);
   const [tuningTier, setTuningTier] = useState('');
   const [tuningDisplayScore, setTuningDisplayScore] = useState(0);
+  const [tuningProgress, setTuningProgress] = useState(0);
   const [tuningSignalSeed, setTuningSignalSeed] = useState(() => Math.floor(Math.random() * 0xffffffff) || 1);
   const [tuningDuration, setTuningDuration] = useState(1700);
   const [tuningStatus, setTuningStatus] = useState('CAPTURING INPUT // SCANNING NOISE');
@@ -824,9 +825,7 @@ function App() {
   const tuningNoiseFinal = tuningScore === null ? 1 : Math.max(.025, 1 - tuningScore / 100 * .975);
   const tuningWaveFinal = tuningScore === null ? .02 : Math.max(.08, tuningScore / 100);
   const tuningChaosFinal = tuningScore === null ? .95 : Math.max(.03, .95 - tuningScore / 100 * .92);
-  const tuningLockProgressRaw = tuningPhase === 'recovering' && tuningScore !== null
-    ? Math.max(0, Math.min(1, (100 - tuningDisplayScore) / Math.max(1, 100 - tuningScore)))
-    : Math.max(0, Math.min(1, tuningDisplayScore / 100));
+  const tuningLockProgressRaw = Math.max(0, Math.min(1, tuningProgress / 100));
   const tuningLockProgress = Math.pow(tuningLockProgressRaw, .72);
   const tuningCaptureStyle = {
     '--noise-final': String(tuningNoiseFinal),
@@ -834,7 +833,7 @@ function App() {
     '--wave-mid': String(Math.max(.01, tuningWaveFinal * .42)),
     '--chaos-final': String(tuningChaosFinal),
     '--tune-duration': tuningDuration + 'ms',
-    '--score-width': tuningDisplayScore + '%',
+    '--score-width': tuningProgress + '%',
     '--lock-progress': String(tuningLockProgress),
     '--lock-progress-pct': (tuningLockProgress * 100).toFixed(1) + '%',
     '--reticle-scale': String(1.48 - tuningLockProgress * .72),
@@ -1038,55 +1037,79 @@ function App() {
     submittingRef.current = true;
     const signalSeed = Math.floor(Math.random() * 0xffffffff) || 1;
     setTuningSignalSeed(signalSeed); setTuningAnswer(clean); setTuningScore(null); setTuningTier('');
-    setTuningDisplayScore(0); setTuningDuration(5600); setReceiverPhase('searching', 0);
+    setTuningDisplayScore(0); setTuningProgress(0); setTuningDuration(5700); setReceiverPhase('searching', 0);
     setTuningStatus('CAPTURING INPUT // SCANNING STATIC'); setIsTuning(true); setMessage('');
     const wait = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
     const animateFailure = async (status: string) => {
       setTuningTier(status.startsWith('NO MATCH') ? 'NO MATCH' : 'NO SIGNAL');
-      setTuningScore(0); setTuningDisplayScore(0); setTuningDuration(1300);
+      setTuningScore(0); setTuningDisplayScore(0); setTuningProgress(0); setTuningDuration(1300);
       setReceiverPhase('failed', 0); setTuningStatus(status);
       if (!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) await wait(950);
     };
     const animateCapture = async (score: number, tier: string) => {
       setTuningScore(score); setTuningTier(tier);
       if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
-        setTuningDisplayScore(score); setReceiverPhase('locked', score);
+        setTuningDisplayScore(score); setTuningProgress(score); setReceiverPhase('locked', score);
         setTuningStatus('CARRIER ACQUIRED // RESULT CONFIRMED');
         return;
       }
 
-      // Let the observatory receiver track and resolve the carrier before revealing its rarity.
-      setTuningDisplayScore(0); setTuningDuration(score >= 85 && score < 100 ? 6500 : 5600);
-      const animateScore = async (from: number, to: number, ms: number) => {
-        const steps = Math.max(1, Math.ceil(ms / 70));
+      // Build visible receiver confidence during the scan; points stay hidden until the lock.
+      setTuningDisplayScore(0); setTuningProgress(0);
+      setTuningDuration(score >= 85 && score < 100 ? 6700 : score === 100 ? 6000 : 5700);
+      const animateValue = async (update: (value: number) => void, from: number, to: number, ms: number) => {
+        const steps = Math.max(1, Math.ceil(ms / 50));
         for (let step = 1; step <= steps; step++) {
           await wait(ms / steps);
-          setTuningDisplayScore(Math.round(from + (to - from) * (step / steps)));
+          const progress = step / steps;
+          const eased = 1 - Math.pow(1 - progress, 2);
+          update(Math.round(from + (to - from) * eased));
         }
       };
+      const animateProgress = (from: number, to: number, ms: number) =>
+        animateValue(setTuningProgress, from, to, ms);
+      const animateScore = (from: number, to: number, ms: number) =>
+        animateValue(setTuningDisplayScore, from, to, ms);
 
+      const trackingLevel = score * .42;
+      const lockLevel = score * .86;
       setReceiverPhase('tracking', score);
       setTuningStatus('CARRIER DETECTED // TRACKING');
-      await wait(1900);
+      await animateProgress(0, trackingLevel, 1550);
+      await wait(350);
 
       setReceiverPhase('locking', score);
       setTuningStatus('RECEIVER SWEEP // PHASE ALIGNMENT');
-      await wait(1900);
+      await animateProgress(trackingLevel, lockLevel, 1550);
+      await wait(350);
 
+      let finalApproach = lockLevel;
       if (score >= 85 && score < 100) {
+        // Near-perfect carriers briefly drift off center before the receiver corrects phase.
+        const driftLevel = score * .76;
         setReceiverPhase('slipping', score);
         setTuningStatus('NEAR LOCK // MINOR DRIFT');
+        setTuningProgress(Math.round(driftLevel));
         await wait(460);
         setReceiverPhase('recovering', score);
         setTuningStatus('PHASE CORRECTION');
-        await wait(420);
+        finalApproach = score * .94;
+        await animateProgress(driftLevel, finalApproach, 420);
       }
 
-      // The tier appears first; the points count up beneath it.
+      if (score === 100) {
+        setReceiverPhase('surging', score);
+        setTuningStatus('CARRIER SATURATION // PERFECT LOCK');
+        await wait(320);
+      }
+
+      // Confirm the rarity first; the points then count up beneath it.
       setReceiverPhase('locked', score);
       setTuningStatus('CARRIER ACQUIRED // RESULT CONFIRMED');
-      await animateScore(0, score, 1050);
-      await wait(450);
+      await animateProgress(finalApproach, score, 360);
+      await wait(220);
+      await animateScore(0, score, 850);
+      await wait(250);
     };
 
     try {
@@ -1513,7 +1536,7 @@ function App() {
                       </div>
                       <div className="signal-capture-readout">
                         <div className="signal-answer-readout">
-                          <span>DECODED RESPONSE</span>
+                          <span>{tuningPhase === 'locked' ? 'DECODED RESPONSE' : tuningPhase === 'failed' ? 'UNRESOLVED INPUT' : 'TRANSMITTED RESPONSE'}</span>
                           <strong className="signal-live-answer">{tuningAnswer}</strong>
                         </div>
                         <div className="signal-score-readout">
@@ -1530,7 +1553,7 @@ function App() {
                       <div className="signal-quality-row">
                         <span>ACQUISITION QUALITY</span>
                         <div className="signal-quality-track"><i /></div>
-                        <strong>{tuningPhase === 'locked' ? tuningDisplayScore : tuningPhase === 'failed' ? 0 : '—'}%</strong>
+                        <strong>{Math.round(tuningProgress)}%</strong>
                       </div>
                       {(tuningPhase === 'locked' || tuningPhase === 'failed') && (
                         <div className={'signal-live-grade ' + (tuningPhase === 'failed' ? 'failed' : '')} aria-live="polite">

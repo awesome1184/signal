@@ -612,16 +612,47 @@
   animation:signal-scan-pass var(--tune-duration) cubic-bezier(.18,.62,.22,1) both;
 }
 .signal-live-capture .signal-lock-reticle {
-  animation:signal-reticle-search 3.6s ease-in-out infinite alternate;
+  animation:signal-live-reticle-search 3.6s ease-in-out infinite alternate;
 }
 .signal-live-capture[data-phase="locking"] .signal-lock-reticle {
   animation:signal-reticle-converge .85s cubic-bezier(.16,.8,.2,1) both;
+}
+.signal-live-capture[data-phase="slipping"] .signal-lock-reticle {
+  animation:signal-live-reticle-slip .46s ease-out both;
+}
+.signal-live-capture[data-phase="recovering"] .signal-lock-reticle {
+  animation:signal-live-reticle-correct .42s cubic-bezier(.18,.78,.2,1) both;
+}
+.signal-live-capture[data-phase="surging"] .signal-lock-reticle {
+  animation:signal-live-reticle-surge .32s ease-out both;
 }
 .signal-live-capture[data-phase="locked"] .signal-lock-reticle {
   animation:signal-reticle-settle .75s cubic-bezier(.16,.8,.2,1) both;
 }
 .signal-live-capture[data-phase="locked"] .signal-lock-flare {
   animation:signal-lock-arrive .85s ease-out both;
+}
+.signal-live-capture[data-grade="perfect"][data-phase="locked"] .signal-lock-flare {
+  animation:none;
+  opacity:.5;
+  transform:translate(-50%,-50%) scale(1);
+}
+.signal-live-capture[data-phase="slipping"] .signal-static {
+  opacity:.38 !important;
+  filter:contrast(1.75) brightness(1.2) !important;
+}
+.signal-live-capture[data-phase="recovering"] .signal-static {
+  opacity:var(--noise-final) !important;
+  filter:contrast(.92) brightness(.84) !important;
+}
+.signal-live-capture[data-phase="slipping"] .signal-clean-trace {
+  filter:drop-shadow(0 0 4px rgba(255,181,120,.8)) !important;
+}
+.signal-live-capture[data-phase="recovering"] .signal-clean-trace {
+  filter:drop-shadow(0 0 9px rgba(134,255,228,.95)) !important;
+}
+.signal-live-capture[data-phase="surging"] .signal-lock-flare {
+  animation:signal-lock-arrive .32s ease-out both;
 }
 .signal-live-capture[data-phase="failed"] .signal-lock-reticle {
   opacity:.32;
@@ -652,6 +683,7 @@
 }
 .signal-live-capture[data-phase="tracking"] .signal-lock-steps span:nth-child(1),
 .signal-live-capture[data-phase="locking"] .signal-lock-steps span:nth-child(-n+2),
+.signal-live-capture[data-phase="surging"] .signal-lock-steps span,
 .signal-live-capture[data-phase="slipping"] .signal-lock-steps span:nth-child(-n+2),
 .signal-live-capture[data-phase="recovering"] .signal-lock-steps span:nth-child(-n+2),
 .signal-live-capture[data-phase="locked"] .signal-lock-steps span,
@@ -660,12 +692,72 @@
 }
 .signal-live-capture[data-phase="tracking"] .signal-lock-steps span:nth-child(1) i,
 .signal-live-capture[data-phase="locking"] .signal-lock-steps span:nth-child(-n+2) i,
+.signal-live-capture[data-phase="surging"] .signal-lock-steps span i,
 .signal-live-capture[data-phase="slipping"] .signal-lock-steps span:nth-child(-n+2) i,
 .signal-live-capture[data-phase="recovering"] .signal-lock-steps span:nth-child(-n+2) i,
 .signal-live-capture[data-phase="locked"] .signal-lock-steps span i,
 .signal-live-capture[data-phase="failed"] .signal-lock-steps span:nth-child(1) i {
   background:#91e9e5;
   box-shadow:0 0 9px rgba(91,216,232,.55);
+}
+.signal-live-capture .signal-live-answer {
+  display:inline-block;
+  color:#d8f3f4;
+  transition:color .3s ease,text-shadow .3s ease;
+}
+.signal-live-capture[data-phase="searching"] .signal-live-answer {
+  opacity:.58;
+  filter:blur(.65px);
+  letter-spacing:.11em;
+}
+.signal-live-capture[data-phase="tracking"] .signal-live-answer {
+  animation:signal-live-answer-decode .9s cubic-bezier(.16,.76,.2,1) both;
+}
+.signal-live-capture[data-phase="locking"] .signal-live-answer,
+.signal-live-capture[data-phase="recovering"] .signal-live-answer {
+  color:#e7ffff;
+  text-shadow:0 0 11px rgba(110,239,239,.2);
+}
+.signal-live-capture[data-phase="slipping"] .signal-live-answer {
+  color:#ffdfbd;
+  text-shadow:0 0 11px rgba(255,168,101,.25);
+}
+.signal-live-capture[data-phase="surging"] .signal-live-answer,
+.signal-live-capture[data-phase="locked"] .signal-live-answer {
+  color:#caffef;
+  text-shadow:0 0 14px rgba(115,255,215,.3);
+}
+.signal-live-capture[data-grade="perfect"][data-phase="surging"] {
+  border-color:rgba(135,242,226,.66) !important;
+  box-shadow:0 20px 55px rgba(0,0,0,.56),0 0 34px rgba(78,242,204,.2),inset 0 1px 0 rgba(231,255,247,.16) !important;
+}
+.signal-live-capture[data-phase="surging"] .signal-screen {
+  border-color:rgba(186,255,235,.7);
+  box-shadow:inset 0 0 35px rgba(36,169,139,.18),0 0 25px rgba(83,255,218,.24);
+}
+@keyframes signal-live-answer-decode {
+  0% {opacity:.42;filter:blur(2.6px);clip-path:inset(0 100% 0 0);letter-spacing:.16em;}
+  72% {opacity:1;filter:blur(0);letter-spacing:.055em;}
+  100% {opacity:1;filter:blur(0);clip-path:inset(0 0 0 0);letter-spacing:.04em;}
+}
+@keyframes signal-live-reticle-search {
+  0% {transform:translate(-50%,-50%) translate(-10px,5px) scale(var(--reticle-scale,1.2));}
+  50% {transform:translate(-50%,-50%) translate(9px,-7px) scale(var(--reticle-scale,1.2));}
+  100% {transform:translate(-50%,-50%) translate(-3px,10px) scale(var(--reticle-scale,1.2));}
+}
+@keyframes signal-live-reticle-slip {
+  0%,100% {transform:translate(-50%,-50%) translate(0,0) scale(1.05);filter:drop-shadow(0 0 11px rgba(255,177,105,.78));}
+  42% {transform:translate(-50%,-50%) translate(15px,-8px) scale(1.24);filter:drop-shadow(0 0 5px rgba(255,177,105,.3));}
+}
+@keyframes signal-live-reticle-correct {
+  0% {transform:translate(-50%,-50%) translate(-9px,5px) scale(1.1);filter:drop-shadow(0 0 8px rgba(255,177,105,.48));}
+  72% {transform:translate(-50%,-50%) scale(.84);filter:drop-shadow(0 0 14px rgba(121,240,230,.88));}
+  100% {transform:translate(-50%,-50%) scale(var(--reticle-scale, .9));filter:drop-shadow(0 0 9px rgba(121,240,230,.72));}
+}
+@keyframes signal-live-reticle-surge {
+  0% {transform:translate(-50%,-50%) scale(.9);filter:drop-shadow(0 0 8px rgba(139,255,224,.45));}
+  52% {transform:translate(-50%,-50%) scale(1.18);filter:drop-shadow(0 0 18px rgba(139,255,224,.98));}
+  100% {transform:translate(-50%,-50%) scale(.98);filter:drop-shadow(0 0 11px rgba(139,255,224,.8));}
 }
 .signal-live-grade {
   display:flex;
@@ -738,9 +830,15 @@
   .play-view.tuning-view .signal-screen::after,
   .signal-live-capture .signal-scanbeam,
   .signal-live-capture .signal-lock-reticle,
-  .signal-live-grade {
+  .signal-live-grade,
+  .signal-live-capture .signal-live-answer {
     animation:none !important;
     transition:none !important;
+  }
+  .signal-live-capture .signal-live-answer {
+    opacity:1 !important;
+    filter:none !important;
+    clip-path:none !important;
   }
   .play-view.tuning-view .signal-static { opacity:var(--noise-final) !important; }
   .play-view.tuning-view .signal-clean-trace { opacity:var(--wave-final) !important;stroke-dashoffset:0 !important; }
