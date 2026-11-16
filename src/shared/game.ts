@@ -10,7 +10,7 @@ export type Prompt = {
   hint: string;
   /** Local-only metadata used by the standalone browser preview's archive fallback. */
   sourcePromptId?: string;
-  fallbackAnswerId?: string;
+  archiveSeedId?: string;
 };
 
 export type PromptSelectionMode = 'question' | 'answer';
@@ -19,7 +19,7 @@ export type DailyPromptSelection = {
   id: string;
   questionId: string;
   mode: PromptSelectionMode;
-  answerId?: string;
+  archiveSeedId?: string;
 };
 
 const PACKS: Prompt[][] = [
