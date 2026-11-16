@@ -768,6 +768,7 @@ function App() {
   const [isTuning, setIsTuning] = useState(false);
   const [tuningAnswer, setTuningAnswer] = useState('');
   const [tuningScore, setTuningScore] = useState<number | null>(null);
+  const [tuningTier, setTuningTier] = useState('');
   const [tuningDisplayScore, setTuningDisplayScore] = useState(0);
   const [tuningSignalSeed, setTuningSignalSeed] = useState(() => Math.floor(Math.random() * 0xffffffff) || 1);
   const [tuningDuration, setTuningDuration] = useState(1700);
@@ -1036,23 +1037,26 @@ function App() {
     if (isTuning || submittingRef.current || game.phase !== 'playing') return;
     submittingRef.current = true;
     const signalSeed = Math.floor(Math.random() * 0xffffffff) || 1;
-    setTuningSignalSeed(signalSeed); setTuningAnswer(clean); setTuningScore(null);
+    setTuningSignalSeed(signalSeed); setTuningAnswer(clean); setTuningScore(null); setTuningTier('');
     setTuningDisplayScore(0); setTuningDuration(1700); setReceiverPhase('searching', 0);
     setTuningStatus('CAPTURING INPUT // SCANNING NOISE'); setIsTuning(true); setMessage('');
     const wait = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
     const animateFailure = async (status: string) => {
-      setTuningScore(0); setTuningDisplayScore(0); setTuningDuration(900);
+      setTuningTier(status.startsWith('NO MATCH') ? 'NO MATCH' : 'NO SIGNAL');
+      setTuningScore(0); setTuningDisplayScore(0); setTuningDuration(1300);
       setReceiverPhase('failed', 0); setTuningStatus(status);
-      if (!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) await wait(750);
+      if (!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) await wait(950);
     };
-    const animateCapture = async (score: number) => {
-      setTuningScore(score);
+    const animateCapture = async (score: number, tier: string) => {
+      setTuningScore(score); setTuningTier(tier);
       if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
         setTuningDisplayScore(score); setReceiverPhase('locked', score);
-        setTuningStatus(score === 100 ? 'SIGNAL FOUND // PERFECT LOCK' : 'CARRIER ACQUIRED // RESULT CONFIRMED');
+        setTuningStatus('CARRIER ACQUIRED // RESULT CONFIRMED');
         return;
       }
-      setTuningDisplayScore(0); setTuningDuration(3600);
+
+      // Give the answer a full dive-and-scan sequence before revealing its rarity.
+      setTuningDisplayScore(0); setTuningDuration(5600);
       const animateScore = async (from: number, to: number, ms: number) => {
         const steps = Math.max(1, Math.ceil(ms / 70));
         for (let step = 1; step <= steps; step++) {
@@ -1060,21 +1064,31 @@ function App() {
           setTuningDisplayScore(Math.round(from + (to - from) * (step / steps)));
         }
       };
-      const midpoint = Math.round(score * .56);
-      setReceiverPhase('tracking', score); setTuningStatus('CARRIER DETECTED // TRACKING FREQUENCY');
-      await animateScore(0, midpoint, 1250);
+
+      setReceiverPhase('tracking', score);
+      setTuningStatus('CARRIER DETECTED // TRACKING');
+      await wait(1900);
+
       setReceiverPhase('locking', score);
-      setTuningStatus(score >= 85 ? 'FREQUENCY CENTERED // FINAL LOCK' : 'ALIGNING CARRIER // REDUCING INTERFERENCE');
-      await animateScore(midpoint, score, 1500);
+      setTuningStatus('SONAR SWEEP // RESOLVING CARRIER');
+      await wait(1900);
+
       if (score >= 85 && score < 100) {
-        setReceiverPhase('slipping', score); setTuningStatus('NEAR LOCK // A TRACE OF DRIFT REMAINS');
-        await wait(420); setReceiverPhase('recovering', score);
-        setTuningStatus('AUTO-CORRECTION // FINAL ALIGNMENT'); await wait(350);
+        setReceiverPhase('slipping', score);
+        setTuningStatus('NEAR LOCK // MINOR DRIFT');
+        await wait(460);
+        setReceiverPhase('recovering', score);
+        setTuningStatus('PHASE CORRECTION');
+        await wait(420);
       }
+
+      // The tier appears first; the points count up beneath it.
       setReceiverPhase('locked', score);
-      setTuningStatus(score === 100 ? '100% CARRIER // PERFECT LOCK' : 'CARRIER ACQUIRED // RESULT CONFIRMED');
-      setTuningDisplayScore(score); await wait(300);
+      setTuningStatus('CARRIER ACQUIRED // RESULT CONFIRMED');
+      await animateScore(0, score, 1050);
+      await wait(450);
     };
+
     try {
       let result: { score: number; tier: string; note: string } | null = null;
       let updatedRun: RunState | null = null;
@@ -1119,7 +1133,7 @@ function App() {
         return;
       }
       setLastUnmatchedAnswer(''); setReportSent(false);
-      await animateCapture(result.score);
+      await animateCapture(result.score, result.tier);
       const entry: Entry = { promptId: prompt.id, answer: clean, score: result.score, tier: result.tier, note: result.note, signalSeed };
       if (DEMO_MODE || game.isTest) {
         setGame((previous) => previous.phase === 'playing'
@@ -1461,36 +1475,13 @@ function App() {
                       data-wave-style={waveStyle}
                       style={tuningCaptureStyle}
                     >
-                      <div className="signal-capture-head">
-                        <span className="signal-station"><i /> MT. AURORA / RECEIVER 07</span>
-                        <span className="signal-input-state" key={tuningPhase}>{tuningInputLabel}</span>
-                      </div>
-                      <div className="signal-capture-copy" key={tuningPhase}>
-                        <div className="signal-capture-kicker">TRANSMISSION ANALYSIS</div>
-                        <h2>{tuningHeading}</h2>
-                            </div>
-                      <div className="signal-screen" style={{ '--reticle-x': tuningSignalPaths.reticleX + '%', '--reticle-y': tuningSignalPaths.reticleY + '%' } as React.CSSProperties} aria-label="Live receiver waveform resolving from static">
+                      <div className="signal-screen" style={{ '--reticle-x': tuningSignalPaths.reticleX + '%', '--reticle-y': tuningSignalPaths.reticleY + '%' } as React.CSSProperties} aria-label="Your answer is being scanned">
                         <div className="signal-screen-grid" />
+                        <div className="signal-bubble-field" aria-hidden="true" />
                         <div className="signal-static" />
                         <svg className="signal-traces" viewBox="0 0 720 180" preserveAspectRatio="none" aria-hidden="true">
                           <path className="signal-centerline" d="M0 90H720" />
-                          <g className="signal-carrier-group">
-                            <path id="signal-live-carrier" className="signal-clean-trace" d={tuningSignalPaths.carrier} />
-                            {tuningAnswer && (
-                              <text className="signal-carrier-word" aria-hidden="true">
-                                <textPath
-                                  href="#signal-live-carrier"
-                                  startOffset="50%"
-                                  textAnchor="middle"
-                                  textLength={Math.min(650, Math.max(44,
-                                    tuningAnswer.replace(/\s/g, '').length * 11.5
-                                    + Math.max(0, tuningAnswer.trim().split(/\s+/).length - 1) * 22
-                                  ))}
-                                  lengthAdjust="spacing"
-                                >{tuningAnswer.toUpperCase()}</textPath>
-                              </text>
-                            )}
-                          </g>
+                          <path className="signal-clean-trace" d={tuningSignalPaths.carrier} />
                         </svg>
                         <ReceiverModeOverlay mode={waveStyle} />
                         <div className="signal-lock-reticle" aria-hidden="true">
@@ -1500,31 +1491,12 @@ function App() {
                           <i className="reticle-corner bottom-right" />
                           <b className="reticle-center" />
                         </div>
-                        <span className="signal-screen-label">RF / {receiverFrequency(tuningSignalSeed)} MHZ</span>
-                        <span className="signal-screen-state" key={tuningPhase}>{tuningScreenState}</span>
+                        <div className="signal-answer-marker">{tuningAnswer.toUpperCase()}</div>
                       </div>
-                      <div className="signal-lock-steps" data-phase={tuningPhase} aria-hidden="true">
-                        <span><i />01 / SCAN</span>
-                        <span><i />02 / TRACK</span>
-                        <span><i />03 / LOCK</span>
+                      <div className="signal-grade-reveal" data-phase={tuningPhase} aria-live="polite">
+                        <span>{tuningTier ? tuningTier.toUpperCase() : 'SCANNING'}</span>
+                        <strong>{tuningPhase === 'locked' ? '+' + tuningDisplayScore : tuningPhase === 'failed' ? '0' : '—'}<small> PTS</small></strong>
                       </div>
-                      <div className="signal-capture-readout">
-                        <div className="signal-answer-readout">
-                          <span>DECODED RESPONSE</span>
-                          <strong>{tuningAnswer}</strong>
-                        </div>
-                        <div className="signal-score-readout">
-                          <span>LIVE SCORE</span>
-                          <strong>{tuningScore === null ? '···' : tuningDisplayScore}<small>/100</small></strong>
-                        </div>
-                      </div>
-                      <div className="signal-quality-row">
-                        <span>RECOVERED SIGNAL</span>
-                        <div className="signal-quality-track"><i /></div>
-                        <strong>{tuningScore === null ? '—' : tuningDisplayScore + '%'}</strong>
-                      </div>
-                      <div className="signal-capture-status"><i /><span key={tuningPhase}>{tuningStatus}</span></div>
-                    </div>
                   </div>
                 )}
                 {isTuning && (

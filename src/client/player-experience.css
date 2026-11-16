@@ -489,3 +489,260 @@
 @media (prefers-reduced-motion: reduce) {
   .mountain-signal-ray,.mountain-signal-node { animation:none !important; }
 }
+
+
+/* ANSWER DIVE: let the submitted word hang in the scene, scan it, then reveal its tier. */
+.play-view.tuning-view {
+  min-height:580px !important;
+  padding:8px 0 4px !important;
+  justify-content:center !important;
+}
+.play-view.tuning-view .signal-capture-overlay {
+  width:100% !important;
+  min-height:550px !important;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+}
+.play-view.tuning-view .signal-capture {
+  width:min(920px,100%) !important;
+  padding:0 clamp(12px,2vw,24px) !important;
+  overflow:visible !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  text-align:center !important;
+}
+.play-view.tuning-view .signal-capture::before,
+.play-view.tuning-view .signal-capture::after,
+.play-view.tuning-view .signal-capture-head,
+.play-view.tuning-view .signal-capture-copy,
+.play-view.tuning-view .signal-lock-steps,
+.play-view.tuning-view .signal-capture-readout,
+.play-view.tuning-view .signal-quality-row,
+.play-view.tuning-view .signal-capture-status,
+.play-view.tuning-view .signal-screen-label,
+.play-view.tuning-view .signal-screen-state {
+  display:none !important;
+}
+.play-view.tuning-view .signal-screen {
+  width:100%;
+  height:clamp(250px,34vw,360px) !important;
+  border:0 !important;
+  border-radius:10px !important;
+  background:
+    radial-gradient(ellipse at 50% 54%,rgba(36,133,146,.20),transparent 48%),
+    radial-gradient(ellipse at 50% 100%,rgba(17,76,104,.24),transparent 72%),
+    linear-gradient(180deg,rgba(5,21,34,.42),rgba(2,10,18,.94)) !important;
+  box-shadow:inset 0 0 45px rgba(0,0,0,.4),0 16px 45px rgba(0,0,0,.18) !important;
+}
+.play-view.tuning-view .signal-screen-grid {
+  opacity:.25 !important;
+  background-size:48px 42px !important;
+  animation:signal-dive-grid 14s linear infinite !important;
+}
+.play-view.tuning-view .signal-bubble-field {
+  position:absolute;
+  z-index:2;
+  inset:0;
+  pointer-events:none;
+  opacity:.72;
+  background-image:
+    radial-gradient(circle,rgba(184,249,247,.65) 0 1px,transparent 1.8px),
+    radial-gradient(circle,rgba(107,219,227,.55) 0 1.4px,transparent 2.1px),
+    radial-gradient(circle,rgba(193,246,242,.42) 0 1px,transparent 1.8px);
+  background-size:71px 96px,113px 137px,157px 119px;
+  background-position:13px 92px,62px 28px,104px 74px;
+  mask-image:linear-gradient(180deg,transparent 0%,#000 24%,#000 100%);
+  animation:signal-bubbles-rise 8s linear infinite;
+}
+.play-view.tuning-view .signal-static {
+  z-index:3 !important;
+  opacity:.34 !important;
+  mix-blend-mode:screen;
+}
+.play-view.tuning-view .signal-traces { z-index:4; }
+.play-view.tuning-view .signal-clean-trace {
+  stroke:#8df4ee !important;
+  stroke-width:1.7 !important;
+  filter:drop-shadow(0 0 7px rgba(115,239,230,.62)) !important;
+}
+.play-view.tuning-view .signal-centerline {
+  stroke:rgba(124,232,230,.34) !important;
+  stroke-dasharray:2 8 !important;
+}
+.play-view.tuning-view .signal-screen::after {
+  content:"";
+  display:block !important;
+  position:absolute;
+  z-index:6;
+  top:50%;
+  left:0;
+  right:0;
+  height:2px;
+  pointer-events:none;
+  background:linear-gradient(90deg,transparent 0%,rgba(114,230,232,.10) 12%,rgba(168,255,248,.98) 50%,rgba(114,230,232,.10) 88%,transparent 100%);
+  box-shadow:0 0 16px rgba(111,239,231,.65),0 0 32px rgba(91,216,232,.28);
+  transform:translateY(-180px);
+  opacity:0;
+  animation:none !important;
+}
+.play-view.tuning-view .signal-capture[data-phase="locking"] .signal-screen::after {
+  animation:signal-answer-sonar-pass 1.9s cubic-bezier(.2,.68,.22,1) both !important;
+}
+.signal-answer-marker {
+  position:absolute;
+  z-index:9;
+  left:50%;
+  top:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:max-content;
+  max-width:min(82%,650px);
+  min-height:38px;
+  padding:8px 18px;
+  overflow-wrap:anywhere;
+  border:1px solid rgba(103,231,229,.48);
+  border-radius:5px;
+  background:rgba(3,17,27,.90);
+  color:#b8fffa;
+  font:700 clamp(13px,2vw,18px)/1.25 var(--mono);
+  letter-spacing:.13em;
+  text-align:center;
+  text-shadow:0 0 13px rgba(117,255,244,.45);
+  box-shadow:0 0 24px rgba(85,219,224,.16),inset 0 0 18px rgba(81,203,211,.08);
+  opacity:0;
+  transform:translate(-50%,-44%) scale(.92);
+  pointer-events:none;
+}
+.signal-answer-marker::before {
+  content:"";
+  position:absolute;
+  inset:-11px -16px;
+  border:1px solid rgba(106,222,225,.22);
+  border-radius:8px;
+  box-shadow:0 0 22px rgba(70,208,214,.08);
+}
+.signal-answer-marker::after {
+  content:"";
+  position:absolute;
+  width:4px;
+  height:4px;
+  top:-19px;
+  left:23%;
+  border-radius:50%;
+  background:#b7fffa;
+  box-shadow:34px 7px 0 -1px rgba(158,244,241,.85),78px -4px 0 -1px rgba(158,244,241,.6),-17px 22px 0 -1px rgba(158,244,241,.55);
+  filter:drop-shadow(0 0 5px rgba(137,255,244,.75));
+}
+.play-view.tuning-view .signal-capture[data-phase="tracking"] .signal-answer-marker,
+.play-view.tuning-view .signal-capture[data-phase="locking"] .signal-answer-marker,
+.play-view.tuning-view .signal-capture[data-phase="slipping"] .signal-answer-marker,
+.play-view.tuning-view .signal-capture[data-phase="recovering"] .signal-answer-marker,
+.play-view.tuning-view .signal-capture[data-phase="locked"] .signal-answer-marker,
+.play-view.tuning-view .signal-capture[data-phase="failed"] .signal-answer-marker {
+  animation:signal-answer-arrive .8s cubic-bezier(.18,.72,.22,1) both,signal-answer-float 5.2s .8s ease-in-out infinite;
+}
+.signal-grade-reveal {
+  display:flex;
+  min-height:104px;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  padding:8px 10px 14px;
+  opacity:0;
+  transform:translateY(12px);
+  pointer-events:none;
+}
+.signal-grade-reveal > span {
+  color:#8ef0e9;
+  font:700 clamp(18px,3vw,27px)/1.1 var(--display);
+  letter-spacing:.19em;
+  text-align:center;
+  text-shadow:0 0 18px rgba(91,216,232,.25);
+}
+.signal-grade-reveal > strong {
+  color:#edffff;
+  font:700 clamp(24px,4vw,36px)/1 var(--display);
+  letter-spacing:.04em;
+  font-variant-numeric:tabular-nums;
+  text-shadow:0 0 18px rgba(91,216,232,.32);
+}
+.signal-grade-reveal > strong small {
+  color:#9ec8ce;
+  font:9px var(--mono);
+  letter-spacing:.16em;
+}
+.signal-capture[data-phase="locked"] .signal-grade-reveal,
+.signal-capture[data-phase="failed"] .signal-grade-reveal {
+  animation:signal-grade-arrive .72s cubic-bezier(.18,.72,.22,1) both;
+}
+.signal-capture[data-grade="perfect"] .signal-grade-reveal > span { color:#baffea; }
+.signal-capture[data-grade="deep"] .signal-grade-reveal > span { color:#d8c6ff; }
+.signal-capture[data-grade="clear"] .signal-grade-reveal > span { color:#9cebf1; }
+.signal-capture[data-grade="faint"] .signal-grade-reveal > span { color:#a9c4d1; }
+.signal-capture[data-grade="background"] .signal-grade-reveal > span { color:#849eaa; }
+.signal-capture[data-phase="failed"] .signal-grade-reveal > span,
+.signal-capture[data-phase="failed"] .signal-grade-reveal > strong { color:#a7b2b8; }
+@keyframes signal-dive-grid {
+  from { background-position:0 0,0 0; }
+  to { background-position:48px 42px,48px 42px; }
+}
+@keyframes signal-bubbles-rise {
+  from { background-position:13px 92px,62px 28px,104px 74px; }
+  to { background-position:13px -196px,62px -246px,104px -164px; }
+}
+@keyframes signal-answer-sonar-pass {
+  0% { transform:translateY(-180px);opacity:0; }
+  16% { opacity:1; }
+  82% { opacity:.92; }
+  100% { transform:translateY(180px);opacity:0; }
+}
+@keyframes signal-answer-arrive {
+  from { opacity:0;filter:blur(7px);transform:translate(-50%,-36%) scale(.88); }
+  to { opacity:1;filter:blur(0);transform:translate(-50%,-50%) scale(1); }
+}
+@keyframes signal-answer-float {
+  0%,100% { transform:translate(-50%,-50%) translateY(0); }
+  50% { transform:translate(-50%,-50%) translateY(-7px); }
+}
+@keyframes signal-grade-arrive {
+  from { opacity:0;transform:translateY(15px) scale(.96);filter:blur(4px); }
+  70% { opacity:1;transform:translateY(-2px) scale(1.015);filter:blur(0); }
+  to { opacity:1;transform:translateY(0) scale(1);filter:blur(0); }
+}
+@media (max-width:680px) {
+  .play-view.tuning-view { min-height:520px !important; }
+  .play-view.tuning-view .signal-capture-overlay { min-height:500px !important; }
+  .play-view.tuning-view .signal-screen { height:clamp(230px,58vw,300px) !important; }
+  .signal-answer-marker {
+    max-width:86%;
+    min-height:35px;
+    padding:7px 11px;
+    font-size:clamp(11px,3.4vw,15px);
+    letter-spacing:.09em;
+  }
+  .signal-grade-reveal { min-height:92px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .play-view.tuning-view .signal-screen-grid,
+  .play-view.tuning-view .signal-bubble-field,
+  .play-view.tuning-view .signal-answer-marker,
+  .play-view.tuning-view .signal-screen::after,
+  .signal-grade-reveal {
+    animation:none !important;
+    transition:none !important;
+  }
+  .signal-answer-marker {
+    opacity:1 !important;
+    transform:translate(-50%,-50%) !important;
+  }
+  .signal-grade-reveal {
+    opacity:1 !important;
+    transform:none !important;
+  }
+}
