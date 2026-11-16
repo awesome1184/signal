@@ -950,7 +950,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Amundsen', 'Amundsen crater']
     ]},
     { score: 85, tier: "DEEP CUT", note: "Additional verified entries from the referenced catalogue for this question.", names: [
-      "Atlas",
+      "Thebit",
       "Hercules",
       "Macrobius",
       "Aristoteles",
