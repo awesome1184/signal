@@ -52,8 +52,8 @@ function records(...groups: TierGroup[]): AnswerRecord[] {
 export const ANSWER_SUBMISSIONS_BATCH_2: Record<string, AnswerRecord[]> = {
   'holocene-volcano': records(
     { score: 10, tier: 'BACKGROUND', note: 'A widely recognized volcano in the Smithsonian Holocene catalogue.', names: [
-      'Mount Etna', 'Kilauea', ['Mount St. Helens', 'St. Helens'], ['Mount Vesuvius', 'Vesuvius'],
-      ['Mount Fuji', 'Fuji'], 'Krakatau', 'Mauna Loa', 'Mount Rainier', 'Popocatepetl', 'Stromboli'
+      ['Mount Etna', 'Etna'], 'Kilauea', ['Mount St. Helens', 'St. Helens'], ['Mount Vesuvius', 'Vesuvius'],
+      ['Mount Fuji', 'Fuji'], ['Krakatau', 'Krakatoa'], 'Mauna Loa', 'Mount Rainier', 'Popocatepetl', 'Stromboli'
     ]},
     { score: 15, tier: 'FAMILIAR', note: 'A well-known Holocene volcanic system or mountain.', names: [
       'Cotopaxi', 'Arenal', 'Merapi', 'Sakurajima', 'Taal', 'Hekla', 'Eyjafjallajokull',

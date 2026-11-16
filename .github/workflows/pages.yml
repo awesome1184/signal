@@ -35,6 +35,8 @@ jobs:
           node-version: 24
       - name: Install dependencies
         run: npm install
+      - name: Run answer-catalog regression tests
+        run: npm test
       - name: Typecheck client and server
         run: npm run typecheck
       - name: Build browser preview

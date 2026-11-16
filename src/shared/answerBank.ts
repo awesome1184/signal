@@ -4,6 +4,7 @@ import { ANSWER_SUBMISSIONS_ACCESSIBILITY } from './answerSubmissions/agent-gpt-
 import { ANSWER_SUBMISSIONS_CORE_EXPANSION } from './answerSubmissions/agent-gpt-2026-11-16-core-expansion.js';
 import { ANSWER_SUBMISSIONS_THIRD_EXPANSION } from './answerSubmissions/agent-gpt-2026-11-17-third-expansion.js';
 import { ANSWER_SUBMISSIONS_BREADTH_EXPANSION } from './answerSubmissions/agent-gpt-2026-11-16-breadth-expansion.js';
+import { ANSWER_SUBMISSIONS_REFERENCE_CATALOGS } from './answerSubmissions/agent-gpt-2026-11-16-reference-catalogs.js';
 
 export type AnswerResult = { score: number; tier: string; note: string; answerId?: string };
 export type AnswerRecord = AnswerResult & { aliases: string[] };
@@ -198,7 +199,8 @@ const BASE_BANK: Record<string, AnswerRecord[]> = {
 const BANK: Record<string, AnswerRecord[]> = [
   ANSWER_SUBMISSIONS_CORE_EXPANSION,
   ANSWER_SUBMISSIONS_THIRD_EXPANSION,
-  ANSWER_SUBMISSIONS_BREADTH_EXPANSION
+  ANSWER_SUBMISSIONS_BREADTH_EXPANSION,
+  ANSWER_SUBMISSIONS_REFERENCE_CATALOGS
 ].reduce<Record<string, AnswerRecord[]>>((merged, additionsByPrompt) => {
   for (const [promptId, additions] of Object.entries(additionsByPrompt)) {
     merged[promptId] = [...(merged[promptId] ?? []), ...additions];

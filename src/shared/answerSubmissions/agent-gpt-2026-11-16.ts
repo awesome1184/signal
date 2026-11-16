@@ -893,7 +893,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
     { score: 30, tier: 'UNCOMMON', note: 'A confirmed exoplanet with a recognized discovery or host-star designation.', names: [
       ['Kepler-186 f', 'Kepler 186f'],
       ['Kepler-452 b', 'Kepler 452b'],
-      '55 Cancri e',
+      ['55 Cancri e', '55 Cnc e'],
       ['K2-18 b', 'K2 18b']
     ]},
     { score: 60, tier: 'RARE', note: 'A less commonly recalled confirmed exoplanet in NASA’s Planetary Systems data.', names: [

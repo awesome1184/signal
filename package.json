@@ -10,7 +10,7 @@
     "web:dev": "vite --config vite.pages.config.ts --mode pages --base / --host 0.0.0.0",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.server.json",
     "preflight": "npm run typecheck && npm run build",
-    "test": "tsc --module NodeNext --target ES2022 --moduleResolution NodeNext --outDir node_modules/.cache/signal-test-dist --rootDir src/shared --skipLibCheck src/shared/answerBank.ts && node --test tests/*.test.mjs",
+    "test": "tsc --module NodeNext --target ES2022 --moduleResolution NodeNext --outDir node_modules/.cache/signal-test-dist --rootDir src/shared --skipLibCheck src/shared/answerBank.ts src/shared/game.ts && node --test tests/*.test.mjs",
     "upload": "npm run typecheck && devvit upload",
     "playtest": "devvit playtest"
   },
