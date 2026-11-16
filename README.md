@@ -13,13 +13,13 @@ SIGNAL is an original daily open-answer game for Reddit, built with Devvit Web. 
 - 700-point maximum daily score.
 - One saved result per Reddit account per day.
 - Redis-backed, subreddit-scoped leaderboard and shared daily content rotation.
-- Seven randomly selected, never-before-used questions per day.
-- Archive fallback that uses distinct answer entries not selected during the previous seven days once the unused question pool is exhausted.
+- Up to seven randomly selected, never-before-used questions per day; when fewer than seven remain, archive-answer transmissions fill the open slots.
+- Once the question pool is exhausted, all seven transmissions use distinct archive answers not selected during the previous seven days whenever enough fresh answers remain.
 - New questions remain inactive until at least one accepted answer is added to their answer bank.
 - Local browser preview with a sample leaderboard and localStorage-backed simulation of the same content rotation.
 - Separate compact Reddit post launch screen and expanded game.
 
-The initial question and answer catalogs are deliberately small. As new question IDs and answer records are committed, they automatically become eligible for future daily rotations. The Devvit server stores permanent question usage and recent answer usage in Redis; the Pages/Codespaces preview simulates that history locally in the browser, so preview rotations are not shared with Reddit.
+The initial question and answer catalogs are deliberately small. New questions become eligible only after at least one accepted answer is committed for that question. The Devvit server stores permanent question usage, recent answer usage, and the shared daily selection in Redis. That state is shared by players on the same subreddit installation and is not stored in the content files. The Pages/Codespaces preview simulates that history locally in the browser, so preview rotations are not shared with Reddit.
 
 ## Run the browser preview in GitHub Codespaces
 
@@ -52,8 +52,8 @@ The Codespaces preview works without changing repository visibility or enabling 
 ## Daily game rules
 
 - The daily set contains seven shared prompts selected once for the entire subreddit installation.
-- Questions are not repeated until the approved question pool is exhausted.
-- Archive fallback uses one randomly selected answer per transmission and avoids answers selected in the preceding seven days whenever enough unused answers remain.
+- Questions are not repeated until the approved question pool is exhausted; if fewer than seven new questions remain, archive transmissions fill the remaining slots.
+- Each archive transmission uses one randomly selected accepted answer, and the system avoids answer entries selected in the preceding seven days whenever enough unused answers remain.
 - Each prompt has a 25-second answer window.
 - One accepted answer is scored per prompt.
 - Answers are checked against the current field catalog.
