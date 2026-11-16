@@ -301,7 +301,7 @@ export const ANSWER_SUBMISSIONS_BATCH_2: Record<string, AnswerRecord[]> = {
       'Mudi', 'Norwegian Lundehund', 'Otterhound', 'Pharaoh Hound',
       'Plott', 'Pumi', 'Russian Toy', 'Sealyham Terrier',
       'Skye Terrier', 'Sloughi', 'Swedish Vallhund', 'Tibetan Spaniel',
-      'Treeing Walker Coonhound', 'Xoloitzcuintli', 'American Leopard Hound'
+      'Treeing Walker Coonhound', 'Xoloitzcuintli'
     ]},
     { score: 100, tier: 'SIGNAL FOUND', note: 'A particularly uncommon breed on the AKC’s recognized-breed register.', names: [
       'Grand Basset Griffon Vendéen'

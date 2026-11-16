@@ -69,3 +69,12 @@ test('expanded non-exoplanet catalogs accept source-backed long-tail additions',
   assert.equal(evaluateAnswer('shark-species', 'Bluntnose sixgill shark')?.score, 85);
   assert.ok(evaluateAnswer('ich-heritage-element', 'Yoga'));
 });
+
+
+test('AKC expansion follows the fully recognized breed register, not FSS candidates', () => {
+  assert.equal(evaluateAnswer('akc-dog-breed', 'Barbet')?.score, 60);
+  assert.equal(evaluateAnswer('akc-dog-breed', 'Bernese Mountain Dog')?.score, 15);
+  assert.equal(evaluateAnswer('akc-dog-breed', 'Nederlandse Kooikerhondje')?.score, 85);
+  assert.equal(evaluateAnswer('akc-dog-breed', 'American Leopard Hound'), null);
+  assert.equal(evaluateAnswer('canadian-national-park', 'Rouge National Urban Park')?.score, 85);
+});
