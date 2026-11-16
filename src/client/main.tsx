@@ -699,6 +699,7 @@ function App() {
   const [now, setNow] = useState(Date.now());
   const [playerName, setPlayerName] = useState(DEMO_MODE ? 'LOCAL EXPLORER' : 'REDDIT EXPLORER');
   const [playerCount, setPlayerCount] = useState(0);
+  const [playerRank, setPlayerRank] = useState<number | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardRow[]>([]);
   const [serverReady, setServerReady] = useState(false);
   const [bootstrapping, setBootstrapping] = useState(!DEMO_MODE);
@@ -873,6 +874,7 @@ function App() {
         setCanTest(Boolean(data.canTest));
         setPlayerName(data.username ? String(data.username).toUpperCase() : 'REDDIT EXPLORER');
         setPlayerCount(Number(data.playerCount) || 0);
+        setPlayerRank(typeof data.playerRank === 'number' ? data.playerRank : null);
         setLeaderboard(Array.isArray(data.leaderboard) ? data.leaderboard : []);
         if (data.result && Array.isArray(data.result.entries)) {
           setGame({ dateKey: data.result.dateKey || dayKey, phase: 'complete', index: 6, entries: data.result.entries, deadline: null });
@@ -959,6 +961,7 @@ function App() {
       const data = await response.json().catch(() => ({}));
       if (!response.ok || !data?.ok) throw new Error(data.message || 'Could not start today’s scan.');
       if (data.completed && Array.isArray(data.result?.entries)) {
+        setPlayerRank(typeof data.playerRank === 'number' ? data.playerRank : null);
         setGame({ dateKey: data.result.dateKey || dayKey, phase: 'complete', index: 6, entries: data.result.entries, deadline: null });
         return;
       }
@@ -1145,6 +1148,7 @@ function App() {
       setGame(next);
       if (data.result) {
         setPlayerCount(Number(data.playerCount) || 0);
+        setPlayerRank(typeof data.playerRank === 'number' ? data.playerRank : null);
         if (Array.isArray(data.leaderboard)) setLeaderboard(data.leaderboard);
       }
     } catch (error) {
@@ -1183,7 +1187,7 @@ function App() {
     const shareText = [
       'SIGNAL // ' + formatDay(game.dateKey),
       total + '/700  ·  ' + scoreLabel(total),
-      !DEMO_MODE && playerRank !== null ? 'COMMUNITY PLACE // #' + playerRank + ' OF ' + playerCount : '',
+      !DEMO_MODE && !game.isTest && playerRank !== null ? 'COMMUNITY PLACE // #' + playerRank + ' OF ' + playerCount : '',
       '',
       ...rows,
       '',
@@ -1584,7 +1588,7 @@ function App() {
                   <span><strong>{game.entries.filter((entry) => entry.score >= 85).length}</strong> DEEP CUTS</span>
                   <span><strong>{Math.round(total / Math.max(1, game.entries.length))}</strong> AVG / ROUND</span>
                 </div>
-                {!DEMO_MODE && (
+                {!DEMO_MODE && !game.isTest && (
                   <div className="personal-rank">
                     <span>YOUR COMMUNITY PLACE</span>
                     <strong>{playerRank !== null ? '#' + playerRank : 'NOT RANKED'}</strong>
