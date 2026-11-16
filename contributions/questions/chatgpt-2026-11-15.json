@@ -1,0 +1,355 @@
+{
+  "schemaVersion": 1,
+  "submission": {
+    "phase": "A",
+    "agent": "chatgpt",
+    "submittedOn": "2026-11-15",
+    "baseBranch": "main",
+    "baseCommit": "814532ee967961e7a0461c371872bdef7a7d82d1",
+    "answerPoolsIncluded": false,
+    "note": "Question-only contribution. Do not activate these questions in daily rotation until Phase B answer records have been committed and validated."
+  },
+  "questions": [
+    {
+      "id": "video-game-company",
+      "channel": "VIDEO GAME INDUSTRY",
+      "prompt": "Name a company that has developed or published a video game.",
+      "category": "Technology / Entertainment",
+      "context": "The company may be a large publisher, an independent studio, a regional developer, or a historical company. It only needs one verifiable credit on a released video game.",
+      "hint": "Think about studios, publishers, regional specialists, and companies from the early arcade era onward.",
+      "acceptanceCriteria": {
+        "include": [
+          "A distinct, identifiable company or studio credited as the developer or publisher of at least one released electronic video game.",
+          "Companies from any country, platform, genre, or historical period.",
+          "Defunct companies and independently operated subsidiaries when the credited entity is separately identifiable.",
+          "Mobile, browser, arcade, console, computer, and handheld game developers or publishers."
+        ],
+        "exclude": [
+          "Companies connected only as retailers, hardware manufacturers, distributors, licensors, or marketing partners without a development or publishing credit.",
+          "Individual games, franchises, people, esports teams, and informal groups that are not companies or identifiable studios.",
+          "Unreleased projects without a verifiable released-game credit."
+        ],
+        "canonicalization": "Use the credited company or studio name as the canonical identity. Treat former names, spelling variants, punctuation variants, and language variants as aliases. Keep a parent company and a separately credited subsidiary distinct only when both are independently credited entities."
+      },
+      "sourceGuidance": [
+        {
+          "name": "MobyGames company database",
+          "url": "https://www.mobygames.com/company/",
+          "use": "High-volume discovery index; verify each entry's actual developer or publisher role from game credits."
+        },
+        {
+          "name": "Official game credits and publisher catalogues",
+          "use": "Primary verification for the company's development or publishing role."
+        }
+      ],
+      "poolPotential": "Very high; the discovery database indexes tens of thousands of company records, although only qualifying developer and publisher credits should be accepted."
+    },
+    {
+      "id": "time-travel-film",
+      "channel": "CINEMA",
+      "prompt": "Name a feature film in which time travel is a major plot element.",
+      "category": "Film / Science Fiction",
+      "context": "Films from any country, language, decade, or animation style qualify. Time travel must materially drive the story rather than appear only as a brief reference.",
+      "hint": "Consider films about time machines, temporal loops, people displaced into another era, and journeys into the future or past.",
+      "acceptanceCriteria": {
+        "include": [
+          "A feature-length live-action or animated film in which a central character travels to another point in time, or is repeatedly sent through a time loop that materially drives the plot.",
+          "Travel may be intentional or accidental and may move into the past or future.",
+          "Films from all national cinemas, including theatrical, television, and direct-to-video feature films."
+        ],
+        "exclude": [
+          "Short films, individual television episodes, and series seasons.",
+          "Stories containing only flashbacks, flash-forwards, prophecies, memories, visions, or non-linear editing without an in-story temporal displacement.",
+          "Stories in which time travel is only mentioned or appears as an incidental background detail."
+        ],
+        "canonicalization": "Use the film's original or best-established release title as the canonical name. Record translated titles, alternate release titles, transliterations, and punctuation variants as aliases; do not count a remake as the same film as its original."
+      },
+      "sourceGuidance": [
+        {
+          "name": "AFI Catalog of Feature Films",
+          "url": "https://catalog.afi.com/",
+          "use": "Verify film identity, production details, and release format for eligible American films."
+        },
+        {
+          "name": "British Film Institute collections",
+          "url": "https://www.bfi.org.uk/",
+          "use": "Discover and verify films from international and historical cinema."
+        },
+        {
+          "name": "Official synopsis, credits, or distributor materials",
+          "use": "Verify that temporal displacement is a material plot element; general genre labels alone are insufficient."
+        }
+      ],
+      "poolPotential": "High; include international cinema and animation rather than limiting research to well-known English-language releases."
+    },
+    {
+      "id": "animal-logo-brand",
+      "channel": "BRANDS & DESIGN",
+      "prompt": "Name a brand whose logo depicts an animal.",
+      "category": "Business / Visual identity",
+      "context": "The animal must be visibly represented in an official brand logo or wordmark. The brand name alone does not qualify.",
+      "hint": "Look across food, sports, fashion, transportation, technology, entertainment, and regional businesses.",
+      "acceptanceCriteria": {
+        "include": [
+          "A distinct commercial, nonprofit, institutional, or product brand whose official logo visibly depicts an identifiable real or mythical animal.",
+          "Full-body animals, animal heads, silhouettes, heraldic animals, and clearly identifiable animal parts when they are part of the official logo.",
+          "Current or historical official logos, provided the brand identity and its logo can be verified."
+        ],
+        "exclude": [
+          "Brands whose names merely contain an animal word when no animal is depicted in the logo.",
+          "Unofficial fan art, one-off advertisements, product mascots that are not part of the brand logo, and unrelated sponsor graphics.",
+          "Ambiguous abstract shapes for which an animal interpretation is speculative."
+        ],
+        "canonicalization": "Use the brand's canonical public-facing name. Merge spelling, punctuation, and regional-name variants for the same brand; keep unrelated brands with similar animal imagery separate."
+      },
+      "sourceGuidance": [
+        {
+          "name": "Official brand identity and press-kit materials",
+          "use": "Primary proof that the animal artwork is an official logo."
+        },
+        {
+          "name": "Archived official websites and historical brand-guideline documents",
+          "use": "Verify discontinued logos and legacy brands."
+        }
+      ],
+      "poolPotential": "High; search across industries and countries, and retain dated evidence for historical marks."
+    },
+    {
+      "id": "uniformed-occupation",
+      "channel": "WORK & SOCIETY",
+      "prompt": "Name an occupation whose workers commonly wear a recognizable uniform.",
+      "category": "Occupations / Culture",
+      "context": "The clothing must be a widely recognized, standardized part of performing the occupation in at least one substantial region or industry. It need not be identical worldwide.",
+      "hint": "Think about public service, transportation, healthcare, hospitality, trades, education, and ceremonial work.",
+      "acceptanceCriteria": {
+        "include": [
+          "A named occupation for which a recognizable uniform or standardized profession-specific work outfit is a common norm, formal requirement, or established occupational convention.",
+          "Occupations from any country, historical period, and employment sector.",
+          "Uniforms such as scrubs, service uniforms, flight uniforms, chef whites, academic or judicial robes, and other role-specific standard attire when the occupational connection is documented."
+        ],
+        "exclude": [
+          "Jobs for which only ordinary everyday clothing or a generic business dress code is customary.",
+          "Occupations where only optional fashion, an individual employer's unusual dress choice, or generic personal protective equipment distinguishes the clothing.",
+          "A specific employer, rank, team, or uniform item offered instead of an occupation."
+        ],
+        "canonicalization": "Use the standard occupation name as the canonical answer. Treat regional titles and synonymous job names as aliases, but do not merge genuinely different occupations merely because they share a uniform."
+      },
+      "sourceGuidance": [
+        {
+          "name": "National occupational classifications and labour agencies",
+          "use": "Establish the occupation's recognized name and scope."
+        },
+        {
+          "name": "Professional associations, licensing authorities, and employer uniform standards",
+          "use": "Verify that the uniform is a common or formal occupational convention rather than an isolated dress choice."
+        }
+      ],
+      "poolPotential": "Medium to high; maximize international coverage and distinguish occupations carefully to avoid near-duplicate job titles."
+    },
+    {
+      "id": "naruto-franchise-character",
+      "channel": "ANIME & MANGA",
+      "prompt": "Name a character from the Naruto franchise.",
+      "category": "Anime / Manga",
+      "context": "Characters from Naruto and its official sequel Boruto qualify, including major and minor named characters from the manga and officially released anime, films, or novels.",
+      "hint": "Look beyond Team 7 to the villages, clans, allied shinobi, historical figures, and sequel generation.",
+      "acceptanceCriteria": {
+        "include": [
+          "A named character who appears in an officially released Naruto or Boruto manga, anime, feature film, or licensed novel.",
+          "Major, supporting, minor, historical, deceased, and non-human characters, provided the character has an established name.",
+          "Official romanization variants and Japanese names when they refer to the same character."
+        ],
+        "exclude": [
+          "Unnamed background characters, animals, techniques, locations, clans, and organizations.",
+          "Characters created solely for a video game, fan work, or unofficial crossover who do not appear in an official Naruto or Boruto publication or screen release.",
+          "Different aliases or titles for the same individual as separate answers."
+        ],
+        "canonicalization": "Use the most commonly recognized character name as canonical. Store family-name/given-name order variants, official transliterations, former names, and titles as aliases when unambiguous."
+      },
+      "sourceGuidance": [
+        {
+          "name": "NARUTO Official Site",
+          "url": "https://naruto-official.com/en/about",
+          "use": "Establish franchise scope and verify official Naruto/Boruto releases."
+        },
+        {
+          "name": "Shueisha / VIZ manga releases and official anime credits",
+          "use": "Verify named characters and resolve transliteration or identity questions."
+        }
+      ],
+      "poolPotential": "High; include the full franchise and minor named characters, not just the principal cast."
+    },
+    {
+      "id": "one-piece-franchise-character",
+      "channel": "ANIME & MANGA",
+      "prompt": "Name a character from the One Piece franchise.",
+      "category": "Anime / Manga",
+      "context": "Any named character appearing in the official One Piece manga, anime, feature films, or licensed novels may qualify, including minor characters and characters from earlier arcs.",
+      "hint": "Think about pirates, marines, royalty, civilians, historical figures, and characters from every sea and island.",
+      "acceptanceCriteria": {
+        "include": [
+          "A named character who appears in an officially released One Piece manga chapter, anime episode, feature film, or licensed novel.",
+          "Major, supporting, minor, historical, deceased, and non-human characters with an established name.",
+          "Official romanization variants, epithets, and aliases when they identify the same individual."
+        ],
+        "exclude": [
+          "Unnamed background characters, ships, crews or organizations as a whole, islands, species, powers, and objects.",
+          "Characters created only for a video game, fan work, or unofficial crossover who do not appear in an official One Piece publication or screen release.",
+          "Separate entries for aliases, titles, or alternate spellings of the same character."
+        ],
+        "canonicalization": "Use the best-established character name as canonical. Preserve official romanization, name-order, epithet, and former-name variants as aliases when they refer to one individual."
+      },
+      "sourceGuidance": [
+        {
+          "name": "ONE PIECE Official character search",
+          "url": "https://one-piece.com/character/",
+          "use": "Primary identity cross-check for listed characters; supplement it with manga and anime source material for exhaustive coverage."
+        },
+        {
+          "name": "Shueisha / VIZ manga releases and Toei Animation materials",
+          "use": "Verify minor characters, appearances, and official spellings."
+        }
+      ],
+      "poolPotential": "Very high; the manga and anime contain a large international cast, so arc-by-arc research is appropriate."
+    },
+    {
+      "id": "national-park",
+      "channel": "WORLD ATLAS",
+      "prompt": "Name a national park anywhere in the world.",
+      "category": "Geography / Conservation",
+      "context": "Parks from every country and territory qualify, including parks whose official designation is expressed in another language. Include historical parks that were formally designated nationally.",
+      "hint": "Explore every continent and look beyond the best-known parks in North America and Africa.",
+      "acceptanceCriteria": {
+        "include": [
+          "A named protected area that has been formally designated as a national park by the relevant national-level government or statutory authority.",
+          "Current and former national parks, including official translated designations and recognized local-language names.",
+          "Marine national parks and national parks with unusual environments or cultural features."
+        ],
+        "exclude": [
+          "State, provincial, municipal, or private parks without national-park designation.",
+          "Nature reserves, monuments, sanctuaries, biosphere reserves, and World Heritage sites unless the same place also has an official national-park designation.",
+          "A region, mountain range, forest, or attraction that is not itself a designated national park."
+        ],
+        "canonicalization": "Use the official park name in its local or best-established form. Keep separate parks distinct even when they share a translated name; store transliterations, translated names, and former official names as aliases."
+      },
+      "sourceGuidance": [
+        {
+          "name": "Protected Planet / UNEP-WCMC and IUCN",
+          "url": "https://www.protectedplanet.net/",
+          "use": "Global discovery and cross-checking; filter specifically for national-park designations rather than accepting all protected areas."
+        },
+        {
+          "name": "National government park agencies and official gazettes",
+          "use": "Primary confirmation of the national designation, official name, and historical status."
+        }
+      ],
+      "poolPotential": "Very high; use a country-by-country workflow and preserve the exact national designation for every accepted park."
+    },
+    {
+      "id": "non-avian-dinosaur-genus",
+      "channel": "PALEONTOLOGY",
+      "prompt": "Name a genus of non-avian dinosaur.",
+      "category": "Paleontology / Taxonomy",
+      "context": "Use a formally named dinosaur genus. Include dinosaurs from every geological period and region, not only famous late-Cretaceous species.",
+      "hint": "Look across Triassic, Jurassic, and Cretaceous discoveries, including small and fragmentary genera.",
+      "acceptanceCriteria": {
+        "include": [
+          "A formally published genus assigned to Dinosauria that is not an avian dinosaur.",
+          "Accepted valid genera from the Triassic, Jurassic, and Cretaceous, including herbivores, carnivores, and less familiar groups.",
+          "A genus supported by a recognized taxonomic database or a defensible published taxonomic treatment."
+        ],
+        "exclude": [
+          "Pterosaurs, marine reptiles, other non-dinosaur reptiles, and living birds.",
+          "Informal nicknames, unpublished names, invalid names, and junior synonyms when they are not accepted as distinct genera.",
+          "Species epithets or individual fossil specimens submitted as though they were genus names."
+        ],
+        "canonicalization": "Use the currently accepted genus spelling as canonical. Map historical spellings and documented synonyms to that accepted genus; do not count two names for the same taxon separately."
+      },
+      "sourceGuidance": [
+        {
+          "name": "Paleobiology Database",
+          "url": "https://paleobiodb.org/",
+          "use": "Primary taxonomic and occurrence-data research source; inspect accepted-name and synonym relationships."
+        },
+        {
+          "name": "DinoPages PBDB-derived genus index",
+          "url": "https://dinopages.com/",
+          "use": "Convenient discovery index of non-avian dinosaur genera; trace accepted names back to Paleobiology Database records."
+        }
+      ],
+      "poolPotential": "High; a PBDB-derived index reports more than 1,600 valid non-avian dinosaur genera, subject to checking current taxonomic status."
+    },
+    {
+      "id": "butterfly-species",
+      "channel": "FIELD BIOLOGY",
+      "prompt": "Name a species of butterfly.",
+      "category": "Biology / Taxonomy",
+      "context": "Butterfly species from every continent and habitat qualify, including skippers. Give a species-level name, not merely a family, genus, or subspecies.",
+      "hint": "Explore swallowtails, skippers, blues, brush-footed butterflies, moth-like groups, and tropical families.",
+      "acceptanceCriteria": {
+        "include": [
+          "A recognized species within the butterfly superfamily Papilionoidea, including skippers under modern classification.",
+          "Species from any geographic region, including island endemics, migratory species, and rare or recently described species.",
+          "Accepted scientific binomials and established common names that unambiguously identify one accepted species."
+        ],
+        "exclude": [
+          "Moths outside Papilionoidea, other insects, and informal names that cannot be tied to a specific butterfly species.",
+          "Subspecies submitted as separate species unless a current taxonomic authority recognizes the taxon at species rank.",
+          "Synonyms, misspellings, and historical combinations counted separately from the accepted species."
+        ],
+        "canonicalization": "Use the currently accepted scientific binomial as canonical. Map common names, former combinations, spelling variants, and recognized synonyms to the same species identity."
+      },
+      "sourceGuidance": [
+        {
+          "name": "GBIF Backbone Taxonomy",
+          "url": "https://www.gbif.org/",
+          "use": "Global discovery and accepted-name/synonym cross-checking at species rank."
+        },
+        {
+          "name": "Catalogue of Life / ChecklistBank",
+          "url": "https://www.catalogueoflife.org/",
+          "use": "Compare accepted taxonomic names and synonymy; record checklist version and retrieval date."
+        },
+        {
+          "name": "Museum and specialist lepidopterist checklists",
+          "use": "Resolve disputed species boundaries, regional names, and recent taxonomic changes."
+        }
+      ],
+      "poolPotential": "Very high; use global taxonomic checklists and deduplicate by accepted species identity rather than by common name."
+    },
+    {
+      "id": "confirmed-exoplanet",
+      "channel": "ASTRONOMY",
+      "prompt": "Name a confirmed exoplanet.",
+      "category": "Astronomy / Planetary science",
+      "context": "Any planet outside our Solar System that is listed as confirmed by the NASA Exoplanet Archive qualifies, including planets known mainly by catalog designation.",
+      "hint": "Look beyond the famous nearby systems to planets discovered by transit surveys, radial velocity, and microlensing.",
+      "acceptanceCriteria": {
+        "include": [
+          "A unique planet recorded as confirmed in the NASA Exoplanet Archive's current Planetary Systems (PS) data.",
+          "Planets in single-star, multi-star, circumbinary, and other confirmed planetary systems when the archive identifies a distinct planet.",
+          "Official proper names, host-star-plus-planet designations, and archive catalog designations as names for the same underlying planet."
+        ],
+        "exclude": [
+          "Unconfirmed candidates, false positives, brown dwarfs not classified as planets, stars, and host systems submitted without a planet.",
+          "Duplicate archive solutions or alternate catalog labels for the same planet counted as separate answers.",
+          "Fictional planets and planets within our Solar System."
+        ],
+        "canonicalization": "Assign one identity per confirmed planet. Prefer the established host-star-plus-letter designation as canonical when no IAU proper name is established; store proper names and catalogue aliases on that same record."
+      },
+      "sourceGuidance": [
+        {
+          "name": "NASA Exoplanet Archive",
+          "url": "https://exoplanetarchive.ipac.caltech.edu/",
+          "use": "Authoritative confirmation and current Planetary Systems (PS) table; exclude candidate-only tables."
+        },
+        {
+          "name": "NASA Exoplanet Archive API documentation",
+          "url": "https://exoplanetarchive.ipac.caltech.edu/docs/program_interfaces.html",
+          "use": "Retrieve the current Planetary Systems table and maintain a repeatable, dated research snapshot."
+        }
+      ],
+      "poolPotential": "Very high; the archive reported 6,470 confirmed planets on 2026-11-12, and its holdings are updated as literature is reviewed."
+    }
+  ]
+}
