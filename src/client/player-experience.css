@@ -738,6 +738,7 @@
 }
 .signal-live-capture[data-phase="failed"] .signal-lock-reticle {
   opacity:.32;
+  animation:none;
   transform:translate(-50%,-50%) scale(1.45);
 }
 .signal-live-capture .signal-lock-steps {
@@ -912,6 +913,7 @@
   .play-view.tuning-view .signal-screen::after,
   .signal-live-capture .signal-scanbeam,
   .signal-live-capture .signal-lock-reticle,
+  .signal-live-capture[data-phase="surging"],
   .signal-live-capture .signal-motion-trace,
   .signal-live-capture .signal-station i,
   .signal-live-capture .signal-capture-status i,
