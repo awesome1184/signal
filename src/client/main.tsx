@@ -211,7 +211,8 @@ function getPreviewDailyPrompts(dateKey: string): Prompt[] {
       if (previewDayAge(dateKey, day) > 30 || previewDayAge(dateKey, day) < 0) delete state.daily[day];
     }
 
-    const questions = previewShuffle(getQuestionBank().filter((question) => !state.usedQuestions[question.id])).slice(0, 7);
+    const answerableQuestionIds = new Set(getAnswerEntries().map((entry) => entry.promptId));
+    const questions = previewShuffle(getQuestionBank().filter((question) => answerableQuestionIds.has(question.id) && !state.usedQuestions[question.id])).slice(0, 7);
     const prompts: Prompt[] = [...questions];
     for (const question of questions) state.usedQuestions[question.id] = dateKey;
 
