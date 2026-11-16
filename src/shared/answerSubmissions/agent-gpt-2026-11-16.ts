@@ -245,7 +245,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Vanilla orchid', 'Vanilla planifolia']
     ]},
     { score: 15, tier: 'FAMILIAR', note: 'A widely cultivated or recognized orchid species.', names: [
-      ['Cattleya labiata', 'Cattleya labiata'],
+      'Cattleya labiata',
       ['Noble dendrobium', 'Dendrobium nobile'],
       ['Blue vanda', 'Vanda coerulea']
     ]},
@@ -301,8 +301,8 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Orange cup coral', 'Tubastraea coccinea']
     ]},
     { score: 60, tier: 'RARE', note: 'A less commonly named coral species with a documented database record.', names: [
-      ['Acanthastrea echinata', 'Acanthastrea echinata'],
-      ['Acanthastrea hemprichii', 'Acanthastrea hemprichii'],
+      'Acanthastrea echinata',
+      'Acanthastrea hemprichii',
       ['Heliofungia actiniformis', 'Heliofungia actiniformis'],
       ["Jardine's bush coral", 'Catalaphyllia jardinei'],
       ['Cactus coral', 'Pavona cactus'],
@@ -322,7 +322,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Bubblegum coral', 'Paragorgia arborea'],
       ['Primnoa resedaeformis', 'Primnoa resedaeformis'],
       ['Venus sea fan', 'Gorgonia ventalina'],
-      ['Acanthastrea regularis', 'Acanthastrea regularis']
+      'Acanthastrea regularis'
     ]},
     { score: 100, tier: 'SIGNAL FOUND', note: 'An obscure species-level coral entry visible in the database catalogue.', names: [
       'Acanthacis austera'
@@ -335,7 +335,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Tango', 'Argentine tango']
     ]},
     { score: 15, tier: 'FAMILIAR', note: 'A widely known UNESCO-inscribed cultural practice or tradition.', names: [
-      ['Kumbh Mela', 'Kumbh Mela'],
+      'Kumbh Mela',
       ['Yoga', 'Yoga'],
       ['Washoku, traditional dietary cultures of the Japanese', 'Washoku']
     ]},
@@ -438,7 +438,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
     { score: 60, tier: 'RARE', note: 'A less commonly named UNESCO Creative City with a designated creative field.', names: [
       ['Bradford', 'Bradford, City of Film'],
       ['Graz', 'Graz, City of Design'],
-      ['Paducah', 'Paducah, City of Crafts and Folk Art'],
+      ['Chiang Mai', 'Chiang Mai, City of Crafts and Folk Art'],
       ['Jaipur', 'Jaipur, City of Crafts and Folk Art'],
       ['Hamamatsu', 'Hamamatsu, City of Music'],
       ['Bergen', 'Bergen, City of Gastronomy']
@@ -470,7 +470,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['51 Pegasi b', '51 Peg b']
     ]},
     { score: 15, tier: 'FAMILIAR', note: 'A widely discussed confirmed planet in the NASA Exoplanet Archive.', names: [
-      ['TRAPPIST-1 e', 'TRAPPIST 1 e'],
+      'TRAPPIST-1 e',
       ['Kepler-22 b', 'Kepler 22b'],
       ['HD 209458 b', 'Osiris']
     ]},
@@ -663,7 +663,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
     ]},
     { score: 60, tier: 'RARE', note: 'A less commonly named coaster with a distinct RCDB entry.', names: [
       ['Taron', 'Taron coaster'],
-      ['Black Mamba', 'Black Mamba coaster'],
+      ['Black Mamba (Phantasialand)', 'Black Mamba coaster'],
       ['Expedition GeForce', 'Expedition GeForce coaster'],
       ['Shambhala', 'Shambhala coaster'],
       ['Zadra', 'Zadra coaster'],
@@ -676,7 +676,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['F.L.Y.', 'FLY coaster'],
       ['Wodan Timburcoaster', 'Wodan'],
       ['Balder', 'Balder coaster'],
-      ['Wildfire', 'Wildfire Kolmarden'],
+      ['Wildfire (Kolmården)', 'Wildfire Kolmarden'],
       ['Toutatis', 'Toutatis coaster'],
       ['Oziris', 'Oziris coaster'],
       ['Red Force', 'Red Force coaster'],
