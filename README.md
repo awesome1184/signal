@@ -19,7 +19,7 @@ SIGNAL is an original daily open-answer game for Reddit, built with Devvit Web. 
 - Local browser preview with a sample leaderboard and localStorage-backed simulation of the same content rotation.
 - Separate compact Reddit post launch screen and expanded game.
 
-The initial question and answer catalogs are deliberately small. New questions become eligible only after at least one accepted answer is committed for that question. The Devvit server stores permanent question usage, recent answer usage, and the shared daily selection in Redis. That state is shared by players on the same subreddit installation and is not stored in the content files. The Pages/Codespaces preview simulates that history locally in the browser, so preview rotations are not shared with Reddit.
+The current catalog contains 59 questions and 2,281 distinct canonical answer entries across those question pools. Each question has at least one accessible 10-point answer, with progressively less familiar answers in the higher tiers. New questions become eligible only after at least one accepted answer is committed for that question. The Devvit server stores permanent question usage, recent answer usage, and the shared daily selection in Redis. That state is shared by players on the same subreddit installation and is not stored in the content files. The Pages/Codespaces preview simulates that history locally in the browser, so preview rotations are not shared with Reddit.
 
 ## Run the browser preview in GitHub Codespaces
 
@@ -64,4 +64,4 @@ The Codespaces preview works without changing repository visibility or enabling 
 
 ## Hackathon checklist
 
-The game is designed as a short daily experience in a Reddit Interactive Post. Before hackathon submission, it still needs a public test subreddit with a working post, a larger answer/content bank, a final README and submission description, an app link, and a short demo video.
+The game is designed as a short daily experience in a Reddit Interactive Post. Before hackathon submission, it still needs a public test subreddit with a working post, continued answer-bank coverage and accessibility review, a final submission description, an app link, and a short demo video.
