@@ -866,7 +866,7 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       'Alnitak', 'Mintaka', 'Shaula'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A less familiar named star with a recognized astronomical designation.', names: [
-      'Fomalhaut', 'Denebola', 'Mimosa', 'Rigil Kentaurus',
+      'Denebola', 'Mimosa', 'Rigil Kentaurus',
       'Epsilon Eridani', '61 Cygni'
     ]},
     { score: 15, tier: 'FAMILIAR', note: 'A widely discussed confirmed planet in the NASA Exoplanet Archive.', names: [
