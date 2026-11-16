@@ -193,8 +193,9 @@ export function normalizeAnswer(value: string): string {
     .trim();
 }
 
-function answerRecordId(promptId: string, record: AnswerRecord): string {
-  return promptId + ':' + normalizeAnswer(record.aliases[0] ?? '');
+function answerRecordId(_promptId: string, record: AnswerRecord): string {
+  // The same canonical answer is one archive item even if it qualifies for multiple questions.
+  return normalizeAnswer(record.aliases[0] ?? '');
 }
 
 /** Flatten the approved answer database for archive rotation and auditing. */
