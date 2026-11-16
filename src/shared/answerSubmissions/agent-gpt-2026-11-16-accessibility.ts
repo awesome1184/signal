@@ -65,10 +65,10 @@ export const ANSWER_SUBMISSIONS_ACCESSIBILITY: Record<string, AnswerRecord[]> = 
       'Djibouti', 'Rwanda'
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A comparatively less expected country where French still has national official status.', names: [
-      'Equatorial Guinea', 'Gabon', 'Guinea', 'Seychelles', 'Togo', 'Vanuatu'
+      'Equatorial Guinea', 'Gabon', 'Guinea', 'Seychelles', 'Togo'
     ]},
     { score: 100, tier: 'SIGNAL FOUND', note: 'An especially unexpected but valid country from the current legal-status list.', names: [
-      'Guinea-Bissau'
+      'Vanuatu'
     ]}
   ),
 
@@ -92,7 +92,7 @@ export const ANSWER_SUBMISSIONS_ACCESSIBILITY: Record<string, AnswerRecord[]> = 
       'The Laughing Cow', 'Greyhound'
     ]},
     { score: 100, tier: 'SIGNAL FOUND', note: 'A comparatively obscure animal-logo brand with a distinct official mark.', names: [
-      'Aussie'
+      'BAPE'
     ]}
   ),
 
@@ -144,7 +144,7 @@ export const ANSWER_SUBMISSIONS_ACCESSIBILITY: Record<string, AnswerRecord[]> = 
       'Beyond the Infinite Two Minutes', 'The Navigator: A Medieval Odyssey'
     ]},
     { score: 100, tier: 'SIGNAL FOUND', note: 'A comparatively obscure feature film whose central story depends on time travel.', names: [
-      'The Incident (2014)'
+      'The Infinite Man'
     ]}
   ),
 
@@ -169,7 +169,7 @@ export const ANSWER_SUBMISSIONS_ACCESSIBILITY: Record<string, AnswerRecord[]> = 
     ]},
     { score: 85, tier: 'DEEP CUT', note: 'A more specialized named character from the official Naruto or Boruto franchise.', names: [
       'Shisui Uchiha', 'Kurenai Yuhi', 'Asuma Sarutobi',
-      'Kankuro', 'Darui', 'Mei Terumi', 'Onoki',
+      'Darui', 'Mei Terumi', 'Onoki',
       'Killer B', 'Suigetsu Hozuki', 'Jugo', 'Karin'
     ]},
     { score: 100, tier: 'SIGNAL FOUND', note: 'A comparatively obscure but named official franchise character.', names: [
@@ -186,7 +186,7 @@ export const ANSWER_SUBMISSIONS_ACCESSIBILITY: Record<string, AnswerRecord[]> = 
       'Buggy', 'Portgas D. Ace', 'Sabo'
     ]},
     { score: 30, tier: 'UNCOMMON', note: 'A recognizable character with a major role in one or more story arcs.', names: [
-      'Trafalgar D. Water Law', 'Boa Hancock', 'Crocodile',
+      ['Trafalgar D. Water Law', 'Trafalgar Law'], 'Boa Hancock', 'Crocodile',
       'Dracule Mihawk', 'Smoker', 'Tashigi', 'Donquixote Doflamingo',
       'Rob Lucci', 'Bartolomeo', 'Bon Clay', 'Eustass Kid'
     ]},
@@ -260,7 +260,7 @@ export const ANSWER_SUBMISSIONS_ACCESSIBILITY: Record<string, AnswerRecord[]> = 
 
   'culinary-spice-plant': records(
     { score: 10, tier: 'BACKGROUND', note: 'A very familiar plant used to make a common culinary spice.', names: [
-      'Black pepper plant', 'Ginger', 'Turmeric', 'Cinnamon tree', 'Chili pepper plant'
+      ['Black pepper plant', 'Black pepper'], 'Ginger', 'Turmeric', ['Cinnamon tree', 'Cinnamon'], ['Chili pepper plant', 'Chili pepper']
     ]},
     { score: 15, tier: 'FAMILIAR', note: 'A commonly recognized spice-producing plant.', names: [
       'Cumin', 'Coriander', 'Clove tree', 'Nutmeg tree', 'Cardamom plant'
