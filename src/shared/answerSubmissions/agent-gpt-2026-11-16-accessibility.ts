@@ -239,7 +239,7 @@ export const ANSWER_SUBMISSIONS_ACCESSIBILITY: Record<string, AnswerRecord[]> = 
       'Python', 'Java', 'JavaScript', 'C++', 'C'
     ]},
     { score: 15, tier: 'FAMILIAR', note: 'A common language that many people who have encountered programming recognize.', names: [
-      'C#', 'PHP', 'Ruby', 'Swift', 'Kotlin', 'Go'
+      'C#', 'PHP', 'Ruby', 'Swift', 'Kotlin', 'Groovy'
     ]},
     { score: 30, tier: 'UNCOMMON', note: 'A widely used but somewhat more specialized programming or query language.', names: [
       'Rust', 'TypeScript', 'R', 'SQL', 'MATLAB', 'Perl',
