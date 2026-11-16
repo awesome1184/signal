@@ -86,7 +86,7 @@ export const QUESTION_SUBMISSIONS_BATCH_3: Prompt[] = [
     id: 'lunar-crater',
     channel: 'LUNAR NOMENCLATURE',
     prompt: 'Name a named surface feature on the Moon.',
-    context: 'The answer must be a named lunar surface feature recorded in the IAU/USGS Gazetteer of Planetary Nomenclature. Craters, maria (lunar seas), mountains, valleys, and rilles count. Use the official name or a recognized English name; features on other worlds do not qualify.'
+    context: 'The answer must be a named lunar surface feature recorded in the IAU/USGS Gazetteer of Planetary Nomenclature. Craters, maria (lunar seas), mountains, valleys, and rilles count. Use the official name or a recognized English name; features on other worlds do not qualify.',
     hint: 'Familiar examples include the Sea of Tranquility, Tycho Crater, and the Sea of Serenity.'
   },
   {
