@@ -86,7 +86,7 @@ app.post('/api/test-answer', async (c) => {
   const score = typeof body.score === 'number' ? body.score : 0;
   if (![10, 15, 30, 60, 85, 100].includes(score)) return c.json({ ok: false, message: 'Unknown score tier.' }, 400);
   const daily = await getRotatedDailySelection(getNewYorkDateKey());
-  const selected = daily.prompts.find((prompt) => prompt.id === promptId);
+  const selected = daily.selections.find((prompt) => prompt.id === promptId);
   if (!selected) return c.json({ ok: false }, 400);
   const answer = getTestAnswer(selected.questionId, score, selected.answerId);
   return c.json({ ok: true, answer });
