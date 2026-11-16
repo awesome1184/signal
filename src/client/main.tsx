@@ -147,6 +147,7 @@ type RunState = {
   index: number;
   entries: Entry[];
   deadline: number | null;
+  attemptsRemaining?: number;
   isTest?: boolean;
 };
 type LeaderboardRow = { name: string; score: number };
@@ -216,7 +217,19 @@ function getPreviewDailyPrompts(dateKey: string): Prompt[] {
       };
     }
     const existing = state.daily[dateKey];
-    if (Array.isArray(existing) && existing.length === 7) return existing;
+    if (Array.isArray(existing) && existing.length === 7) {
+      const refreshed = existing.map((prompt) => {
+        if (!prompt.id.startsWith('archive-')) return prompt;
+        const source = prompt.sourcePromptId ? getPromptById(prompt.sourcePromptId) : undefined;
+        return {
+          ...prompt,
+          context: 'ARCHIVE ROUND — This is an open-answer question. Any accepted answer in this question’s catalog can earn its assigned rarity score. ' + (source?.context ?? prompt.context)
+        };
+      });
+      state.daily[dateKey] = refreshed;
+      localStorage.setItem(storageKey, JSON.stringify(state));
+      return refreshed;
+    }
 
     for (const [id, usedOn] of Object.entries(state.usedAnswers)) {
       if (previewDayAge(dateKey, usedOn) > 30 || previewDayAge(dateKey, usedOn) < 0) delete state.usedAnswers[id];
@@ -273,7 +286,7 @@ function getPreviewDailyPrompts(dateKey: string): Prompt[] {
           ...source,
           id: 'archive-' + dateKey + '-' + (index + 1),
           channel: 'ARCHIVE // ' + source.channel,
-          context: 'Archive fallback: this transmission has one randomly selected answer that has not appeared in the previous seven days. ' + source.context,
+          context: 'ARCHIVE ROUND — This is an open-answer question. Any accepted answer in this question’s catalog can earn its assigned rarity score. The archive selection avoids source answers used in the previous seven days when enough fresh entries remain. ' + source.context,
           sourcePromptId: entry.promptId,
           fallbackAnswerId: entry.id
         });
@@ -291,7 +304,7 @@ function getPreviewDailyPrompts(dateKey: string): Prompt[] {
 }
 
 function blankRun(dateKey: string): RunState {
-  return { dateKey, phase: 'ready', index: 0, entries: [], deadline: null };
+  return { dateKey, phase: 'ready', index: 0, entries: [], deadline: null, attemptsRemaining: 15 };
 }
  
 function serverRunToState(value: unknown, fallbackDate: string): RunState | null {
@@ -313,7 +326,10 @@ function serverRunToState(value: unknown, fallbackDate: string): RunState | null
   if ((phase === 'playing' && deadline === null)
     || (phase === 'reveal' && entries.length !== index + 1)
     || (phase === 'complete' && entries.length !== 7)) return null;
-  return { dateKey: typeof run.dateKey === 'string' ? run.dateKey : fallbackDate, phase, index, entries, deadline };
+  const attemptsRemaining = Number.isInteger(run.attemptsRemaining)
+    ? Math.max(0, Math.min(15, Number(run.attemptsRemaining)))
+    : 15;
+  return { dateKey: typeof run.dateKey === 'string' ? run.dateKey : fallbackDate, phase, index, entries, deadline, attemptsRemaining };
 }
 
 function loadRun(dateKey: string): RunState {
@@ -344,7 +360,10 @@ function loadRun(dateKey: string): RunState {
     if (phase === 'playing' && deadline === null) return blankRun(dateKey);
     if (phase === 'complete' && entries.length !== 7) return blankRun(dateKey);
     if (phase === 'reveal' && entries.length !== index + 1) return blankRun(dateKey);
-    return { dateKey, phase, index, entries, deadline, isTest: Boolean(saved.isTest) };
+    const attemptsRemaining = Number.isInteger(saved.attemptsRemaining)
+      ? Math.max(0, Math.min(15, Number(saved.attemptsRemaining)))
+      : 15;
+    return { dateKey, phase, index, entries, deadline, attemptsRemaining, isTest: Boolean(saved.isTest) };
   } catch {
     return blankRun(dateKey);
   }
@@ -707,6 +726,8 @@ function App() {
   const submittingRef = useRef(false);
   const advancingRef = useRef(false);
   const answerInputRef = useRef<HTMLInputElement>(null);
+  const questionHeadingRef = useRef<HTMLHeadingElement>(null);
+  const revealHeadingRef = useRef<HTMLHeadingElement>(null);
   const [game, setGame] = useState<RunState>(() => DEMO_MODE ? loadRun(dayKey) : blankRun(dayKey));
   const [answer, setAnswer] = useState('');
   const [message, setMessage] = useState('');
@@ -745,6 +766,7 @@ function App() {
   const currentPrompt: Prompt = prompts[Math.min(game.index, prompts.length - 1)];
   const answerCharacters = answer.length;
   const answerRemaining = Math.max(0, 80 - answerCharacters);
+  const attemptsRemaining = Math.max(0, Math.min(15, game.attemptsRemaining ?? 15));
   const total = game.entries.reduce((sum, entry) => sum + entry.score, 0);
   const currentEntry = game.entries[game.entries.length - 1];
   const tuningSignalPaths = useMemo(() => buildReceiverPaths(tuningSignalSeed, tuningDisplayScore), [tuningSignalSeed, tuningDisplayScore]);
@@ -869,8 +891,15 @@ function App() {
   }, [dayKey]);
 
   useEffect(() => {
+    if (game.phase === 'reveal') {
+      revealHeadingRef.current?.focus({ preventScroll: true });
+      return;
+    }
     if (game.phase !== 'playing' || isTuning) return;
-    if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) return;
+    if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) {
+      questionHeadingRef.current?.focus({ preventScroll: true });
+      return;
+    }
     answerInputRef.current?.focus({ preventScroll: true });
   }, [game.phase, game.index, isTuning]);
 
@@ -901,7 +930,11 @@ function App() {
         if (data.result && Array.isArray(data.result.entries)) {
           setGame({ dateKey: data.result.dateKey || dayKey, phase: 'complete', index: 6, entries: data.result.entries, deadline: null });
         } else {
-          setGame(serverRunToState(data.run, dayKey) ?? blankRun(dayKey));
+          const restoredRun = serverRunToState(data.run, dayKey) ?? blankRun(dayKey);
+          setGame(restoredRun);
+          if (data.run && restoredRun.phase !== 'complete') {
+            setMessage('Welcome back. Your progress is saved. Continue with round ' + (restoredRun.index + 1) + ' of 7.');
+          }
         }
         timeoutPendingRef.current = false;
       })
@@ -974,7 +1007,7 @@ function App() {
     if (soundEnabled) playSoftUiCue();
     setMessage(''); setAnswer(''); setLastUnmatchedAnswer(''); setReportSent(false); setNow(Date.now());
     if (DEMO_MODE || isTest) {
-      setGame({ dateKey: dayKey, phase: 'playing', index: 0, entries: [], deadline: Date.now() + ROUND_SECONDS * 1000, isTest });
+      setGame({ dateKey: dayKey, phase: 'playing', index: 0, entries: [], deadline: Date.now() + ROUND_SECONDS * 1000, attemptsRemaining: 15, isTest });
       return;
     }
     if (!serverReady) { setMessage('SIGNAL is not connected yet. Retry the connection before starting.'); return; }
@@ -1045,14 +1078,19 @@ function App() {
       let updatedRun: RunState | null = null;
       if (DEMO_MODE) {
         const module = await import('../shared/answerBank');
-        result = module.evaluateAnswer(prompt.sourcePromptId ?? prompt.id, clean, prompt.fallbackAnswerId);
+        result = module.evaluateAnswer(prompt.sourcePromptId ?? prompt.id, clean);
       } else {
         const response = await fetch('/api/check-answer', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ promptId: prompt.id, answer: clean, testMode: Boolean(game.isTest) })
         });
         const data = await response.json().catch(() => ({}));
-        if (response.status === 429) { setMessage(data.message || 'Please slow down before trying another answer.'); return; }
+        if (response.status === 429) {
+          const limitedRun = serverRunToState(data.run, dayKey);
+          if (limitedRun) setGame(limitedRun);
+          setMessage(data.message || 'Please slow down before trying another answer.');
+          return;
+        }
         if (!response.ok) throw new Error(data.message || 'The receiver could not verify that answer.');
         if (data.expired && data.run) {
           updatedRun = serverRunToState(data.run, dayKey);
@@ -1065,9 +1103,17 @@ function App() {
         updatedRun = serverRunToState(data.run, dayKey);
       }
       if (!result) {
+        const remaining = updatedRun?.attemptsRemaining
+          ?? (game.isTest ? attemptsRemaining : Math.max(0, attemptsRemaining - 1));
+        if (updatedRun) setGame(updatedRun);
+        else if (!game.isTest) {
+          setGame((previous) => previous.phase === 'playing'
+            ? { ...previous, attemptsRemaining: remaining }
+            : previous);
+        }
         await animateFailure('NO MATCH // TRY A DIFFERENT FREQUENCY');
         setLastUnmatchedAnswer(clean); setReportSent(false);
-        setMessage('No match in today’s field catalog. Try another answer, or report it if you believe it should count.');
+        setMessage('No match in today’s field catalog. ' + remaining + ' ' + (remaining === 1 ? 'attempt' : 'attempts') + ' left. Try another answer, or report it if you believe it should count.');
         return;
       }
       setLastUnmatchedAnswer(''); setReportSent(false);
@@ -1094,7 +1140,7 @@ function App() {
       let candidate: string | null = null;
       if (DEMO_MODE) {
         const module = await import('../shared/answerBank');
-        candidate = module.getTestAnswer(currentPrompt.sourcePromptId ?? currentPrompt.id, score, currentPrompt.fallbackAnswerId);
+        candidate = module.getTestAnswer(currentPrompt.sourcePromptId ?? currentPrompt.id, score);
       } else {
         const response = await fetch('/api/test-answer', {
           method: 'POST',
@@ -1157,7 +1203,7 @@ function App() {
         return;
       }
       setNow(Date.now());
-      setGame((previous) => ({ ...previous, phase: 'playing', index: nextIndex, deadline: Date.now() + ROUND_SECONDS * 1000 }));
+      setGame((previous) => ({ ...previous, phase: 'playing', index: nextIndex, deadline: Date.now() + ROUND_SECONDS * 1000, attemptsRemaining: 15 }));
       advancingRef.current = false;
       return;
     }
@@ -1377,7 +1423,7 @@ function App() {
                 <div className="ready-copy">
                   <div className="section-label">A SIGNAL IS WAITING</div>
                   <h1>Can you hear<br />what others miss?</h1>
-                  <p>Seven open prompts. One answer each. Familiar answers barely register; unusual, valid answers send a stronger signal.</p>
+                  <p>Answer seven open questions. Every accepted catalog answer earns its assigned rarity score; less familiar answers send a stronger signal.</p>
                   <div className="rule-strip">
                     <div><strong>07</strong><span>PROMPTS</span></div><div><strong>25s</strong><span>PER ROUND</span></div><div><strong>700</strong><span>MAX POINTS</span></div>
                   </div>
@@ -1396,7 +1442,7 @@ function App() {
                   <button className="primary-button" onClick={() => void startGame()} disabled={!dailyPromptsReady || bootstrapping}>
                     <span>{bootstrapping ? 'CONNECTING…' : dailyPromptsReady ? 'BEGIN DAILY SCAN' : 'CONNECTION REQUIRED'}</span><span className="button-arrow">↗</span>
                   </button>
-                  <p className="fine-print">One daily attempt · Resets at midnight Eastern</p>
+                  <p className="fine-print">One completed scan per Reddit account · Progress saves automatically · Resets at midnight Eastern</p>
                 </div>
               </div>
             )}
@@ -1500,15 +1546,15 @@ function App() {
                 </div>
                 <div className="timer-track"><i style={{ width: (secondsLeft / ROUND_SECONDS * 100) + '%' }} /></div>
                 <div className="question-index">TRANSMISSION {String(game.index + 1).padStart(2, '0')}</div>
-                <h1 className="question-text">{currentPrompt.prompt}</h1>
+                <h1 ref={questionHeadingRef} tabIndex={-1} className="question-text">{currentPrompt.prompt}</h1>
                 <p className="question-context" id="question-context">{currentPrompt.context}</p>
                 <details className="hint-disclosure">
-                  <summary><span>REQUEST FIELD HINT</span><span className="hint-mark" aria-hidden="true">+</span></summary>
+                  <summary><span>SHOW QUESTION HINT</span><span className="hint-mark" aria-hidden="true">+</span></summary>
                   <p>{currentPrompt.hint}</p>
                 </details>
                 <form className="answer-form" onSubmit={(event) => { event.preventDefault(); void validateAnswer(currentPrompt, answer); }}>
                   <div className="answer-helper-row">
-                    <label htmlFor="signal-answer">YOUR RESPONSE</label>
+                    <label htmlFor="signal-answer">YOUR ANSWER</label>
                     <span id="answer-counter" className={answerRemaining <= 12 ? 'answer-counter near-limit' : 'answer-counter'}>{answerCharacters}/80</span>
                   </div>
                   <div className="answer-control">
@@ -1524,14 +1570,14 @@ function App() {
                       enterKeyHint="send"
                       aria-label="Your answer"
                       aria-describedby="question-context answer-counter"
-                      placeholder="Type one answer..."
+                      placeholder="Enter one answer..."
                       disabled={isTuning}
                     />
-                    <button type="submit" className="primary-button submit-button" disabled={isTuning}>TRANSMIT <span className="button-arrow">↗</span></button>
+                    <button type="submit" className="primary-button submit-button" disabled={isTuning}>SUBMIT ANSWER <span className="button-arrow">↗</span></button>
                   </div>
-                  <p className="answer-footnote">One answer per transmission. Specific answers can carry a stronger signal.</p>
+                  <p className="answer-footnote">{attemptsRemaining < 15 ? attemptsRemaining + (attemptsRemaining === 1 ? ' attempt' : ' attempts') + ' remaining. ' : ''}One answer per question. Any accepted catalog answer counts; more specific, less familiar answers can carry a stronger signal.</p>
                 </form>
-                <div className="play-footer"><span><span className="tiny-pulse" /> RECEIVER OPEN</span><button className="text-button" onClick={skipPrompt} disabled={isTuning}>SKIP THIS FREQUENCY</button></div>
+                <div className="play-footer"><span><span className="tiny-pulse" /> RECEIVER OPEN</span><button className="text-button" onClick={skipPrompt} disabled={isTuning}>SKIP QUESTION</button></div>
                 {message && <div className="inline-message" role="status" aria-live="polite">{message}</div>}
                 {message && !lastUnmatchedAnswer && !DEMO_MODE && /(offline|could not|retry|refresh|sync|network|fetch)/i.test(message) && (
                   <button type="button" className="text-button sync-game-button" onClick={retryBootstrap}>SYNC DAILY RUN</button>
@@ -1582,7 +1628,7 @@ function App() {
                   <div className="signal-result-hero">
                     <div className="signal-capture-copy">
                       <div className="signal-capture-kicker">TRANSMISSION {String(game.index + 1).padStart(2, '0')} / ACQUISITION REPORT</div>
-                      <h2>{currentEntry.score === 100 ? 'SIGNAL LOCKED' : currentEntry.score >= 85 ? 'SIGNAL ALMOST LOCKED' : currentEntry.score > 0 ? 'PARTIAL SIGNAL LOCK' : 'NO SIGNAL'}</h2>
+                      <h2 ref={revealHeadingRef} tabIndex={-1}>{currentEntry.score === 100 ? 'SIGNAL LOCKED' : currentEntry.score >= 85 ? 'SIGNAL ALMOST LOCKED' : currentEntry.score > 0 ? 'PARTIAL SIGNAL LOCK' : 'NO SIGNAL'}</h2>
                       <p>{currentEntry.score === 100 ? 'Perfect carrier. The noise floor has been eliminated.' : currentEntry.score >= 85 ? 'It looked perfect for a moment. A final trace of drift kept the carrier just shy of a flawless lock.' : currentEntry.score >= 60 ? 'A stable carrier recovered from the interference.' : currentEntry.score > 0 ? 'A weak carrier recovered. Interference remains.' : 'No stable carrier could be recovered.'}</p>
                     </div>
                     <div className="signal-result-score">
@@ -1633,7 +1679,7 @@ function App() {
                   <div className="signal-capture-status"><i /><span>{currentEntry.score === 100 ? '100% CARRIER // LOCK CONFIRMED' : currentEntry.score >= 85 ? 'NEAR-PERFECT // FINAL CARRIER DRIFT' : currentEntry.score > 0 ? 'CARRIER STABLE // RESULT RECORDED' : 'NO CARRIER // TRANSMISSION CLOSED'}</span></div>
                 </div>
                 <p className="signal-result-note">{currentEntry.note}</p>
-                <button className="primary-button next-button" onClick={nextPrompt}>{game.index === 6 ? 'VIEW SCAN REPORT' : 'NEXT TRANSMISSION'} <span className="button-arrow">↗</span></button>
+                <button className="primary-button next-button" onClick={nextPrompt}>{game.index === 6 ? 'VIEW SCAN REPORT' : 'NEXT QUESTION'} <span className="button-arrow">↗</span></button>
                 {message && <div className="inline-message" role="status" aria-live="polite">{message}</div>}
                 {message && !lastUnmatchedAnswer && !DEMO_MODE && /(offline|could not|retry|refresh|sync|network|fetch)/i.test(message) && (
                   <button type="button" className="text-button sync-game-button" onClick={retryBootstrap}>SYNC DAILY RUN</button>
@@ -1732,7 +1778,7 @@ function App() {
                         <article className="admin-report-card" key={report.id}>
                           <div className="admin-report-meta">
                             <span>{report.channel}</span>
-                            <span>{report.dateKey} · {report.selectionMode.toUpperCase()} ROUND</span>
+                            <span>{report.dateKey} · {report.selectionMode === 'answer' ? 'OPEN ARCHIVE' : report.selectionMode === 'question' ? 'NORMAL QUESTION' : 'LEGACY'} ROUND</span>
                           </div>
                           <strong className="admin-report-question">{report.prompt}</strong>
                           <div className="admin-report-answer">“{report.answer}”</div>
