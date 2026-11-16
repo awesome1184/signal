@@ -223,12 +223,14 @@ function getPreviewDailyPrompts(dateKey: string): Prompt[] {
       const usedSources = new Set(prompts.map((prompt) => prompt.id));
       const fresh = previewShuffle(getAnswerEntries().filter((entry) => !recent.has(entry.id)));
       const picked = new Set<string>();
-      const chosen = fresh.filter((entry) => {
-        if (usedSources.has(entry.promptId) || chosen.length >= slots) return false;
+      const chosen = [] as typeof fresh;
+      for (const entry of fresh) {
+        if (chosen.length >= slots) break;
+        if (usedSources.has(entry.promptId)) continue;
+        chosen.push(entry);
         usedSources.add(entry.promptId);
         picked.add(entry.id);
-        return true;
-      });
+      }
 
       if (chosen.length < slots) {
         for (const entry of fresh) {
