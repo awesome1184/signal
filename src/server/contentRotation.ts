@@ -77,8 +77,10 @@ function pruneHistory(state: RotationState, today: string): void {
 }
 
 function chooseDailySelection(state: RotationState, dateKey: string): SavedDailySelection {
+  // Phase-A question commits stay inactive until Phase-B adds at least one approved answer.
+  const answerableQuestionIds = new Set(getAnswerEntries().map((answer) => answer.promptId));
   const unusedQuestions = shuffle(
-    getQuestionBank().filter((question) => !state.usedQuestionIds[question.id])
+    getQuestionBank().filter((question) => answerableQuestionIds.has(question.id) && !state.usedQuestionIds[question.id])
   );
   const selectedQuestions = unusedQuestions.slice(0, DAILY_PROMPT_COUNT);
   const prompts: DailyPromptSelection[] = selectedQuestions.map((question) => ({
