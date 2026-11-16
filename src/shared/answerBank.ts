@@ -200,17 +200,23 @@ function answerRecordId(_promptId: string, record: AnswerRecord): string {
 
 /** Flatten the approved answer database for archive rotation and auditing. */
 export function getAnswerEntries(): AnswerEntry[] {
-  return Object.entries(BANK).flatMap(([promptId, records]) =>
-    records.map((record) => ({
-      id: answerRecordId(promptId, record),
-      promptId,
-      canonical: record.aliases[0] ?? '',
-      aliases: [...record.aliases],
-      score: record.score,
-      tier: record.tier,
-      note: record.note
-    }))
-  );
+  const unique = new Map<string, AnswerEntry>();
+  for (const [promptId, records] of Object.entries(BANK)) {
+    for (const record of records) {
+      const id = answerRecordId(promptId, record);
+      if (unique.has(id)) continue;
+      unique.set(id, {
+        id,
+        promptId,
+        canonical: record.aliases[0] ?? '',
+        aliases: [...record.aliases],
+        score: record.score,
+        tier: record.tier,
+        note: record.note
+      });
+    }
+  }
+  return [...unique.values()];
 }
 
 export function evaluateAnswer(promptId: string, rawAnswer: string, selectedAnswerId?: string): AnswerResult | null {
