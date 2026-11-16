@@ -1,0 +1,98 @@
+/* Focused player-experience refinements layered on the established SIGNAL art direction. */
+:root {
+  --signal-readable-muted: #91aab6;
+  --signal-readable-soft: #a9bec7;
+}
+
+/* Keep the atmospheric labels legible without making them compete with questions. */
+.station-kicker { font-size: 10px; }
+.preview-chip { font-size: 9px; }
+.eyebrow { font-size: 9px; }
+.fine-print { color: var(--signal-readable-muted) !important; font-size: 10px !important; line-height: 1.5 !important; }
+.panel-subtitle { font-size: 10px; }
+.progress-cell span { color: #7895a4; font-size: 9px; }
+.channel-label { font-size: 11px; }
+.question-index { font-size: 10px; }
+.question-context { color: #b1c2ca; }
+.answer-form label { font-size: 10px; }
+.answer-counter { font-size: 10px; }
+.answer-footnote { color: var(--signal-readable-muted); font: 10px/1.5 var(--mono); }
+.score-guide span { color: #b2c3ca; font-size: 9px; }
+.score-guide b { font-size: 13px; }
+.scoring-explainer { color: #b0c1c9; font-size: 12px; }
+.hint-disclosure summary { min-height: 42px; font-size: 9px; }
+.hint-disclosure p { font-size: 12px; }
+.text-button { min-height: 42px; font-size: 10px; letter-spacing: .08em; }
+.inline-message { font-size: 12px; line-height: 1.5; }
+.report-answer-button { min-height: 42px; font-size: 9px; }
+.primary-button { min-height: 48px; }
+.secondary-button { min-height: 44px; }
+.sound-toggle { min-height: 44px; }
+.answer-control input { font-size: 16px; scroll-margin-bottom: 180px; }
+.answer-control input::placeholder { color: #829ba7; opacity: 1; }
+.play-footer > span { font-size: 10px; }
+.bottom-note strong { font-size: 10px; }
+.bottom-note span { color: #91aab6; font-size: 11px; }
+.strength-caption { font-size: 9px; color: #8da6b2; }
+.instrument-footnote { font-size: 10px; }
+.leaderboard-title { font-size: 12px; }
+.leaderboard-row { font-size: 11px; }
+.leaderboard-foot { font-size: 9px; color: #87a2af; }
+.empty-board { color: #a0b3bd; font-size: 12px; }
+.log-entry p { color: #9bafba; font-size: 11px; }
+.side-footer, .app-footer { color: #819aa7; font-size: 9px; }
+.splash-content p { color: #b7c8d0; font-size: 13px; line-height: 1.6; }
+.splash-kicker { font-size: 10px; }
+.splash-stats { font-size: 9px; line-height: 1.5; }
+.splash-play { min-height: 48px; font-size: 11px; }
+.wave-style-option { min-height: 44px; }
+.wave-style-option small { font-size: 8px; }
+.signal-capture-copy p { font-size: 10px; line-height: 1.5; }
+.signal-capture-status { font-size: 8px; line-height: 1.5; }
+.signal-lock-steps span { font-size: 8px; }
+.signal-quality-row { font-size: 8px; }
+.signal-result-note { font-size: 11px; line-height: 1.6; }
+.signal-result-tier { font-size: 8px; }
+.connection-status { font-size: 10px; }
+.connection-error span { font-size: 12px; line-height: 1.55; }
+.personal-rank span { font-size: 9px; }
+.personal-rank small { font-size: 8px; }
+.admin-report-heading span,
+.admin-report-meta,
+.admin-report-actions label,
+.admin-report-actions select,
+.admin-report-actions button { font-size: 8px; }
+
+/* Mobile answer entry stays comfortably tappable and readable with the keyboard open. */
+@media (max-width: 720px) {
+  .answer-control input { min-height: 52px; font-size: 16px; }
+  .submit-button { min-height: 48px; }
+  .text-button { min-height: 44px; }
+  .hint-disclosure summary { min-height: 44px; }
+  .score-guide span { font-size: 9px; }
+  .complete-stat-strip > span { font-size: 8px; line-height: 1.35; }
+  .signal-capture-head { font-size: 8px; }
+  .signal-capture-copy p { font-size: 9px; }
+  .signal-quality-row { font-size: 8px; }
+  .signal-capture-status { font-size: 8px; }
+  .signal-result-score > span { font-size: 8px; }
+  .signal-result-tier { font-size: 8px; }
+  .signal-result-note { font-size: 11px; }
+}
+
+@media (max-width: 420px) {
+  .station-kicker { font-size: 8px; }
+  .eyebrow { font-size: 8px; }
+  .score-guide span { font-size: 8px; }
+  .score-guide b { flex-basis: 22px; font-size: 12px; }
+  .complete-stat-strip > span { font-size: 8px; }
+  .complete-stat-strip strong { font-size: 18px; }
+  .answer-footnote { font-size: 10px; }
+  .splash-stats { gap: 12px; }
+}
+
+/* Keep the scenery atmospheric rather than competing with a live question. */
+@media (prefers-reduced-motion: no-preference) {
+  .app-shell::before,
+  .app-shell::after { animation-duration: 18s; }
+}
