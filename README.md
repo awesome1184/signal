@@ -21,7 +21,7 @@ SIGNAL is an original daily open-answer game for Reddit, built with Devvit Web. 
 - Server-saved progress that resumes at the current round if a player leaves and returns.
 - Clear open-answer archive rules and an answer-report review path for normal and archive rounds.
 
-The current catalog contains 59 questions, 3,103 accepted answer records, and 3,084 distinct canonical answers across those question pools. Each question has at least one accessible 10-point answer, with progressively less familiar answers in the higher tiers. New questions become eligible only after at least one accepted answer is committed for that question. The Devvit server stores permanent question usage, recent answer usage, and the shared daily selection in Redis. That state is shared by players on the same subreddit installation and is not stored in the content files. The Pages/Codespaces preview simulates that history locally in the browser, so preview rotations are not shared with Reddit.
+The current catalog contains 59 questions, 3,193 accepted answer records, and 3,173 distinct canonical answers across those question pools. Each question has at least one accessible 10-point answer, with progressively less familiar answers in the higher tiers. New questions become eligible only after at least one accepted answer is committed for that question. The Devvit server stores permanent question usage, recent answer usage, and the shared daily selection in Redis. That state is shared by players on the same subreddit installation and is not stored in the content files. The Pages/Codespaces preview simulates that history locally in the browser, so preview rotations are not shared with Reddit.
 
 ## Run the browser preview in GitHub Codespaces
 
