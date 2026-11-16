@@ -419,6 +419,14 @@ function MountainScene() {
         <circle cx="0" cy="81" r="5" fill="#f4a453"/>
         <path d="M0 240h72M-30 240h-35" stroke="#526d81" strokeWidth="8" strokeLinecap="round"/>
       </g>
+      <g className="mountain-signal-beam" transform="translate(1010 185)" fill="none" aria-hidden="true">
+        <path className="mountain-signal-ray" d="M0 81C-15 22-55-31-102-80" />
+        <path className="mountain-signal-ray" d="M0 81C0 15 0-38 0-112" />
+        <path className="mountain-signal-ray" d="M0 81C15 22 55-31 102-80" />
+        <path className="mountain-signal-arc" d="M-42 1Q0-43 42 1" />
+        <path className="mountain-signal-arc" d="M-68-18Q0-91 68-18" />
+        <circle className="mountain-signal-node" cx="0" cy="-42" r="3" />
+      </g>
       <g transform="translate(740 470)" opacity=".9">
         <rect width="220" height="84" rx="8" fill="#102231" stroke="#426176" strokeWidth="3"/>
         <path d="M18 0v-35h185v35" fill="#182f40" stroke="#526d7c" strokeWidth="3"/>
@@ -1360,7 +1368,7 @@ function App() {
   const dateLabel = formatDay(dayKey);
 
   return (
-    <div className={'app-shell ' + (game.phase === 'playing' ? 'round-active' : '')}>
+    <div className={'app-shell phase-' + game.phase + ' ' + (completedPrompts >= 5 ? 'world-resonant' : completedPrompts >= 2 ? 'world-awake' : 'world-quiet') + (game.phase === 'playing' ? ' round-active' : '')}>
       <MountainScene />
       <div className="screen-vignette" />
       <header className="topbar">
@@ -1395,7 +1403,7 @@ function App() {
             {!DEMO_MODE && serverReady && <span className="preview-chip connected">REDDIT LINK ACTIVE</span>}
           </div>
 
-          <section className={'game-panel scan-hum ' + (game.phase === 'playing' ? 'active-round' : '')}>
+          <section className={'game-panel scan-hum phase-' + game.phase + ' ' + (game.phase === 'playing' ? 'active-round' : '')}>
             <div className="panel-scanline" aria-hidden="true" />
             <div className="panel-topline">
               <div><span className="eyebrow">INCOMING TRANSMISSION</span><div className="panel-title">Today's signal scan</div><span className="panel-subtitle">One answer. Seven chances to stand out.</span></div>
