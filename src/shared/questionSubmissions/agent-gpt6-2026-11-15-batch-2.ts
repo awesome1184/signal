@@ -38,8 +38,8 @@ export const QUESTION_SUBMISSIONS_BATCH_2: Prompt[] = [
   {
     id: 'dinosaur-genus',
     channel: 'PALEONTOLOGY',
-    prompt: 'Name a genus of dinosaur.',
-    context: 'Acceptance: The answer must be a formally published genus classified within Dinosauria in a recognized paleontological or taxonomic reference. Include non-avian dinosaurs and avian dinosaurs when the genus is treated as part of Dinosauria. Exclude species epithets without the genus, informal nicknames, and names that are only proposed or known to be invalid synonyms.',
+    prompt: 'Name a genus of non-avian dinosaur.',
+    context: 'Acceptance: The answer must be a formally published genus of an extinct non-avian dinosaur, classified within Dinosauria by a recognized paleontological or taxonomic reference. Exclude living bird genera, species epithets without the genus, informal nicknames, and names that are only proposed or known to be invalid synonyms.',
     hint: 'The fossil record includes far more than the most famous giant dinosaurs.'
   },
   {
