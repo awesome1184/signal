@@ -679,7 +679,7 @@ app.post('/api/test-answer', async (c) => {
   const index = daily.prompts.findIndex((prompt) => prompt.id === promptId);
   if (index < 0) return c.json({ ok: false }, 400);
   const selected = daily.selections[index];
-  const answer = getTestAnswer(selected.questionId, score, selected.answerId);
+  const answer = getTestAnswer(selected.questionId, score);
   return c.json({ ok: true, answer });
 });
 
