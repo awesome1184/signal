@@ -1,8 +1,9 @@
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
 import { createServer, getServerPort, context, redis, reddit } from '@devvit/web/server';
-import { getDailyPrompts, getNewYorkDateKey, MAX_SCORE } from '../shared/game';
+import { getNewYorkDateKey, MAX_SCORE } from '../shared/game';
 import { evaluateAnswer, getTestAnswer } from '../shared/answerBank';
+import { getRotatedDailySelection } from './contentRotation';
 
 const app = new Hono();
 const boardKey = (day: string) => 'signal:v1:board:' + day;
@@ -31,6 +32,7 @@ app.get('/api/health', (c) => c.json({ ok: true, app: 'SIGNAL' }));
 
 app.get('/api/bootstrap', async (c) => {
   const day = getNewYorkDateKey();
+  const daily = await getRotatedDailySelection(day);
   const userId = context.userId;
   const username = displayName(await reddit.getCurrentUsername());
   const raw = userId ? await redis.hGet(resultsKey(day), userId) : null;
@@ -41,7 +43,17 @@ app.get('/api/bootstrap', async (c) => {
   }
   const playerCount = await redis.zCard(boardKey(day));
   const canTest = isTestUser(username);
-  return c.json({ ok: true, dateKey: day, username, playerCount, leaderboard: await leaderboard(day), result, canTest });
+  return c.json({
+    ok: true,
+    dateKey: day,
+    username,
+    playerCount,
+    leaderboard: await leaderboard(day),
+    result,
+    canTest,
+    prompts: daily.prompts,
+    selectionMode: daily.mode
+  });
 });
 
 app.post('/api/check-answer', async (c) => {
@@ -53,11 +65,12 @@ app.post('/api/check-answer', async (c) => {
   if (!answer || answer.length > 80) {
     return c.json({ ok: false, valid: false, message: answer ? 'Answers must be 80 characters or fewer.' : 'Enter an answer first.' }, 400);
   }
-  const prompts = getDailyPrompts(getNewYorkDateKey());
-  if (!prompts.some((prompt) => prompt.id === promptId)) {
+  const daily = await getRotatedDailySelection(getNewYorkDateKey());
+  const selected = daily.prompts.find((prompt) => prompt.id === promptId);
+  if (!selected) {
     return c.json({ ok: false, valid: false }, 400);
   }
-  const match = evaluateAnswer(promptId, answer);
+  const match = evaluateAnswer(selected.questionId, answer, selected.answerId);
   return c.json({ ok: true, valid: Boolean(match), result: match });
 });
 
@@ -72,9 +85,10 @@ app.post('/api/test-answer', async (c) => {
   const promptId = typeof body.promptId === 'string' ? body.promptId : '';
   const score = typeof body.score === 'number' ? body.score : 0;
   if (![10, 15, 30, 60, 85, 100].includes(score)) return c.json({ ok: false, message: 'Unknown score tier.' }, 400);
-  const prompts = getDailyPrompts(getNewYorkDateKey());
-  if (!prompts.some((prompt) => prompt.id === promptId)) return c.json({ ok: false }, 400);
-  const answer = getTestAnswer(promptId, score);
+  const daily = await getRotatedDailySelection(getNewYorkDateKey());
+  const selected = daily.prompts.find((prompt) => prompt.id === promptId);
+  if (!selected) return c.json({ ok: false }, 400);
+  const answer = getTestAnswer(selected.questionId, score, selected.answerId);
   return c.json({ ok: true, answer });
 });
 
@@ -86,7 +100,8 @@ app.post('/api/complete', async (c) => {
   try { body = await c.req.json(); }
   catch { return c.json({ ok: false, message: 'Malformed result request.' }, 400); }
   const day = getNewYorkDateKey();
-  const prompts = getDailyPrompts(day);
+  const daily = await getRotatedDailySelection(day);
+  const prompts = daily.prompts;
   const submitted = Array.isArray(body.entries) ? body.entries : [];
   if (submitted.length !== prompts.length) {
     return c.json({ ok: false, message: 'A daily result must contain all seven transmissions.' }, 400);
@@ -99,7 +114,8 @@ app.post('/api/complete', async (c) => {
   const entries = prompts.map((prompt, index) => {
     const item = submitted[index];
     const answer = typeof item?.answer === 'string' ? item.answer.trim() : '';
-    const match = evaluateAnswer(prompt.id, answer);
+    const selected = daily.prompts[index];
+    const match = evaluateAnswer(selected.questionId, answer, selected.answerId);
     return {
       promptId: prompt.id,
       answer,
