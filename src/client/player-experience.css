@@ -1095,3 +1095,19 @@
   .signal-grade-reveal { opacity:1;transform:translate(-50%,-50%); }
   .signal-dive-sonar-line { opacity:.6;transform:scaleX(1); }
 }
+
+
+/* Escape the animated game panel's containing block so the dive occupies the entire viewport. */
+.game-panel.answer-dive-active {
+  overflow:visible !important;
+  transform:none !important;
+  animation:none !important;
+  isolation:auto !important;
+}
+.game-panel.answer-dive-active::before { display:none !important; }
+.play-view.tuning-view {
+  overflow:visible !important;
+  transform:none !important;
+  animation:none !important;
+  isolation:auto !important;
+}

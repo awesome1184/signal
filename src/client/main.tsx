@@ -1404,7 +1404,7 @@ function App() {
             {!DEMO_MODE && serverReady && <span className="preview-chip connected">REDDIT LINK ACTIVE</span>}
           </div>
 
-          <section className={'game-panel scan-hum phase-' + game.phase + ' ' + (game.phase === 'playing' ? 'active-round' : '')}>
+          <section className={'game-panel scan-hum phase-' + game.phase + ' ' + (game.phase === 'playing' ? 'active-round' : '') + (isTuning ? ' answer-dive-active' : '')}>
             <div className="panel-scanline" aria-hidden="true" />
             <div className="panel-topline">
               <div><span className="eyebrow">INCOMING TRANSMISSION</span><div className="panel-title">Today's signal scan</div><span className="panel-subtitle">One answer. Seven chances to stand out.</span></div>
