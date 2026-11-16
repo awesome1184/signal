@@ -847,6 +847,28 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
       ['Proxima Centauri b', 'Proxima b'],
       ['51 Pegasi b', '51 Peg b']
     ]},
+    { score: 10, tier: 'BACKGROUND', note: 'A famous star that many people recognize by name.', names: [
+      'Sirius',
+      ['Polaris', 'North Star'],
+      'Betelgeuse',
+      'Vega',
+      'Rigel'
+    ]},
+    { score: 15, tier: 'FAMILIAR', note: 'A prominent named star that is often mentioned in astronomy or popular culture.', names: [
+      'Arcturus', 'Altair', 'Deneb', 'Aldebaran', 'Antares', 'Canopus'
+    ]},
+    { score: 30, tier: 'UNCOMMON', note: 'A recognized named star that is less likely to be the first answer from a casual player.', names: [
+      'Capella', 'Procyon', 'Spica', 'Pollux', 'Castor', 'Fomalhaut',
+      'Regulus', 'Achernar', 'Algol'
+    ]},
+    { score: 60, tier: 'RARE', note: 'A named star more commonly encountered by regular skywatchers.', names: [
+      'Mira', 'Hadar', 'Acrux', 'Adhara', 'Bellatrix', 'Alnilam',
+      'Alnitak', 'Mintaka', 'Shaula'
+    ]},
+    { score: 85, tier: 'DEEP CUT', note: 'A less familiar named star with a recognized astronomical designation.', names: [
+      'Fomalhaut', 'Denebola', 'Mimosa', 'Rigil Kentaurus',
+      'Epsilon Eridani', '61 Cygni'
+    ]},
     { score: 15, tier: 'FAMILIAR', note: 'A widely discussed confirmed planet in the NASA Exoplanet Archive.', names: [
       'TRAPPIST-1 e',
       ['Kepler-22 b', 'Kepler 22b'],
@@ -912,12 +934,18 @@ export const ANSWER_SUBMISSIONS_BATCH_3: Record<string, AnswerRecord[]> = {
   'lunar-crater': records(
     { score: 10, tier: 'BACKGROUND', note: 'A prominent crater with an official IAU-approved lunar name.', names: [
       ['Tycho', 'Tycho crater'],
-      ['Copernicus', 'Copernicus crater']
+      ['Copernicus', 'Copernicus crater'],
+      ['Sea of Tranquility', 'Mare Tranquillitatis'],
+      ['Sea of Serenity', 'Mare Serenitatis'],
+      ['Ocean of Storms', 'Oceanus Procellarum']
     ]},
     { score: 15, tier: 'FAMILIAR', note: 'A well-known lunar impact crater recorded in the IAU/USGS gazetteer.', names: [
       ['Kepler', 'Kepler crater'],
       ['Plato', 'Plato crater'],
-      ['Aristarchus', 'Aristarchus crater']
+      ['Aristarchus', 'Aristarchus crater'],
+      ['Sea of Crises', 'Mare Crisium'],
+      ['Sea of Fertility', 'Mare Fecunditatis'],
+      ['Sea of Nectar', 'Mare Nectaris']
     ]},
     { score: 30, tier: 'UNCOMMON', note: 'A recognized lunar crater name rather than a mare or other surface feature.', names: [
       ['Clavius', 'Clavius crater'],
