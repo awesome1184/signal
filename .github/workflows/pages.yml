@@ -45,9 +45,9 @@ jobs:
           path: dist/pages
 
   deploy:
-    # GitHub Free requires a public repository for Pages. Paid plans can
-    # deploy from private repositories when ENABLE_PRIVATE_PAGES is true.
-    if: github.repository_visibility == 'public' || vars.ENABLE_PRIVATE_PAGES == 'true'
+    # Publish the game from this private source repository. The Pages site itself
+    # is public; GitHub Free requires a public source repository, while Pro
+    # supports Pages deployments from private repositories.
     needs: build
     runs-on: ubuntu-latest
     environment:
