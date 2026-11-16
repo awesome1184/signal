@@ -1,6 +1,15 @@
-name: Build SIGNAL preview
+name: Deploy SIGNAL browser preview
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/pages.yml"
+      - ".nvmrc"
+      - "package.json"
+      - "vite.pages.config.ts"
+      - "src/client/**"
+      - "src/shared/**"
   workflow_dispatch:
 
 permissions:
@@ -32,6 +41,8 @@ jobs:
           path: dist/pages
 
   deploy:
+    # GitHub Free requires a public repository for Pages. Paid plans can
+    # deploy from private repositories when ENABLE_PRIVATE_PAGES is true.
     if: github.repository_visibility == 'public' || vars.ENABLE_PRIVATE_PAGES == 'true'
     needs: build
     runs-on: ubuntu-latest
