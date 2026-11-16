@@ -156,7 +156,7 @@ function chooseDailySelection(state: RotationState, dateKey: string, answerEntri
       prompts.push({
         id: 'archive-' + dateKey + '-' + (index + 1),
         questionId: answer.promptId,
-        answerId: answer.id,
+        archiveSeedId: answer.id,
         mode: 'answer'
       });
       state.usedAnswerIds[answer.id] = dateKey;
