@@ -1,7 +1,8 @@
 import './styles.css';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { getDailyPrompts, getNewYorkDateKey, formatDay, ROUND_SECONDS, MAX_SCORE, type Prompt } from '../shared/game';
+import { getDailyPrompts, getQuestionBank, getPromptById, getNewYorkDateKey, formatDay, ROUND_SECONDS, MAX_SCORE, type Prompt } from '../shared/game';
+import { getAnswerEntries } from '../shared/answerBank';
 
 type Entry = { promptId: string; answer: string; score: number; tier: string; note: string; signalSeed?: number };
 type ReceiverPaths = { carrier: string; reticleX: number; reticleY: number };
@@ -166,6 +167,111 @@ const TEST_TIERS = [
   { score: 85, label: 'DEEP CUT' },
   { score: 100, label: 'SIGNAL FOUND' }
 ];
+
+type PreviewRotationState = {
+  usedQuestions: Record<string, string>;
+  usedAnswers: Record<string, string>;
+  daily: Record<string, Prompt[]>;
+};
+
+function previewShuffle<T>(items: T[]): T[] {
+  const shuffled = [...items];
+  for (let index = shuffled.length - 1; index > 0; index--) {
+    const swap = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swap]] = [shuffled[swap], shuffled[index]];
+  }
+  return shuffled;
+}
+
+function previewDayAge(today: string, earlier: string): number {
+  return Math.floor((Date.parse(today + 'T00:00:00Z') - Date.parse(earlier + 'T00:00:00Z')) / 86400000);
+}
+
+/** Local-only simulation of the server rotation for the GitHub Pages/Codespaces preview. */
+function getPreviewDailyPrompts(dateKey: string): Prompt[] {
+  const storageKey = 'signal:preview-rotation:v1';
+  try {
+    let state: PreviewRotationState = { usedQuestions: {}, usedAnswers: {}, daily: {} };
+    const raw = localStorage.getItem(storageKey);
+    if (raw) {
+      const saved = JSON.parse(raw) as Partial<PreviewRotationState>;
+      state = {
+        usedQuestions: saved.usedQuestions && typeof saved.usedQuestions === 'object' ? saved.usedQuestions : {},
+        usedAnswers: saved.usedAnswers && typeof saved.usedAnswers === 'object' ? saved.usedAnswers : {},
+        daily: saved.daily && typeof saved.daily === 'object' ? saved.daily : {}
+      };
+    }
+    const existing = state.daily[dateKey];
+    if (Array.isArray(existing) && existing.length === 7) return existing;
+
+    for (const [id, usedOn] of Object.entries(state.usedAnswers)) {
+      if (previewDayAge(dateKey, usedOn) > 30 || previewDayAge(dateKey, usedOn) < 0) delete state.usedAnswers[id];
+    }
+    for (const [day] of Object.entries(state.daily)) {
+      if (previewDayAge(dateKey, day) > 30 || previewDayAge(dateKey, day) < 0) delete state.daily[day];
+    }
+
+    const questions = previewShuffle(getQuestionBank().filter((question) => !state.usedQuestions[question.id])).slice(0, 7);
+    const prompts: Prompt[] = [...questions];
+    for (const question of questions) state.usedQuestions[question.id] = dateKey;
+
+    const slots = 7 - prompts.length;
+    if (slots > 0) {
+      const recent = new Set(Object.entries(state.usedAnswers)
+        .filter(([, usedOn]) => previewDayAge(dateKey, usedOn) >= 1 && previewDayAge(dateKey, usedOn) <= 7)
+        .map(([id]) => id));
+      const usedSources = new Set(prompts.map((prompt) => prompt.id));
+      const fresh = previewShuffle(getAnswerEntries().filter((entry) => !recent.has(entry.id)));
+      const picked = new Set<string>();
+      const chosen = fresh.filter((entry) => {
+        if (usedSources.has(entry.promptId) || chosen.length >= slots) return false;
+        usedSources.add(entry.promptId);
+        picked.add(entry.id);
+        return true;
+      });
+
+      if (chosen.length < slots) {
+        for (const entry of fresh) {
+          if (chosen.length >= slots) break;
+          if (picked.has(entry.id)) continue;
+          chosen.push(entry);
+          picked.add(entry.id);
+        }
+      }
+
+      if (chosen.length < slots) {
+        const stale = previewShuffle(getAnswerEntries().filter((entry) => !picked.has(entry.id)))
+          .sort((left, right) => (state.usedAnswers[left.id] ?? '0000-00-00').localeCompare(state.usedAnswers[right.id] ?? '0000-00-00'));
+        for (const entry of stale) {
+          if (chosen.length >= slots) break;
+          chosen.push(entry);
+          picked.add(entry.id);
+        }
+      }
+
+      chosen.forEach((entry, index) => {
+        const source = getPromptById(entry.promptId);
+        if (!source) return;
+        prompts.push({
+          ...source,
+          id: 'archive-' + dateKey + '-' + (index + 1),
+          channel: 'ARCHIVE // ' + source.channel,
+          context: 'Archive fallback: this transmission has one randomly selected answer that has not appeared in the previous seven days. ' + source.context,
+          sourcePromptId: entry.promptId,
+          fallbackAnswerId: entry.id
+        });
+        state.usedAnswers[entry.id] = dateKey;
+      });
+    }
+
+    if (prompts.length !== 7) return getDailyPrompts(dateKey);
+    state.daily[dateKey] = prompts;
+    localStorage.setItem(storageKey, JSON.stringify(state));
+    return prompts;
+  } catch {
+    return getDailyPrompts(dateKey);
+  }
+}
 
 function blankRun(dateKey: string): RunState {
   return { dateKey, phase: 'ready', index: 0, entries: [], deadline: null };
@@ -551,7 +657,7 @@ function scoreLabel(score: number): string {
 
 function App() {
   const [dayKey, setDayKey] = useState(() => getNewYorkDateKey());
-  const [prompts, setPrompts] = useState<Prompt[]>(() => getDailyPrompts(dayKey));
+  const [prompts, setPrompts] = useState<Prompt[]>(() => DEMO_MODE ? getPreviewDailyPrompts(dayKey) : getDailyPrompts(dayKey));
   const [dailyPromptsReady, setDailyPromptsReady] = useState(DEMO_MODE);
   const answerInputRef = useRef<HTMLInputElement>(null);
   const [game, setGame] = useState<RunState>(() => loadRun(dayKey));
@@ -695,7 +801,7 @@ function App() {
       const nextDay = getNewYorkDateKey();
       if (nextDay === dayKey) return;
       setDayKey(nextDay);
-      setPrompts(getDailyPrompts(nextDay));
+      setPrompts(DEMO_MODE ? getPreviewDailyPrompts(nextDay) : getDailyPrompts(nextDay));
       setDailyPromptsReady(DEMO_MODE);
       setGame(blankRun(nextDay));
       setAnswer('');
@@ -908,7 +1014,7 @@ function App() {
       let result: { score: number; tier: string; note: string } | null = null;
       if (DEMO_MODE) {
         const module = await import('../shared/answerBank');
-        result = module.evaluateAnswer(prompt.id, clean);
+        result = module.evaluateAnswer(prompt.sourcePromptId ?? prompt.id, clean, prompt.fallbackAnswerId);
       } else {
         const response = await fetch('/api/check-answer', {
           method: 'POST',
@@ -950,7 +1056,7 @@ function App() {
       let candidate: string | null = null;
       if (DEMO_MODE) {
         const module = await import('../shared/answerBank');
-        candidate = module.getTestAnswer(currentPrompt.id, score);
+        candidate = module.getTestAnswer(currentPrompt.sourcePromptId ?? currentPrompt.id, score, currentPrompt.fallbackAnswerId);
       } else {
         const response = await fetch('/api/test-answer', {
           method: 'POST',
