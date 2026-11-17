@@ -1513,7 +1513,7 @@ function App() {
                   <div className="rule-strip">
                     <div><strong>07</strong><span>PROMPTS</span></div><div><strong>25s</strong><span>PER ROUND</span></div><div><strong>700</strong><span>MAX POINTS</span></div>
                   </div>
-                  <div className="score-guide" aria-label="Accepted-answer point tiers">
+                  <div className="score-guide" role="group" aria-label="Accepted-answer point tiers">
                     <span><b>10</b> BACKGROUND</span><span><b>15</b> FAMILIAR</span><span><b>30</b> UNCOMMON</span>
                     <span><b>60</b> RARE</span><span><b>85</b> DEEP CUT</span><span><b>100</b> SIGNAL FOUND</span>
                   </div>
@@ -1560,7 +1560,8 @@ function App() {
                           '--reticle-x': tuningSignalPaths.reticleX + '%',
                           '--reticle-y': tuningSignalPaths.reticleY + '%'
                         } as React.CSSProperties}
-                        aria-label="SIGNAL receiver waveform acquisition"
+                        role="img"
+                        aria-label={'SIGNAL receiver waveform acquisition: ' + tuningScreenState}
                       >
                         <div className="signal-screen-grid" />
                         <div className="signal-static" />
@@ -1593,7 +1594,7 @@ function App() {
                           <small>/ 100</small>
                         </div>
                       </div>
-                      <div className="signal-lock-steps" data-phase={tuningPhase === 'failed' ? 'failed' : tuningPhase === 'locked' ? 'locked' : tuningPhase}>
+                      <div className="signal-lock-steps" role="group" aria-label="Signal scan steps: scan, track, lock" data-phase={tuningPhase === 'failed' ? 'failed' : tuningPhase === 'locked' ? 'locked' : tuningPhase}>
                         <span><i />01 / SCAN</span>
                         <span><i />02 / TRACK</span>
                         <span><i />03 / LOCK</span>
@@ -1627,7 +1628,7 @@ function App() {
                     className={'timer-pill ' + (secondsLeft <= 7 ? 'urgent' : '')}
                     role="timer"
                     aria-label={secondsLeft + ' seconds remaining'}
-                    aria-live={secondsLeft <= 5 ? 'polite' : 'off'}
+                    aria-live={secondsLeft === 5 || secondsLeft === 3 || secondsLeft === 1 ? 'polite' : 'off'}
                     aria-atomic="true"
                   ><span className="timer-ring" aria-hidden="true"><span /></span><strong>{String(secondsLeft).padStart(2, '0')}</strong><span>SEC</span></div>
                 </div>
@@ -1724,7 +1725,7 @@ function App() {
                       <div className="signal-result-tier">{currentEntry.tier}</div>
                     </div>
                   </div>
-                  <div className="signal-screen signal-result-screen" style={{ '--reticle-x': (resultSignalPaths?.reticleX ?? 50) + '%', '--reticle-y': (resultSignalPaths?.reticleY ?? 50) + '%' } as React.CSSProperties} aria-label={'Receiver signal quality: ' + currentEntry.score + ' out of 100'}>
+                  <div className="signal-screen signal-result-screen" role="img" style={{ '--reticle-x': (resultSignalPaths?.reticleX ?? 50) + '%', '--reticle-y': (resultSignalPaths?.reticleY ?? 50) + '%' } as React.CSSProperties} aria-label={'Receiver signal quality: ' + currentEntry.score + ' out of 100'}>
                     <div className="signal-screen-grid" />
                     <div className="signal-static" />
                     <svg className="signal-traces" viewBox="0 0 720 180" preserveAspectRatio="none" aria-hidden="true">
@@ -1742,7 +1743,7 @@ function App() {
                     <span className="signal-screen-label">RF / {receiverFrequency(currentEntry.signalSeed ?? 1)} MHZ</span>
                     <span className="signal-screen-state">{currentEntry.score === 100 ? 'LOCKED' : currentEntry.score >= 85 ? 'NEAR LOCK' : currentEntry.score > 0 ? 'PARTIAL LOCK' : 'NO CARRIER'}</span>
                   </div>
-                  <div className="signal-lock-steps" data-phase={currentEntry.score > 0 ? 'locked' : 'failed'} aria-label="Signal scan steps: scan, track, lock">
+                  <div className="signal-lock-steps" role="group" data-phase={currentEntry.score > 0 ? 'locked' : 'failed'} aria-label="Signal scan steps: scan, track, lock">
                     <span><i />01 / SCAN</span>
                     <span><i />02 / TRACK</span>
                     <span><i />03 / LOCK</span>

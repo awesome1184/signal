@@ -284,7 +284,7 @@
   box-shadow:0 24px 65px rgba(0,0,0,.38),0 0 35px rgba(91,216,232,.085),inset 0 1px 0 rgba(226,248,250,.09);
 }
 .app-shell.phase-reveal .signal-result-hero { padding:8px 0 17px; gap:20px; }
-.app-shell.phase-reveal .signal-result-hero .signal-capture-copy h2 {
+.app-shell.phase-reveal .signal-result-hero .signal-capture-copy h1 {
   color:#f0fbfc; font-size:clamp(29px,4.5vw,45px); line-height:1.02;
   text-shadow:0 0 25px rgba(91,216,232,.15);
 }
@@ -397,7 +397,7 @@
   .app-shell.round-active .timer-pill strong { font-size:24px; }
   .app-shell.round-active .question-text { font-size:32px; }
   .app-shell.phase-reveal .signal-result-hero { grid-template-columns:minmax(0,1fr) 108px; }
-  .app-shell.phase-reveal .signal-result-hero .signal-capture-copy h2 { font-size:26px; }
+  .app-shell.phase-reveal .signal-result-hero .signal-capture-copy h1 { font-size:26px; }
   .app-shell.phase-reveal .signal-result-score > strong { font-size:49px; }
   .app-shell.phase-reveal .signal-result-screen { height:116px; }
   .app-shell.phase-reveal .signal-quality-row { grid-template-columns:1fr auto; gap:8px; }
@@ -534,7 +534,7 @@
   padding:13px 0 12px !important;
   text-align:center !important;
 }
-.play-view.tuning-view .signal-capture-copy h2 {
+.play-view.tuning-view .signal-capture-copy h1 {
   margin:7px 0 5px !important;
   color:#e8f8fa !important;
   font-size:clamp(24px,3.6vw,36px) !important;
