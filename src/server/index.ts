@@ -156,6 +156,15 @@ async function leaderboard(day: string) {
   })));
 }
 
+async function syncLeaderboardEntry(day: string, userId: string, username: string, score: number): Promise<void> {
+  // Keep this idempotent so a retry can repair a result that was saved before a
+  // transient Redis failure interrupted the name or sorted-set write.
+  await Promise.all([
+    redis.hSet(namesKey(day), { [userId]: username }),
+    redis.zAdd(boardKey(day), { member: userId, score: clampScore(score) })
+  ]);
+}
+
 async function storeCompletedResult(day: string, userId: string, username: string, run: PlayerRun) {
   const score = run.entries.reduce((sum, entry) => sum + entry.score, 0);
   const result = {
@@ -164,13 +173,16 @@ async function storeCompletedResult(day: string, userId: string, username: strin
     entries: run.entries,
     completedAt: run.completedAt ?? new Date().toISOString()
   };
-  const stored = await redis.hSetNX(resultsKey(day), userId, JSON.stringify(result));
-  if (stored) {
-    await redis.hSet(namesKey(day), { [userId]: username });
-    await redis.zAdd(boardKey(day), { member: userId, score });
-  }
+  await redis.hSetNX(resultsKey(day), userId, JSON.stringify(result));
+
+  // A prior completion always wins. Rebuild its leaderboard entry from the
+  // stored result rather than trusting the caller's potentially stale run.
   const savedRaw = await redis.hGet(resultsKey(day), userId);
-  return savedRaw ? JSON.parse(savedRaw) : result;
+  if (!savedRaw) throw new Error('SIGNAL completed result was not available after saving.');
+  const savedResult = JSON.parse(savedRaw) as { score?: unknown; [key: string]: unknown };
+  const savedScore = typeof savedResult.score === 'number' ? savedResult.score : score;
+  await syncLeaderboardEntry(day, userId, username, savedScore);
+  return savedResult;
 }
 
 app.get('/api/health', (c) => c.json({ ok: true, app: 'SIGNAL' }));
@@ -192,6 +204,11 @@ app.get('/api/bootstrap', async (c) => {
   }
   if (!result && run?.phase === 'complete' && userId) {
     result = await storeCompletedResult(day, userId, username, run);
+  }
+  if (result && userId && typeof result.score === 'number') {
+    // Repair leaderboard/name writes if an earlier completion request failed
+    // after persisting the result hash.
+    await syncLeaderboardEntry(day, userId, username, result.score);
   }
   if (result) run = null;
   return c.json({
@@ -215,7 +232,11 @@ app.post('/api/start', async (c) => {
   const day = getNewYorkDateKey();
   const username = displayName(await reddit.getCurrentUsername());
   const saved = await redis.hGet(resultsKey(day), userId);
-  if (saved) return c.json({ ok: true, completed: true, result: JSON.parse(saved), playerRank: await playerRank(day, userId) });
+  if (saved) {
+    const result = JSON.parse(saved) as { score?: unknown; [key: string]: unknown };
+    if (typeof result.score === 'number') await syncLeaderboardEntry(day, userId, username, result.score);
+    return c.json({ ok: true, completed: true, result, playerRank: await playerRank(day, userId) });
+  }
 
   const created = await mutatePlayerRun<'existing' | 'started'>(day, userId, (current) => {
     if (current) return { write: false, value: 'existing' as const };
@@ -251,7 +272,10 @@ app.post('/api/check-answer', async (c) => {
   if (!answer || answer.length > 80) {
     return c.json({ ok: false, valid: false, message: answer ? 'Answers must be 80 characters or fewer.' : 'Enter an answer first.' }, 400);
   }
-  const daily = await getRotatedDailySelection(getNewYorkDateKey());
+  // Pin the date for the full request. A request that crosses New York
+  // midnight must use the same day's prompt selection and player-run key.
+  const day = getNewYorkDateKey();
+  const daily = await getRotatedDailySelection(day);
   const selectedIndex = daily.prompts.findIndex((prompt) => prompt.id === promptId);
   if (selectedIndex < 0) return c.json({ ok: false, valid: false, message: 'That transmission is not part of today’s scan.' }, 400);
   const selected = daily.selections[selectedIndex];
@@ -264,9 +288,9 @@ app.post('/api/check-answer', async (c) => {
   }
   if (!userId) return c.json({ ok: false, valid: false, message: 'Sign in to submit a daily answer.' }, 401);
 
-  // Admin-approved submissions enter the rotating archive. They can also count
-  // immediately on a normal question round, but an archive round only accepts
-  // the specific approved entry selected for that transmission.
+  // Admin-approved submissions join the source question's catalog. Archive
+  // selections are rotation seeds only; every accepted catalog answer for the
+  // source question remains valid in both regular and archive rounds.
   if (!match) {
     const normalized = normalizeAnswer(answer);
     const approvedRaw = normalized
@@ -301,7 +325,7 @@ app.post('/api/check-answer', async (c) => {
     | { kind: 'fast'; attemptsRemaining: number }
     | { kind: 'accepted'; result: { score: number; tier: string; note: string } }
     | { kind: 'rejected'; attemptsRemaining: number };
-  const outcome = await mutatePlayerRun<CheckOutcome>(getNewYorkDateKey(), userId, (current) => {
+  const outcome = await mutatePlayerRun<CheckOutcome>(day, userId, (current) => {
     if (!current || current.phase !== 'playing' || current.index !== selectedIndex
       || daily.prompts[current.index]?.id !== promptId) {
       return { write: false, value: { kind: 'stale' as const } };
