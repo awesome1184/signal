@@ -3,7 +3,9 @@ import './player-experience.css';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { getDailyPrompts, getQuestionBank, getPromptById, getNewYorkDateKey, formatDay, ROUND_SECONDS, MAX_SCORE, type Prompt } from '../shared/game';
-import { getAnswerEntries } from '../shared/answerBank';
+import type { AnswerEntry } from '../shared/answerBank';
+
+let previewAnswerEntries: AnswerEntry[] | null = null;
 
 type Entry = { promptId: string; answer: string; score: number; tier: string; note: string; signalSeed?: number };
 type ReceiverPaths = { carrier: string; reticleX: number; reticleY: number };
@@ -205,6 +207,9 @@ function previewDayAge(today: string, earlier: string): number {
 
 /** Local-only simulation of the server rotation for the GitHub Pages/Codespaces preview. */
 function getPreviewDailyPrompts(dateKey: string): Prompt[] {
+  // Render the app shell first; the large answer catalogue is loaded after mount.
+  if (!previewAnswerEntries) return getDailyPrompts(dateKey);
+  const answerEntries = previewAnswerEntries;
   const storageKey = 'signal:preview-rotation:v1';
   try {
     let state: PreviewRotationState = { usedQuestions: {}, usedAnswers: {}, daily: {} };
@@ -240,7 +245,7 @@ function getPreviewDailyPrompts(dateKey: string): Prompt[] {
       if (previewDayAge(dateKey, day) > 30 || previewDayAge(dateKey, day) < 0) delete state.daily[day];
     }
 
-    const answerableQuestionIds = new Set(getAnswerEntries().map((entry) => entry.promptId));
+    const answerableQuestionIds = new Set(answerEntries.map((entry) => entry.promptId));
     const questions = previewShuffle(getQuestionBank().filter((question) => answerableQuestionIds.has(question.id) && !state.usedQuestions[question.id])).slice(0, 7);
     const prompts: Prompt[] = [...questions];
     for (const question of questions) state.usedQuestions[question.id] = dateKey;
@@ -251,7 +256,7 @@ function getPreviewDailyPrompts(dateKey: string): Prompt[] {
         .filter(([, usedOn]) => previewDayAge(dateKey, usedOn) >= 1 && previewDayAge(dateKey, usedOn) <= 7)
         .map(([id]) => id));
       const usedSources = new Set(prompts.map((prompt) => prompt.id));
-      const fresh = previewShuffle(getAnswerEntries().filter((entry) => Boolean(getPromptById(entry.promptId)) && !recent.has(entry.id)));
+      const fresh = previewShuffle(answerEntries.filter((entry) => Boolean(getPromptById(entry.promptId)) && !recent.has(entry.id)));
       const picked = new Set<string>();
       const chosen = [] as typeof fresh;
       for (const entry of fresh) {
@@ -272,7 +277,7 @@ function getPreviewDailyPrompts(dateKey: string): Prompt[] {
       }
 
       if (chosen.length < slots) {
-        const stale = previewShuffle(getAnswerEntries().filter((entry) => Boolean(getPromptById(entry.promptId)) && !picked.has(entry.id)))
+        const stale = previewShuffle(answerEntries.filter((entry) => Boolean(getPromptById(entry.promptId)) && !picked.has(entry.id)))
           .sort((left, right) => (state.usedAnswers[left.id] ?? '0000-00-00').localeCompare(state.usedAnswers[right.id] ?? '0000-00-00'));
         for (const entry of stale) {
           if (chosen.length >= slots) break;
@@ -736,7 +741,7 @@ function scoreLabel(score: number): string {
 function App() {
   const [dayKey, setDayKey] = useState(() => getNewYorkDateKey());
   const [prompts, setPrompts] = useState<Prompt[]>(() => DEMO_MODE ? getPreviewDailyPrompts(dayKey) : getDailyPrompts(dayKey));
-  const [dailyPromptsReady, setDailyPromptsReady] = useState(DEMO_MODE);
+  const [dailyPromptsReady, setDailyPromptsReady] = useState(false);
   const [bootstrapError, setBootstrapError] = useState('');
   const [bootstrapAttempt, setBootstrapAttempt] = useState(0);
   const [lastUnmatchedAnswer, setLastUnmatchedAnswer] = useState('');
@@ -875,6 +880,24 @@ function App() {
   } as React.CSSProperties;
 
   useEffect(() => {
+    if (!DEMO_MODE) return;
+    let active = true;
+    setDailyPromptsReady(false);
+    void import('../shared/answerBank').then((module) => {
+      if (!active) return;
+      previewAnswerEntries = module.getAnswerEntries();
+      setPrompts(getPreviewDailyPrompts(dayKey));
+      setDailyPromptsReady(true);
+      setBootstrapError('');
+    }).catch(() => {
+      if (!active) return;
+      setBootstrapError('The local answer catalogue could not be loaded. Refresh to retry.');
+      setDailyPromptsReady(false);
+    });
+    return () => { active = false; };
+  }, [dayKey]);
+
+  useEffect(() => {
     signalAudioPageHidden = document.visibilityState === 'hidden';
     const handleVisibilityChange = () => {
       signalAudioPageHidden = document.visibilityState === 'hidden';
@@ -913,7 +936,7 @@ function App() {
       if (nextDay === dayKey) return;
       setDayKey(nextDay);
       setPrompts(DEMO_MODE ? getPreviewDailyPrompts(nextDay) : getDailyPrompts(nextDay));
-      setDailyPromptsReady(DEMO_MODE);
+      setDailyPromptsReady(DEMO_MODE ? previewAnswerEntries !== null : false);
       setGame(blankRun(nextDay));
       setAnswer('');
       setMessage('A new daily transmission has arrived.');
@@ -1518,6 +1541,7 @@ function App() {
                     <span><b>60</b> RARE</span><span><b>85</b> DEEP CUT</span><span><b>100</b> SIGNAL FOUND</span>
                   </div>
                   <p className="scoring-explainer">Points reflect the rarity assigned to an accepted answer in SIGNAL’s catalog, not an objective measure of correctness.</p>
+                  {DEMO_MODE && bootstrapError && <div className="connection-error" role="alert">{bootstrapError}</div>}
                   {!DEMO_MODE && bootstrapError && (
                     <div className="connection-error" role="alert">
                       <strong>RECEIVER OFFLINE</strong><span>{bootstrapError}</span>
@@ -1526,7 +1550,7 @@ function App() {
                   )}
                   {!DEMO_MODE && bootstrapping && <p className="connection-status" role="status">CONNECTING TO TODAY’S TRANSMISSION…</p>}
                   <button className="primary-button" onClick={() => void startGame()} disabled={!dailyPromptsReady || bootstrapping}>
-                    <span>{bootstrapping ? 'CONNECTING…' : dailyPromptsReady ? 'BEGIN DAILY SCAN' : 'CONNECTION REQUIRED'}</span><span className="button-arrow">↗</span>
+                    <span>{bootstrapping ? 'CONNECTING…' : dailyPromptsReady ? 'BEGIN DAILY SCAN' : DEMO_MODE ? 'LOADING LOCAL CATALOG…' : 'CONNECTION REQUIRED'}</span><span className="button-arrow">↗</span>
                   </button>
                   <p className="fine-print">One completed scan per Reddit account · Progress saves automatically · Resets at midnight Eastern</p>
                 </div>
