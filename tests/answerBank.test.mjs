@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 const { evaluateAnswer, getAnswerEntries, getTestAnswer, normalizeAnswer } = await import('../node_modules/.cache/signal-test-dist/answerBank.js');
-const { getQuestionBank, getPromptById } = await import('../node_modules/.cache/signal-test-dist/game.js');
+const { getQuestionBank, getPromptById, getDailyPrompts, getNewYorkDateKey } = await import('../node_modules/.cache/signal-test-dist/game.js');
 
 test('globally familiar football clubs are not buried in the deep-cut tier', () => {
   for (const name of [
@@ -99,6 +99,27 @@ test('archive questions accept any matching answer in their question catalog', (
 
 test('catalog evaluation has no selected-answer restriction parameter', () => {
   assert.equal(evaluateAnswer.length, 2);
+});
+
+test('New York daily boundaries remain correct across both daylight-saving changes', () => {
+  assert.equal(getNewYorkDateKey(new Date('2026-03-09T03:59:59Z')), '2026-03-08');
+  assert.equal(getNewYorkDateKey(new Date('2026-03-09T04:00:00Z')), '2026-03-09');
+  assert.equal(getNewYorkDateKey(new Date('2026-11-02T04:59:59Z')), '2026-11-01');
+  assert.equal(getNewYorkDateKey(new Date('2026-11-02T05:00:00Z')), '2026-11-02');
+});
+
+test('local preview prompt packs are stable and rotate on a three-day cycle', () => {
+  const first = getDailyPrompts('2026-11-16').map((question) => question.id);
+  const second = getDailyPrompts('2026-11-17').map((question) => question.id);
+  const third = getDailyPrompts('2026-11-18').map((question) => question.id);
+  const fourth = getDailyPrompts('2026-11-19').map((question) => question.id);
+
+  assert.equal(first.length, 7);
+  assert.equal(new Set(first).size, 7);
+  assert.notDeepEqual(first, second);
+  assert.notDeepEqual(second, third);
+  assert.deepEqual(first, fourth);
+  assert.deepEqual(first, getDailyPrompts('2026-11-16').map((question) => question.id));
 });
 
 test('every catalog alias resolves to the record that owns it', () => {
