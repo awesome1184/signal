@@ -4,6 +4,23 @@ import assert from 'node:assert/strict';
 const { evaluateAnswer, getAnswerEntries, getTestAnswer } = await import('../node_modules/.cache/signal-test-dist/answerBank.js');
 const { getQuestionBank } = await import('../node_modules/.cache/signal-test-dist/game.js');
 
+test('globally familiar football clubs are not buried in the deep-cut tier', () => {
+  for (const name of [
+    'Real Madrid', 'Bayern Munich', 'Borussia Dortmund', 'Juventus', 'AC Milan',
+    'Paris Saint-Germain', 'Barcelona', 'Manchester United', 'Man Utd',
+    'Liverpool', 'Arsenal', 'Chelsea', 'Manchester City'
+  ]) {
+    assert.equal(evaluateAnswer('football-club-openfootball', name)?.score, 10, name);
+  }
+  for (const name of [
+    'Atletico Madrid', 'Boca Juniors', 'River Plate', 'Sporting CP', 'Al Ahly',
+    'Zamalek', 'Tottenham', 'West Ham', 'Everton', 'Newcastle United',
+    'Leeds United', 'Celtic', 'Rangers', 'FC Porto', 'PSV Eindhoven', 'Sevilla FC'
+  ]) {
+    assert.equal(evaluateAnswer('football-club-openfootball', name)?.score, 15, name);
+  }
+});
+
 test('passenger-car catalog excludes pickup and commercial truck models', () => {
   const truckModels = [
   "Chevrolet S-10 Pickup",
