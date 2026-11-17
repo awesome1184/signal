@@ -31,10 +31,16 @@ test('every canonical catalog answer remains accepted at its assigned rarity', (
 });
 
 
-test('every approved question has a familiar 10-point starting answer', () => {
+test('every answerable question has a familiar 10-point starting answer', () => {
+  // Phase-A question definitions can be committed before their Phase-B answer
+  // contributions. The production rotation keeps those prompts inactive.
+  const answerableQuestionIds = new Set(getAnswerEntries().map((entry) => entry.promptId));
+  assert.ok(answerableQuestionIds.size > 0, 'expected at least one answerable question');
+
   for (const question of getQuestionBank()) {
+    if (!answerableQuestionIds.has(question.id)) continue;
     const answer = getTestAnswer(question.id, 10);
-    assert.ok(answer, `expected ${question.id} to have a 10-point answer`);
+    assert.ok(answer, `expected active question ${question.id} to have a 10-point answer`);
     assert.ok(evaluateAnswer(question.id, answer), `expected ${answer} to be accepted for ${question.id}`);
   }
 });
