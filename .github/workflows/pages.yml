@@ -11,6 +11,7 @@ on:
       - "src/client/**"
       - "src/server/**"
       - "src/shared/**"
+      - "tests/**"
       - "tsconfig.json"
   workflow_dispatch:
 
