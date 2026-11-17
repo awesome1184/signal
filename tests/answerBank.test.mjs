@@ -3,6 +3,74 @@ import assert from 'node:assert/strict';
 
 const { evaluateAnswer, getAnswerEntries, getTestAnswer, normalizeAnswer } = await import('../node_modules/.cache/signal-test-dist/answerBank.js');
 const { getQuestionBank, getPromptById, getDailyPrompts, getNewYorkDateKey } = await import('../node_modules/.cache/signal-test-dist/game.js');
+const { parsePlayerRun } = await import('../node_modules/.cache/signal-test-dist/playerRun.js');
+
+test('saved player runs are validated and sanitized before server use', () => {
+  const valid = {
+    version: 1,
+    dateKey: '2026-11-16',
+    phase: 'playing',
+    index: 0,
+    entries: [],
+    deadline: 1000,
+    attempts: 2.8,
+    lastAttemptAt: 500,
+    lastRejectedAnswer: 'bad answer'
+  };
+  assert.deepEqual(parsePlayerRun(JSON.stringify(valid)), {
+    ...valid,
+    attempts: 2,
+    lastAttemptAt: 500
+  });
+
+  const sanitizedEntry = {
+    promptId: 'p'.repeat(120),
+    answer: 'a'.repeat(100),
+    score: 140.8,
+    tier: 'T'.repeat(40),
+    note: 'n'.repeat(300)
+  };
+  const reveal = parsePlayerRun(JSON.stringify({
+    ...valid,
+    phase: 'reveal',
+    index: 0,
+    deadline: null,
+    entries: [sanitizedEntry],
+    attempts: -4,
+    lastAttemptAt: null,
+    lastRejectedAnswer: 'r'.repeat(100)
+  }));
+  assert.ok(reveal);
+  assert.equal(reveal.phase, 'reveal');
+  assert.equal(reveal.entries[0].promptId.length, 100);
+  assert.equal(reveal.entries[0].answer.length, 80);
+  assert.equal(reveal.entries[0].score, 100);
+  assert.equal(reveal.entries[0].tier.length, 32);
+  assert.equal(reveal.entries[0].note.length, 240);
+  assert.equal(reveal.attempts, 0);
+  assert.equal(reveal.lastRejectedAnswer.length, 80);
+  assert.equal(parsePlayerRun(null), null);
+  assert.equal(parsePlayerRun('not json'), null);
+});
+
+test('saved player runs reject impossible persisted phase and entry combinations', () => {
+  const base = {
+    version: 1,
+    dateKey: '2026-11-16',
+    phase: 'playing',
+    index: 0,
+    entries: [],
+    deadline: 1000,
+    attempts: 0,
+    lastAttemptAt: null,
+    lastRejectedAnswer: ''
+  };
+  assert.equal(parsePlayerRun(JSON.stringify({ ...base, deadline: null })), null);
+  assert.equal(parsePlayerRun(JSON.stringify({ ...base, phase: 'reveal', entries: [] })), null);
+  assert.equal(parsePlayerRun(JSON.stringify({ ...base, phase: 'complete', entries: [] })), null);
+  assert.equal(parsePlayerRun(JSON.stringify({ ...base, phase: 'unknown' })), null);
+  assert.equal(parsePlayerRun(JSON.stringify({ ...base, version: 2 })), null);
+});
 
 test('globally familiar football clubs are not buried in the deep-cut tier', () => {
   for (const name of [
