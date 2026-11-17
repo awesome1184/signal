@@ -4,6 +4,53 @@ import assert from 'node:assert/strict';
 const { evaluateAnswer, getAnswerEntries, getTestAnswer } = await import('../node_modules/.cache/signal-test-dist/answerBank.js');
 const { getQuestionBank } = await import('../node_modules/.cache/signal-test-dist/game.js');
 
+test('passenger-car catalog excludes pickup and commercial truck models', () => {
+  const truckModels = [
+  "Chevrolet S-10 Pickup",
+  "Chevrolet Silverado",
+  "Dodge Dakota",
+  "Ford F-100",
+  "Ford F-250",
+  "Ford F-350",
+  "Ford F-450",
+  "Ford F-550",
+  "Ford F-590",
+  "Ford F-600",
+  "Ford F-700",
+  "Ford F-800",
+  "Ford Ranger",
+  "GMC Canyon",
+  "GMC C/K Pickup",
+  "GMC P Truck Forward",
+  "GMC Sierra",
+  "Isuzu Pickup",
+  "Mazda B-Series",
+  "Mitsubishi Mighty Max",
+  "Nissan Frontier",
+  "Nissan Pickup",
+  "Nissan Titan",
+  "Ram 1500",
+  "Ram 2500",
+  "Ram 3500",
+  "Toyota Pick-Up"
+];
+  for (const model of truckModels) {
+    assert.equal(evaluateAnswer('car-model', model), null, model);
+  }
+  assert.equal(evaluateAnswer('car-model', 'Ford F-150'), null);
+});
+
+test('major airports are assigned rarity tiers by ordinary familiarity', () => {
+  assert.equal(evaluateAnswer('airport-iata', 'Chicago O\'Hare International Airport')?.score, 10);
+  assert.equal(evaluateAnswer('airport-iata', 'ORD')?.score, 10);
+  assert.equal(evaluateAnswer('airport-iata', 'Seattle–Tacoma International Airport')?.score, 15);
+  assert.equal(evaluateAnswer('airport-iata', 'Miami International Airport')?.score, 15);
+  assert.equal(evaluateAnswer('airport-iata', 'Orlando International Airport')?.score, 30);
+  assert.equal(evaluateAnswer('airport-iata', 'Dublin Airport')?.score, 30);
+  assert.equal(evaluateAnswer('airport-iata', 'Minneapolis–Saint Paul International Airport / Wold–Chamberlain Field')?.score, 60);
+  assert.equal(evaluateAnswer('airport-iata', 'Portland International Airport')?.score, 60);
+});
+
 test('natural light answers include stars and direct sunlight, not reflected moonlight', () => {
   assert.equal(evaluateAnswer('natural-glow', 'Sun')?.score, 10);
   assert.equal(evaluateAnswer('natural-glow', 'the Sun')?.score, 10);
