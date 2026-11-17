@@ -10,8 +10,6 @@ import type { Prompt } from '../game.js';
  * Candidate reference catalogues:
  * - Mammal Diversity Database v2.5: https://www.mammaldiversity.org/
  * - GBIF Backbone Taxonomy: https://www.gbif.org/dataset/d7dddbf4-2cf0-4f39-9b2a-bb099caae36c
- * - BGCI GlobalTreeSearch: https://tools.bgci.org/global_tree_search.php
- * - WoRMS: https://www.marinespecies.org/
  * - Glottolog: https://glottolog.org/
  * - Minor Planet Center: https://www.minorplanetcenter.net/
  * - ICAO Doc 8585: https://www.icao.int/
@@ -54,18 +52,18 @@ export const QUESTION_SUBMISSIONS_LATE_BATCH: Prompt[] = [
     hint: 'Beetles include weevils, scarabs, ladybirds, longhorns, ground beetles, and many other families.',
   },
   {
-    id: 'tree-species',
-    channel: 'GLOBAL TREE ATLAS',
-    prompt: 'Name a tree species recorded in BGCI GlobalTreeSearch.',
-    context: 'The answer must be a species included in Botanic Gardens Conservation International’s GlobalTreeSearch database. Its tree definition is a woody plant usually with one stem at least two metres tall, or a multi-stemmed plant with at least one vertical stem five centimetres in diameter at breast height. Use the database’s accepted scientific name or an unambiguous common name; cultivars and subspecies are not separate species.',
-    hint: 'The database spans tropical hardwoods, temperate forest trees, palms, conifers, and island endemics.',
+    id: 'fabaceae-species',
+    channel: 'LEGUME ATLAS',
+    prompt: 'Name a living species in the legume family Fabaceae.',
+    context: 'The answer must be an accepted extant species in the plant family Fabaceae (Leguminosae) in the GBIF Backbone Taxonomy. Use the accepted scientific binomial or an unambiguous recognized common name. Do not count subspecies, synonyms, cultivars, or fossil-only taxa as separate species.',
+    hint: 'The family includes beans, peas, lentils, acacias, clovers, lupins, and thousands of wild legumes.',
   },
   {
-    id: 'marine-fish-species',
-    channel: 'MARINE LIFE DATABASE',
-    prompt: 'Name a marine fish species recorded in WoRMS.',
-    context: 'The answer must be an accepted living fish species recorded in the World Register of Marine Species (WoRMS). Use its accepted scientific binomial or an unambiguous recognized common name. Freshwater-only species, marine mammals, invertebrates, subspecies, and synonyms do not qualify.',
-    hint: 'Think beyond sharks and tuna: reef fish, deep-sea fish, rays, eels, and small coastal species count.',
+    id: 'ray-species',
+    channel: 'CARTILAGINOUS FISH ATLAS',
+    prompt: 'Name a living species of ray.',
+    context: 'The answer must be an accepted extant ray species in the superorder Batoidea in the GBIF Backbone Taxonomy. Use the accepted scientific binomial or an unambiguous recognized common name. Sharks, chimaeras, subspecies, synonyms, and fossil-only taxa do not qualify.',
+    hint: 'The group includes stingrays, eagle rays, manta rays, skates, guitarfishes, and electric rays.',
   },
   {
     id: 'glottolog-language',
