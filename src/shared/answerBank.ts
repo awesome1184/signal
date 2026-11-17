@@ -84,6 +84,8 @@ const BASE_BANK: Record<string, AnswerRecord[]> = {
   ],
   'natural-glow': [
     { aliases: ['firefly', 'lightning bug'], score: 10, tier: 'BACKGROUND', note: 'A familiar bioluminescent insect.' },
+    { aliases: ['sun', 'the sun'], score: 10, tier: 'BACKGROUND', note: 'A star that produces its own visible light through nuclear fusion.' },
+    { aliases: ['star', 'stars'], score: 10, tier: 'BACKGROUND', note: 'Stars produce their own visible light rather than reflecting sunlight.' },
     { aliases: ['glowworm', 'glow worm'], score: 15, tier: 'FAMILIAR', note: 'Several species use light to attract prey.' },
     { aliases: ['bioluminescent plankton'], score: 30, tier: 'UNCOMMON', note: 'Tiny organisms can make waves glow blue.' },
     { aliases: ['foxfire', 'fox fire'], score: 60, tier: 'RARE', note: 'A faint glow produced by fungi in decaying wood.' },

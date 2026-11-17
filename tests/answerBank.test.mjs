@@ -4,6 +4,25 @@ import assert from 'node:assert/strict';
 const { evaluateAnswer, getAnswerEntries, getTestAnswer } = await import('../node_modules/.cache/signal-test-dist/answerBank.js');
 const { getQuestionBank } = await import('../node_modules/.cache/signal-test-dist/game.js');
 
+test('natural light answers include stars and direct sunlight, not reflected moonlight', () => {
+  assert.equal(evaluateAnswer('natural-glow', 'Sun')?.score, 10);
+  assert.equal(evaluateAnswer('natural-glow', 'the Sun')?.score, 10);
+  assert.equal(evaluateAnswer('natural-glow', 'stars')?.score, 10);
+  assert.equal(evaluateAnswer('natural-glow', 'Moon'), null);
+});
+
+test('familiar pasta shapes and common football-club names have sensible tiers and aliases', () => {
+  assert.equal(evaluateAnswer('pasta-shape', 'Spaghetti')?.score, 10);
+  assert.equal(evaluateAnswer('pasta-shape', 'Macaroni')?.score, 10);
+  assert.equal(evaluateAnswer('pasta-shape', 'Penne')?.score, 10);
+  assert.equal(evaluateAnswer('pasta-shape', 'Lasagna')?.score, 15);
+  assert.equal(evaluateAnswer('pasta-shape', 'Farfalle')?.score, 15);
+  assert.equal(evaluateAnswer('pasta-shape', 'Ravioli')?.score, 15);
+  assert.equal(evaluateAnswer('football-club-openfootball', 'Manchester United')?.answerId, 'manchester united fc');
+  assert.equal(evaluateAnswer('football-club-openfootball', 'Man Utd')?.answerId, 'manchester united fc');
+  assert.equal(evaluateAnswer('football-club-openfootball', 'PSG')?.answerId, 'paris saint germain');
+});
+
 test('archive questions accept any matching answer in their question catalog', () => {
   const familiar = evaluateAnswer('night-bird', 'owl');
   const uncommon = evaluateAnswer('night-bird', 'tawny frogmouth');
