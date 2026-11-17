@@ -57,9 +57,9 @@ export const QUESTION_SUBMISSIONS_EVENING_BATCH: Prompt[] = [
   {
     id: 'airport-iata',
     channel: 'WORLD AIRPORT INDEX',
-    prompt: 'Name an operating airport with an IATA three-letter airport code.',
-    context: 'The answer must be a currently operating airport facility with its own assigned three-letter IATA airport code. Use the airport name or its unambiguous commonly used name. Metropolitan-area codes, railway or ferry codes, heliports without airport status, closed airports, and airports without an IATA code do not qualify.',
-    hint: 'Major hubs are easy; smaller regional and island airports count too.'
+    prompt: 'Name an airport with an IATA code listed in OurAirports.',
+    context: 'The answer must appear in OurAirports airports.csv with type large_airport, medium_airport, or small_airport; scheduled_service must be yes and the IATA code must be present. Use the airport name or its three-letter IATA code. Heliports, closed facilities, airports without scheduled service, and metropolitan, railway, or ferry location codes do not qualify.',
+    hint: 'The directory includes major international hubs and small scheduled-service airports in remote regions.'
   },
   {
     id: 'afi-feature-film',
