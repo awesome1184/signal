@@ -106,8 +106,8 @@ export const QUESTION_SUBMISSIONS_EVENING_BATCH: Prompt[] = [
   {
     id: 'car-model',
     channel: 'AUTOMOTIVE ARCHIVE',
-    prompt: 'Name a production passenger-car model.',
-    context: 'The answer must be a distinct model nameplate used for a production passenger car by an automobile manufacturer. Current and discontinued models qualify. Do not count a trim level, model year, generation, concept-only vehicle, commercial truck, or a manufacturer as a separate model.',
-    hint: 'Think across manufacturers, countries, body styles, and decades.'
+    prompt: 'Name a passenger vehicle model listed in Open Vehicle DB.',
+    context: 'The answer must be a distinct model in Open Vehicle DB with vehicle_type car or mpv. This includes passenger cars, SUVs, crossovers, and passenger MPVs. Current and discontinued models qualify. Truck records, trim levels, model years, generations, concept-only vehicles, and manufacturers do not count.',
+    hint: 'The catalogue spans manufacturers and model names across multiple decades; make-plus-model answers are accepted when a model name is ambiguous.'
   }
 ];
