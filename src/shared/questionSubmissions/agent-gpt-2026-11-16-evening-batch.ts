@@ -64,9 +64,9 @@ export const QUESTION_SUBMISSIONS_EVENING_BATCH: Prompt[] = [
   {
     id: 'afi-feature-film',
     channel: 'AMERICAN CINEMA ARCHIVE',
-    prompt: 'Name a film listed in the AFI Catalog of Feature Films.',
-    context: 'The answer must have its own movie-title record in the American Film Institute Catalog of Feature Films. Films from any period covered by the catalog qualify, including silent and early cinema. A television episode, television series, stage production, or film that is not represented by an AFI Catalog record does not qualify.',
-    hint: 'The catalog spans more than a century of American filmmaking, from silent-era titles to modern releases.'
+    prompt: 'Name a film ranked in AFI’s 100 Years…100 Movies (10th Anniversary Edition).',
+    context: 'The answer must be one of the 100 ranked film titles in the American Film Institute’s 10th Anniversary Edition of AFI’s 100 Years…100 Movies. Use the listed title or a recognized title variant. A film that appears in the broader AFI Catalog but not in this ranked 100-film list does not qualify.',
+    hint: 'The ranking spans silent cinema through late-1990s and early-2000s American releases.'
   },
   {
     id: 'animated-tv-series',
