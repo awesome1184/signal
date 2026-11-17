@@ -1,6 +1,7 @@
 import { QUESTION_SUBMISSIONS } from './questionSubmissions/agent-gpt-2026-11-15.js';
 import { QUESTION_SUBMISSIONS_BATCH_2 } from './questionSubmissions/agent-gpt-2026-11-15-second-batch.js';
 import { QUESTION_SUBMISSIONS_BATCH_3 } from './questionSubmissions/agent-gpt-2026-11-16.js';
+import { QUESTION_SUBMISSIONS_EVENING_BATCH } from './questionSubmissions/agent-gpt-2026-11-16-evening-batch.js';
 
 export type Prompt = {
   id: string;
@@ -55,7 +56,7 @@ const PACKS: Prompt[][] = [
 
 /** All approved questions available to the server-side daily rotation. */
 export function getQuestionBank(): Prompt[] {
-  return [...PACKS.flat(), ...QUESTION_SUBMISSIONS, ...QUESTION_SUBMISSIONS_BATCH_2, ...QUESTION_SUBMISSIONS_BATCH_3];
+  return [...PACKS.flat(), ...QUESTION_SUBMISSIONS, ...QUESTION_SUBMISSIONS_BATCH_2, ...QUESTION_SUBMISSIONS_BATCH_3, ...QUESTION_SUBMISSIONS_EVENING_BATCH];
 }
 
 /** Resolve a stable question ID without relying on its daily pack position. */
