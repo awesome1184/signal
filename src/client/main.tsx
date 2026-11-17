@@ -447,6 +447,14 @@ let signalAudioEnabled = true;
 let signalAudioContext: AudioContext | null = null;
 let signalMasterGain: GainNode | null = null;
 let receiverBed: ReceiverBed | null = null;
+let signalAudioPageHidden = false;
+
+function suspendSignalAudio(): void {
+  stopReceiverBed();
+  if (signalAudioContext?.state === 'running') {
+    void signalAudioContext.suspend().catch(() => undefined);
+  }
+}
 
 function getSignalAudioContext(): AudioContext | null {
   if (typeof window === 'undefined' || typeof AudioContext === 'undefined') return null;
@@ -457,7 +465,9 @@ function getSignalAudioContext(): AudioContext | null {
       signalMasterGain.gain.value = signalAudioEnabled ? .48 : .0001;
       signalMasterGain.connect(signalAudioContext.destination);
     }
-    if (signalAudioContext.state === 'suspended') void signalAudioContext.resume().catch(() => undefined);
+    if (!signalAudioPageHidden && document.visibilityState !== 'hidden' && signalAudioContext.state === 'suspended') {
+      void signalAudioContext.resume().catch(() => undefined);
+    }
     return signalAudioContext;
   } catch {
     return null;
@@ -739,6 +749,7 @@ function App() {
   const questionHeadingRef = useRef<HTMLHeadingElement>(null);
   const revealHeadingRef = useRef<HTMLHeadingElement>(null);
   const completeHeadingRef = useRef<HTMLHeadingElement>(null);
+  const restoreAnswerFocusRef = useRef(false);
   const [game, setGame] = useState<RunState>(() => DEMO_MODE ? loadRun(dayKey) : blankRun(dayKey));
   const [answer, setAnswer] = useState('');
   const [message, setMessage] = useState('');
@@ -864,6 +875,31 @@ function App() {
   } as React.CSSProperties;
 
   useEffect(() => {
+    signalAudioPageHidden = document.visibilityState === 'hidden';
+    const handleVisibilityChange = () => {
+      signalAudioPageHidden = document.visibilityState === 'hidden';
+      if (signalAudioPageHidden) suspendSignalAudio();
+    };
+    const handlePageHide = () => {
+      signalAudioPageHidden = true;
+      suspendSignalAudio();
+    };
+    const handlePageShow = () => {
+      signalAudioPageHidden = document.visibilityState === 'hidden';
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pagehide', handlePageHide);
+    window.addEventListener('pageshow', handlePageShow);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pagehide', handlePageHide);
+      window.removeEventListener('pageshow', handlePageShow);
+      signalAudioPageHidden = true;
+      suspendSignalAudio();
+    };
+  }, []);
+
+  useEffect(() => {
     try { localStorage.setItem('signal:wave-style', waveStyle); } catch { /* display preference is optional */ }
   }, [waveStyle]);
 
@@ -890,18 +926,26 @@ function App() {
 
   useEffect(() => {
     if (game.phase === 'complete') {
+      restoreAnswerFocusRef.current = false;
       completeHeadingRef.current?.focus({ preventScroll: true });
       return;
     }
     if (game.phase === 'reveal') {
+      restoreAnswerFocusRef.current = false;
       revealHeadingRef.current?.focus({ preventScroll: true });
       return;
     }
     if (game.phase !== 'playing' || isTuning) return;
     if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) {
-      questionHeadingRef.current?.focus({ preventScroll: true });
+      if (restoreAnswerFocusRef.current) {
+        restoreAnswerFocusRef.current = false;
+        answerInputRef.current?.focus({ preventScroll: true });
+      } else {
+        questionHeadingRef.current?.focus({ preventScroll: true });
+      }
       return;
     }
+    restoreAnswerFocusRef.current = false;
     answerInputRef.current?.focus({ preventScroll: true });
   }, [game.phase, game.index, isTuning]);
 
@@ -988,7 +1032,7 @@ function App() {
           setMessage(error instanceof Error ? error.message : 'Could not sync the expired round. Retrying…');
         } finally { timeoutPendingRef.current = false; }
       }
-    }, 750);
+    }, 1000);
     return () => window.clearInterval(timer);
   }, [game.phase, game.index, game.deadline, game.isTest, prompts, isTuning, dayKey]);
 
@@ -1034,6 +1078,7 @@ function App() {
     const clean = raw.trim();
     if (!clean) { setMessage('Enter an answer before transmitting.'); return; }
     if (isTuning || submittingRef.current || game.phase !== 'playing') return;
+    restoreAnswerFocusRef.current = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
     submittingRef.current = true;
     const signalSeed = Math.floor(Math.random() * 0xffffffff) || 1;
     setTuningSignalSeed(signalSeed); setTuningAnswer(clean); setTuningScore(null); setTuningTier('');
@@ -1127,6 +1172,8 @@ function App() {
         if (response.status === 429) {
           const limitedRun = serverRunToState(data.run, dayKey);
           if (limitedRun) setGame(limitedRun);
+          setReceiverPhase('failed', 0);
+          setTuningStatus('RATE LIMITED // WAIT BEFORE RETRYING');
           setMessage(data.message || 'Please slow down before trying another answer.');
           return;
         }
@@ -1668,7 +1715,7 @@ function App() {
                   <div className="signal-result-hero">
                     <div className="signal-capture-copy">
                       <div className="signal-capture-kicker">TRANSMISSION {String(game.index + 1).padStart(2, '0')} / ACQUISITION REPORT</div>
-                      <h2 ref={revealHeadingRef} tabIndex={-1}>{currentEntry.score === 100 ? 'SIGNAL LOCKED' : currentEntry.score >= 85 ? 'SIGNAL ALMOST LOCKED' : currentEntry.score > 0 ? 'PARTIAL SIGNAL LOCK' : 'NO SIGNAL'}</h2>
+                      <h1 ref={revealHeadingRef} tabIndex={-1}>{currentEntry.score === 100 ? 'SIGNAL LOCKED' : currentEntry.score >= 85 ? 'SIGNAL ALMOST LOCKED' : currentEntry.score > 0 ? 'PARTIAL SIGNAL LOCK' : 'NO SIGNAL'}</h1>
                     </div>
                     <div className="signal-result-score">
                       <span>POINTS RECOVERED</span>
@@ -1743,18 +1790,18 @@ function App() {
                     <small>{playerRank !== null ? 'OF ' + playerCount + ' COMPLETED SCANS' : 'YOUR PLACE WILL APPEAR WHEN SAVED'}</small>
                   </div>
                 )}
-                <div className="result-list">
+                <ol className="result-list" aria-label="Your seven-answer scan results">
                   {prompts.map((prompt, index) => {
                     const entry = game.entries[index] ?? { score: 0, tier: 'NO SIGNAL', answer: '' };
-                    return <div className="result-row" key={prompt.id}>
+                    return <li className="result-row" key={prompt.id}>
                       <span className="result-number" aria-label={'Prompt ' + (index + 1)}>{String(index + 1).padStart(2, '0')}</span>
                       <span className="result-prompt">{prompt.prompt}</span>
                       <span className="result-answer" title={entry.answer || 'No answer'}>{entry.answer || '—'}</span>
                       <span className="result-tier">{entry.tier ?? 'NO SIGNAL'}</span>
                       <strong className={entry.score >= 60 ? 'rare-score' : ''} aria-label={entry.score + ' points'}>{entry.score}</strong>
-                    </div>;
+                    </li>;
                   })}
-                </div>
+                </ol>
                 <div className="complete-actions">
                   <button className="primary-button" onClick={() => void copyResult()} aria-label="Share your complete daily result">{copied ? 'RESULT SHARED' : 'SHARE SCAN RESULT'} <span className="button-arrow">↗</span></button>
                   {DEMO_MODE && <button className="secondary-button" onClick={resetPreview}>RESET LOCAL PREVIEW</button>}

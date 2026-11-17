@@ -79,7 +79,4 @@ export const ANSWER_SUBMISSIONS_AKC_CATALOG: Record<string, AnswerRecord[]> = {
     { aliases: ["Nederlandse Kooikerhondje"], score: 85, tier: "DEEP CUT", note: "Listed in the American Kennel Club's 205 fully recognized breeds (2026-01-01 register); point value estimates ordinary-player familiarity." },
     { aliases: ["Belgian Laekenois"], score: 85, tier: "DEEP CUT", note: "Listed in the American Kennel Club's 205 fully recognized breeds (2026-01-01 register); point value estimates ordinary-player familiarity." }
   ],
-  'canadian-national-park': [
-    { aliases: ["Rouge National Urban Park", "Rouge"], score: 85, tier: "DEEP CUT", note: "Listed by Parks Canada on its official National Parks page as a national urban park; a less commonly named Canadian park designation." }
-  ]
 };

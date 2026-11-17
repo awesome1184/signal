@@ -195,31 +195,10 @@ function hydrateSelection(selection: SavedDailySelection): ResolvedDailySelectio
  * only one concurrent request can publish and reserve the day's questions.
  */
 export async function getRotatedDailySelection(dateKey: string): Promise<ResolvedDailySelection> {
-  const approvedRaw = await redis.hGetAll(APPROVED_ANSWER_KEY);
-  const approvedEntries: AnswerEntry[] = [];
-  for (const raw of Object.values(approvedRaw ?? {})) {
-    try {
-      const value = JSON.parse(raw) as {
-        id?: string; promptId?: string; answer?: string; score?: number; tier?: string; note?: string;
-      };
-      if (typeof value.id !== 'string' || typeof value.promptId !== 'string'
-        || typeof value.answer !== 'string' || !Number.isInteger(value.score)
-        || typeof value.tier !== 'string' || typeof value.note !== 'string'
-        || !getPromptById(value.promptId)) continue;
-      approvedEntries.push({
-        id: value.id,
-        promptId: value.promptId,
-        canonical: value.answer,
-        aliases: [value.answer],
-        score: value.score as number,
-        tier: value.tier,
-        note: value.note
-      });
-    } catch {
-      // Ignore malformed admin-approved entries; they must never break daily rotation.
-    }
-  }
-  const answerEntries = [...getAnswerEntries(), ...approvedEntries];
+  // The answer bank is large. Most requests only need the already-published
+  // daily selection, so defer loading and merging the catalog until a day
+  // actually needs to be created.
+  let answerEntries: AnswerEntry[] | null = null;
 
   for (let attempt = 0; attempt < 8; attempt++) {
     const transaction = await redis.watch(ROTATION_KEY);
@@ -230,6 +209,34 @@ export async function getRotatedDailySelection(dateKey: string): Promise<Resolve
     if (existing && Array.isArray(existing.prompts) && existing.prompts.length === DAILY_PROMPT_COUNT) {
       await transaction.unwatch();
       return hydrateSelection(existing);
+    }
+
+    if (answerEntries === null) {
+      const approvedRaw = await redis.hGetAll(APPROVED_ANSWER_KEY);
+      const approvedEntries: AnswerEntry[] = [];
+      for (const raw of Object.values(approvedRaw ?? {})) {
+        try {
+          const value = JSON.parse(raw) as {
+            id?: string; promptId?: string; answer?: string; score?: number; tier?: string; note?: string;
+          };
+          if (typeof value.id !== 'string' || typeof value.promptId !== 'string'
+            || typeof value.answer !== 'string' || !Number.isInteger(value.score)
+            || typeof value.tier !== 'string' || typeof value.note !== 'string'
+            || !getPromptById(value.promptId)) continue;
+          approvedEntries.push({
+            id: value.id,
+            promptId: value.promptId,
+            canonical: value.answer,
+            aliases: [value.answer],
+            score: value.score as number,
+            tier: value.tier,
+            note: value.note
+          });
+        } catch {
+          // Ignore malformed admin-approved entries; they must never break daily rotation.
+        }
+      }
+      answerEntries = [...getAnswerEntries(), ...approvedEntries];
     }
 
     pruneHistory(state, dateKey);

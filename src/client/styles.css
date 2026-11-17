@@ -125,7 +125,7 @@ button { cursor: pointer; }
 .final-score strong { font: 700 74px/.95 var(--display); color: #f3f8fb; text-shadow: 0 0 20px rgba(91,216,232,.13); }
 .final-score span { color: #849eab; font: 14px var(--mono); }
 .complete-subtitle { margin: 0 auto 20px; color: #95adba; font-size: 12px; }
-.result-list { border: 1px solid rgba(91,216,232,.16); border-radius: 9px; overflow: hidden; text-align: left; }
+.result-list { list-style:none; margin:0; padding:0; border: 1px solid rgba(91,216,232,.16); border-radius: 9px; overflow: hidden; text-align: left; }
 .result-row { min-height: 37px; display: grid; grid-template-columns: 35px minmax(0,1fr) minmax(75px, .45fr) 40px; gap: 9px; align-items: center; padding: 5px 10px; border-top: 1px solid rgba(91,216,232,.08); font-size: 10px; }
 .result-row:first-child { border-top: 0; }
 .result-number { color: #6b8b9b; font: 10px var(--mono); }
@@ -954,7 +954,7 @@ button:focus-visible,input:focus-visible {
   font:8px var(--mono);
   letter-spacing:.24em;
 }
-.signal-capture-copy h2 {
+.signal-capture-copy h1 {
   margin:7px 0 5px;
   color:#e8f4f5;
   font:700 clamp(24px,4vw,34px)/1 var(--display);
@@ -1164,7 +1164,7 @@ button:focus-visible,input:focus-visible {
   border-color:rgba(135,242,226,.58);
   box-shadow:0 20px 55px rgba(0,0,0,.55),0 0 32px rgba(85,229,209,.13),inset 0 1px 0 rgba(226,255,247,.12);
 }
-.signal-capture[data-grade="perfect"] .signal-capture-copy h2 {
+.signal-capture[data-grade="perfect"] .signal-capture-copy h1 {
   color:#cafff0;
   text-shadow:0 0 10px rgba(130,255,225,.35),0 0 28px rgba(79,232,207,.3);
 }
@@ -1238,7 +1238,7 @@ button:focus-visible,input:focus-visible {
   .signal-capture { padding:12px 10px 10px; }
   .signal-capture-head { font-size:7px;letter-spacing:.1em; }
   .signal-capture-copy { padding:12px 0 10px; }
-  .signal-capture-copy h2 { font-size:23px; }
+  .signal-capture-copy h1 { font-size:23px; }
   .signal-capture-copy p { font-size:8px; }
   .signal-screen { height:136px; }
   .signal-capture-readout { padding:10px 2px 8px; }
@@ -1407,7 +1407,7 @@ button:focus-visible,input:focus-visible {
   background:#b8ffdf;
   box-shadow:0 0 10px rgba(130,255,218,.75);
 }
-.signal-capture[data-phase="locked"][data-grade="perfect"] .signal-capture-copy h2 {
+.signal-capture[data-phase="locked"][data-grade="perfect"] .signal-capture-copy h1 {
   animation:signal-lock-title .45s ease-out both;
 }
 @keyframes signal-perfect-lock {
@@ -1486,7 +1486,7 @@ button:focus-visible,input:focus-visible {
   border-color:#f0fff9;
   filter:drop-shadow(0 0 8px rgba(166,255,229,.95));
 }
-.perfect-capture .signal-capture:not(.signal-live-capture)[data-phase="surging"] .signal-capture-copy h2 {
+.perfect-capture .signal-capture:not(.signal-live-capture)[data-phase="surging"] .signal-capture-copy h1 {
   color:#f1fff9;
   text-shadow:0 0 12px rgba(190,255,237,.9),0 0 36px rgba(81,255,215,.65);
 }
@@ -1607,7 +1607,7 @@ button:focus-visible,input:focus-visible {
   border-color:rgba(195,255,238,.9);
   box-shadow:inset 0 0 38px rgba(36,169,139,.2),0 0 34px rgba(83,255,218,.28);
 }
-.perfect-capture .signal-capture[data-phase="locked"] .signal-capture-copy h2 {
+.perfect-capture .signal-capture[data-phase="locked"] .signal-capture-copy h1 {
   animation:signal-perfect-title .5s cubic-bezier(.16,.8,.22,1) both;
   color:#e4fff4;
   text-shadow:0 0 12px rgba(165,255,225,.65),0 0 32px rgba(80,255,215,.42);
@@ -1697,7 +1697,7 @@ button:focus-visible,input:focus-visible {
 
 @media (prefers-reduced-motion:reduce) {
   .perfect-capture .signal-capture:not(.signal-live-capture)[data-phase="surging"] .signal-screen,
-  .perfect-capture .signal-capture[data-phase="locked"] .signal-capture-copy h2 {
+  .perfect-capture .signal-capture[data-phase="locked"] .signal-capture-copy h1 {
     animation:none !important;
     filter:none !important;
     transform:none !important;
@@ -1736,7 +1736,7 @@ button:focus-visible,input:focus-visible {
   padding:0;
   text-align:left;
 }
-.signal-result-hero .signal-capture-copy h2 {
+.signal-result-hero .signal-capture-copy h1 {
   margin:8px 0 6px;
   font-size:clamp(26px,4vw,39px);
 }
@@ -1856,7 +1856,7 @@ button:focus-visible,input:focus-visible {
   border-color:rgba(156,255,228,.72);
   box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 38px rgba(78,242,204,.15),inset 0 1px 0 rgba(231,255,247,.15);
 }
-.signal-result-card[data-grade="perfect"] .signal-capture-copy h2,
+.signal-result-card[data-grade="perfect"] .signal-capture-copy h1,
 .signal-result-card[data-grade="perfect"] .signal-result-score > strong {
   color:#ddfff1;
   text-shadow:0 0 12px rgba(174,255,226,.5),0 0 30px rgba(83,255,214,.32);
@@ -1924,7 +1924,7 @@ button:focus-visible,input:focus-visible {
   .signal-result-view { min-height:0;padding:12px 0 10px;gap:10px; }
   .signal-result-card { padding:12px 10px 10px; }
   .signal-result-hero { grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:12px 0; }
-  .signal-result-hero .signal-capture-copy h2 { font-size:clamp(21px,6vw,27px);letter-spacing:.045em; }
+  .signal-result-hero .signal-capture-copy h1 { font-size:clamp(21px,6vw,27px);letter-spacing:.045em; }
   .signal-result-hero .signal-capture-copy p { font-size:7px; }
   .signal-result-score { min-width:88px;padding-left:9px; }
   .signal-result-score > span { font-size:6px;letter-spacing:.08em; }
@@ -2169,7 +2169,7 @@ button:focus-visible,input:focus-visible {
 .perfect-capture .signal-capture[data-phase="slipping"] .reticle-corner {
   border-color:#ffd0a4;
 }
-.perfect-capture .signal-capture[data-phase="slipping"] .signal-capture-copy h2 {
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-capture-copy h1 {
   color:#ffd2a8;
   text-shadow:0 0 12px rgba(255,174,106,.62),0 0 26px rgba(255,134,78,.32);
 }
@@ -2185,7 +2185,7 @@ button:focus-visible,input:focus-visible {
   background:linear-gradient(90deg,#bd7a55,#ffbd82,#fff0dc);
   box-shadow:0 0 10px rgba(255,173,112,.7);
 }
-.signal-result-card[data-grade="deep"] .signal-capture-copy h2,
+.signal-result-card[data-grade="deep"] .signal-capture-copy h1,
 .signal-result-card[data-grade="deep"] .signal-result-score > strong {
   color:#ffd0a4;
   text-shadow:0 0 12px rgba(255,174,106,.4);
@@ -2238,7 +2238,7 @@ button:focus-visible,input:focus-visible {
   border-color:rgba(255,177,105,.54);
   box-shadow:0 18px 52px rgba(0,0,0,.5),0 0 24px rgba(255,153,82,.12),inset 0 1px 0 rgba(255,229,202,.1);
 }
-.perfect-capture .signal-capture[data-grade="deep"][data-phase="locked"] .signal-capture-copy h2,
+.perfect-capture .signal-capture[data-grade="deep"][data-phase="locked"] .signal-capture-copy h1,
 .perfect-capture .signal-capture[data-grade="deep"][data-phase="locked"] .signal-score-readout strong {
   color:#ffd0a4;
   text-shadow:0 0 12px rgba(255,174,106,.4);
@@ -2468,7 +2468,7 @@ button:focus-visible,input:focus-visible {
   stroke-width:2.6;
   filter:drop-shadow(0 0 5px rgba(176,255,232,.65));
 }
-.perfect-capture .signal-capture:not(.signal-live-capture)[data-phase="surging"] .signal-capture-copy h2 {
+.perfect-capture .signal-capture:not(.signal-live-capture)[data-phase="surging"] .signal-capture-copy h1 {
   color:#e1fff4;
   text-shadow:0 0 12px rgba(129,255,216,.28);
 }
@@ -2503,7 +2503,7 @@ button:focus-visible,input:focus-visible {
   border-color:#ffd0a4;
   filter:none;
 }
-.perfect-capture .signal-capture[data-phase="slipping"] .signal-capture-copy h2 {
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-capture-copy h1 {
   color:#ffd2a8;
   text-shadow:0 0 10px rgba(255,174,106,.28);
 }
@@ -2648,7 +2648,7 @@ button:focus-visible,input:focus-visible {
 .perfect-capture .signal-capture[data-phase="slipping"] .reticle-corner {
   border-color:#ffd0a4 !important; transition:none !important;
 }
-.perfect-capture .signal-capture[data-phase="slipping"] .signal-capture-copy h2 {
+.perfect-capture .signal-capture[data-phase="slipping"] .signal-capture-copy h1 {
   color:#ffd2a8 !important; text-shadow:0 0 10px rgba(255,174,106,.3) !important;
 }
 .perfect-capture .signal-capture[data-phase="slipping"] .signal-capture-status,
@@ -2678,7 +2678,7 @@ button:focus-visible,input:focus-visible {
 .perfect-capture .signal-capture[data-phase="recovering"] .reticle-corner {
   border-color:rgba(255,208,164,.82) !important; transition:none !important;
 }
-.perfect-capture .signal-capture[data-phase="recovering"] .signal-capture-copy h2,
+.perfect-capture .signal-capture[data-phase="recovering"] .signal-capture-copy h1,
 .perfect-capture .signal-capture[data-phase="recovering"] .signal-capture-status {
   color:#f2c8a0 !important; text-shadow:0 0 8px rgba(255,174,106,.18);
 }
@@ -4145,4 +4145,11 @@ button { user-select:none; }
   .admin-report-actions label { flex:1 1 100%; }
   .admin-report-actions select { width:100%; }
   .admin-report-actions button { flex:1 1 auto; min-height:36px; }
+}
+
+
+select:focus-visible,
+textarea:focus-visible {
+  outline:2px solid #8deaf0;
+  outline-offset:3px;
 }

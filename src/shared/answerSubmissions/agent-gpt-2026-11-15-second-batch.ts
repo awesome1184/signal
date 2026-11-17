@@ -124,7 +124,7 @@ export const ANSWER_SUBMISSIONS_BATCH_2: Record<string, AnswerRecord[]> = {
     ]},
     { score: 15, tier: 'FAMILIAR', note: 'A widely known UNESCO-inscribed cultural or natural property.', names: [
       'Venice and its Lagoon', 'Historic Centre of Rome', 'Historic Centre of Florence',
-      'Eiffel Tower', 'Galapagos Islands', 'Serengeti National Park',
+      'Galapagos Islands', 'Serengeti National Park',
       'Great Barrier Reef', 'Mount Fuji', 'Kilimanjaro National Park',
       'Old City of Jerusalem'
     ]},

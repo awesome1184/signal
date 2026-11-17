@@ -55,14 +55,24 @@ const PACKS: Prompt[][] = [
   ]
 ];
 
+const QUESTION_BANK: Prompt[] = [
+  ...PACKS.flat(),
+  ...QUESTION_SUBMISSIONS,
+  ...QUESTION_SUBMISSIONS_BATCH_2,
+  ...QUESTION_SUBMISSIONS_BATCH_3,
+  ...QUESTION_SUBMISSIONS_EVENING_BATCH,
+  ...QUESTION_SUBMISSIONS_LATE_BATCH
+];
+const QUESTION_BY_ID = new Map(QUESTION_BANK.map((prompt) => [prompt.id, prompt]));
+
 /** All approved questions available to the server-side daily rotation. */
 export function getQuestionBank(): Prompt[] {
-  return [...PACKS.flat(), ...QUESTION_SUBMISSIONS, ...QUESTION_SUBMISSIONS_BATCH_2, ...QUESTION_SUBMISSIONS_BATCH_3, ...QUESTION_SUBMISSIONS_EVENING_BATCH, ...QUESTION_SUBMISSIONS_LATE_BATCH];
+  return [...QUESTION_BANK];
 }
 
-/** Resolve a stable question ID without relying on its daily pack position. */
+/** Resolve a stable question ID without rebuilding and scanning the full bank. */
 export function getPromptById(id: string): Prompt | undefined {
-  return getQuestionBank().find((prompt) => prompt.id === id);
+  return QUESTION_BY_ID.get(id);
 }
 
 /**

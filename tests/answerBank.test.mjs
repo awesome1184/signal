@@ -70,17 +70,25 @@ test('test-bench answers are drawn from the whole question catalog', () => {
 
 test('expanded non-exoplanet catalogs accept source-backed long-tail additions', () => {
   assert.equal(evaluateAnswer('pokemon-species', 'Snom')?.score, 100);
-  assert.equal(evaluateAnswer('pokemon-species', 'Nidoran male')?.score, 30);
+  assert.equal(evaluateAnswer('pokemon-species', 'Nidoran male')?.answerId, 'nidoran male');
+  assert.equal(evaluateAnswer('pokemon-species', 'Nidoran♂')?.answerId, 'nidoran male');
+  assert.equal(evaluateAnswer('pokemon-species', 'Nidoran♀')?.answerId, 'nidoran female');
+  assert.equal(evaluateAnswer('pokemon-species', 'Nidoran'), null);
   assert.equal(evaluateAnswer('lunar-crater', 'Aitken')?.score, 85);
   assert.equal(evaluateAnswer('shark-species', 'Bluntnose sixgill shark')?.score, 85);
   assert.ok(evaluateAnswer('ich-heritage-element', 'Yoga'));
 });
 
 
+test('catalog entries exclude non-qualifying landmarks and vehicle types', () => {
+  assert.equal(evaluateAnswer('canadian-national-park', 'Rouge National Urban Park'), null);
+  assert.equal(evaluateAnswer('unesco-world-heritage', 'Eiffel Tower'), null);
+  assert.equal(evaluateAnswer('car-model', 'Ford F-150'), null);
+});
+
 test('AKC expansion follows the fully recognized breed register, not FSS candidates', () => {
   assert.equal(evaluateAnswer('akc-dog-breed', 'Barbet')?.score, 60);
   assert.equal(evaluateAnswer('akc-dog-breed', 'Bernese Mountain Dog')?.score, 15);
   assert.equal(evaluateAnswer('akc-dog-breed', 'Nederlandse Kooikerhondje')?.score, 85);
   assert.equal(evaluateAnswer('akc-dog-breed', 'American Leopard Hound'), null);
-  assert.equal(evaluateAnswer('canadian-national-park', 'Rouge National Urban Park')?.score, 85);
 });

@@ -217,12 +217,29 @@ const BANK: Record<string, AnswerRecord[]> = [
 export function normalizeAnswer(value: string): string {
   return value.normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
+    .replace(/♀/g, ' female ')
+    .replace(/♂/g, ' male ')
     .toLowerCase()
     .replace(/&/g, ' and ')
     .replace(/[^a-z0-9\s+#-]/g, ' ')
     .replace(/[\s-]+/g, ' ')
     .trim();
 }
+
+const ANSWER_INDEX_BY_PROMPT = new Map<string, Map<string, AnswerRecord>>();
+for (const [promptId, records] of Object.entries(BANK)) {
+  const aliases = new Map<string, AnswerRecord>();
+  for (const record of records) {
+    for (const alias of record.aliases) {
+      const normalized = normalizeAnswer(alias);
+      if (normalized && !aliases.has(normalized)) aliases.set(normalized, record);
+    }
+  }
+  ANSWER_INDEX_BY_PROMPT.set(promptId, aliases);
+}
+
+let cachedAnswerEntries: AnswerEntry[] | null = null;
+
 
 function answerRecordId(_promptId: string, record: AnswerRecord): string {
   // The same canonical answer is one archive item even if it qualifies for multiple questions.
@@ -231,6 +248,7 @@ function answerRecordId(_promptId: string, record: AnswerRecord): string {
 
 /** Flatten the approved answer database for archive rotation and auditing. */
 export function getAnswerEntries(): AnswerEntry[] {
+  if (cachedAnswerEntries) return cachedAnswerEntries;
   const unique = new Map<string, AnswerEntry>();
   for (const [promptId, records] of Object.entries(BANK)) {
     for (const record of records) {
@@ -247,15 +265,14 @@ export function getAnswerEntries(): AnswerEntry[] {
       });
     }
   }
-  return [...unique.values()];
+  cachedAnswerEntries = [...unique.values()];
+  return cachedAnswerEntries;
 }
 
 export function evaluateAnswer(promptId: string, rawAnswer: string): AnswerResult | null {
   const answer = normalizeAnswer(rawAnswer);
   if (!answer) return null;
-  const match = (BANK[promptId] ?? []).find((record) =>
-    record.aliases.some((alias) => normalizeAnswer(alias) === answer)
-  );
+  const match = ANSWER_INDEX_BY_PROMPT.get(promptId)?.get(answer);
   return match ? {
     score: match.score,
     tier: match.tier,

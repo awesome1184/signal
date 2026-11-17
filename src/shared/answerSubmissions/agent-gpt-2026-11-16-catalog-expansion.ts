@@ -579,7 +579,7 @@ export const ANSWER_SUBMISSIONS_CATALOG_EXPANSION: Record<string, AnswerRecord[]
     { aliases: ["Ivysaur"], score: 30, tier: "UNCOMMON", note: "Official National Pokédex species in the PokeAPI source snapshot; point tier is an estimated familiarity band." },
     { aliases: ["Charmeleon"], score: 30, tier: "UNCOMMON", note: "Official National Pokédex species in the PokeAPI source snapshot; point tier is an estimated familiarity band." },
     { aliases: ["Wartortle"], score: 30, tier: "UNCOMMON", note: "Official National Pokédex species in the PokeAPI source snapshot; point tier is an estimated familiarity band." },
-    { aliases: ["Nidoran female", "Nidoran♀", "Nidoran"], score: 30, tier: "UNCOMMON", note: "Official National Pokédex species in the PokeAPI source snapshot; the sex-specific label is retained to distinguish it from Nidoran male." },
+    { aliases: ["Nidoran female", "Nidoran♀"], score: 30, tier: "UNCOMMON", note: "Official National Pokédex species in the PokeAPI source snapshot; the sex-specific label is retained to distinguish it from Nidoran male." },
     { aliases: ["Nidoran male", "Nidoran♂"], score: 30, tier: "UNCOMMON", note: "Official National Pokédex species in the PokeAPI source snapshot; the sex-specific label is retained to distinguish it from Nidoran female." },
     { aliases: ["Nidorina"], score: 30, tier: "UNCOMMON", note: "Official National Pokédex species in the PokeAPI source snapshot; point tier is an estimated familiarity band." },
     { aliases: ["Nidoqueen"], score: 30, tier: "UNCOMMON", note: "Official National Pokédex species in the PokeAPI source snapshot; point tier is an estimated familiarity band." },

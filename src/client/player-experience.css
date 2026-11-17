@@ -917,6 +917,7 @@
   .signal-live-capture .signal-motion-trace,
   .signal-live-capture .signal-station i,
   .signal-live-capture .signal-capture-status i,
+  .signal-live-capture .signal-score-readout strong,
   .signal-live-grade,
   .signal-live-capture .signal-live-answer {
     animation:none !important;
