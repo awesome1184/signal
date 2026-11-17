@@ -935,3 +935,16 @@
   .play-view.tuning-view .signal-clean-trace { opacity:var(--wave-final) !important;stroke-dashoffset:0 !important; }
   .signal-live-capture .signal-lock-reticle { opacity:var(--reticle-opacity);transform:translate(-50%,-50%) scale(var(--reticle-scale)); }
 }
+
+
+/* Keep dense result-HUD labels legible on phone screens. */
+@media (max-width:720px) {
+  .signal-result-hero .signal-capture-copy p,
+  .signal-result-readout .signal-answer-readout span,
+  .signal-result-scan-total span,
+  .signal-result-view .signal-lock-steps span,
+  .signal-result-view .signal-capture-status {
+    font-size:8px;
+    line-height:1.4;
+  }
+}
