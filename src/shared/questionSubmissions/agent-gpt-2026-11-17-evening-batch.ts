@@ -56,8 +56,8 @@ export const QUESTION_SUBMISSIONS_DAILY_2026_11_17: Prompt[] = [
   {
     id: 'geonames-stream',
     channel: 'GEONAMES HYDROGRAPHY',
-    prompt: 'Name a stream listed in GeoNames with feature code H.STMS.',
-    context: 'The answer must be a named geographic feature in the GeoNames gazetteer whose feature class is H and feature code is STMS (streams). Use the primary name or a documented alternate name for that same feature. Lakes, canals, rivers represented only by another feature code, unnamed reaches, and duplicate spellings of one feature do not count as separate answers.',
+    prompt: 'Name a stream listed in GeoNames with feature code H.STM or H.STMS.',
+    context: 'The answer must be a named geographic feature in the GeoNames gazetteer whose feature class is H and feature code is STM (stream) or STMS (streams). Use the primary name or a documented alternate name for that same feature. Lakes, canals, rivers represented only by another feature code, unnamed reaches, and duplicate spellings of one feature do not count as separate answers.',
     hint: 'GeoNames includes named streams and creeks from every continent, including small local watercourses.'
   },
   {
