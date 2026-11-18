@@ -3,6 +3,7 @@ import { QUESTION_SUBMISSIONS_BATCH_2 } from './questionSubmissions/agent-gpt-20
 import { QUESTION_SUBMISSIONS_BATCH_3 } from './questionSubmissions/agent-gpt-2026-11-16.js';
 import { QUESTION_SUBMISSIONS_EVENING_BATCH } from './questionSubmissions/agent-gpt-2026-11-16-evening-batch.js';
 import { QUESTION_SUBMISSIONS_LATE_BATCH } from './questionSubmissions/agent-gpt-2026-11-16-late-batch.js';
+import { QUESTION_SUBMISSIONS_DAILY_2026_11_17 } from './questionSubmissions/agent-gpt-2026-11-17-evening-batch.js';
 
 export type Prompt = {
   id: string;
@@ -61,7 +62,8 @@ const QUESTION_BANK: Prompt[] = [
   ...QUESTION_SUBMISSIONS_BATCH_2,
   ...QUESTION_SUBMISSIONS_BATCH_3,
   ...QUESTION_SUBMISSIONS_EVENING_BATCH,
-  ...QUESTION_SUBMISSIONS_LATE_BATCH
+  ...QUESTION_SUBMISSIONS_LATE_BATCH,
+  ...QUESTION_SUBMISSIONS_DAILY_2026_11_17
 ];
 const QUESTION_BY_ID = new Map(QUESTION_BANK.map((prompt) => [prompt.id, prompt]));
 
