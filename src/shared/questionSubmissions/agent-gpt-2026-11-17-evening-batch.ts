@@ -70,8 +70,8 @@ export const QUESTION_SUBMISSIONS_DAILY_2026_11_17: Prompt[] = [
   {
     id: 'protected-national-park',
     channel: 'PROTECTED PLANET',
-    prompt: 'Name a national park outside Canada classified as IUCN Category II in Protected Planet.',
-    context: 'The answer must be a protected area outside Canada recorded in Protected Planet’s World Database of Protected and Conserved Areas with IUCN management category II (National Park). Use its official protected-area name. Other IUCN categories, OECMs, proposed sites, and Canadian parks do not qualify.',
+    prompt: 'Name a national park outside Canada recorded in Protected Planet.',
+    context: 'The answer must match a current protected-area record in Protected Planet’s World Database of Protected and Conserved Areas whose official site name or national designation identifies it as a national park outside Canada. Use the recorded site name. OECMs, proposed sites, nature reserves that are not designated national parks, and Canadian parks do not qualify.',
     hint: 'The category includes national parks in Africa, Asia, Europe, Oceania, and the Americas.'
   },
   {
