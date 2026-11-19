@@ -311,3 +311,53 @@ test('AKC expansion follows the fully recognized breed register, not FSS candida
   assert.equal(evaluateAnswer('akc-dog-breed', 'Nederlandse Kooikerhondje')?.score, 85);
   assert.equal(evaluateAnswer('akc-dog-breed', 'American Leopard Hound'), null);
 });
+
+test('2026-11-18 Phase A questions are answer-ready after the separate Phase B catalog commit', () => {
+  const ids = [
+    'ramsar-wetland-site',
+    'unesco-global-geopark',
+    'bgci-botanic-garden',
+    'glims-glacier',
+    'usgs-waterfall',
+    'nga-world-port',
+    'geonames-island',
+    'geonames-cave',
+    'geonames-dam',
+    'grammy-winning-album',
+    'bafta-winning-film',
+    'olympic-medalist',
+    'mlb-player',
+    'ngc-ic-galaxy'
+  ];
+  const questionIds = new Set(getQuestionBank().map((question) => question.id));
+  const entries = getAnswerEntries();
+
+  assert.equal(ids.length, 14);
+  for (const id of ids) {
+    assert.ok(questionIds.has(id), `expected question catalog entry for ${id}`);
+    const pool = entries.filter((entry) => entry.promptId === id);
+    assert.ok(pool.length >= 10, `expected a researched answer pool for ${id}`);
+    for (const score of [10, 15, 30, 60, 85, 100]) {
+      assert.ok(pool.some((entry) => entry.score === score), `expected ${score}-point entry for ${id}`);
+    }
+    const target = getTestAnswer(id, 100);
+    assert.ok(target, `expected a 100-point target for ${id}`);
+    assert.equal(evaluateAnswer(id, target)?.score, 100);
+    const seenAliases = new Set();
+    for (const entry of pool) {
+      assert.equal(entry.tier, ({
+        10: 'BACKGROUND',
+        15: 'FAMILIAR',
+        30: 'UNCOMMON',
+        60: 'RARE',
+        85: 'DEEP CUT',
+        100: 'SIGNAL FOUND'
+      })[entry.score]);
+      for (const alias of entry.aliases) {
+        const normalized = normalizeAnswer(alias);
+        assert.ok(!seenAliases.has(normalized), `duplicate normalized alias in ${id}: ${alias}`);
+        seenAliases.add(normalized);
+      }
+    }
+  }
+});

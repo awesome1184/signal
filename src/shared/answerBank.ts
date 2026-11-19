@@ -8,6 +8,7 @@ import { ANSWER_SUBMISSIONS_REFERENCE_CATALOGS } from './answerSubmissions/agent
 import { ANSWER_SUBMISSIONS_CATALOG_EXPANSION } from './answerSubmissions/agent-gpt-2026-11-16-catalog-expansion.js';
 import { ANSWER_SUBMISSIONS_AKC_CATALOG } from './answerSubmissions/agent-gpt-2026-11-16-akc-catalog.js';
 import { ANSWER_SUBMISSIONS_EVENING_BATCH } from './answerSubmissions/agent-gpt-2026-11-16-evening-batch.js';
+import { ANSWER_SUBMISSIONS_DAILY_2026_11_18 } from './answerSubmissions/agent-gpt-2026-11-18-batch.js';
 
 export type AnswerResult = { score: number; tier: string; note: string; answerId?: string };
 export type AnswerRecord = AnswerResult & { aliases: string[] };
@@ -208,7 +209,8 @@ const BANK: Record<string, AnswerRecord[]> = [
   ANSWER_SUBMISSIONS_REFERENCE_CATALOGS,
   ANSWER_SUBMISSIONS_CATALOG_EXPANSION,
   ANSWER_SUBMISSIONS_AKC_CATALOG,
-  ANSWER_SUBMISSIONS_EVENING_BATCH
+  ANSWER_SUBMISSIONS_EVENING_BATCH,
+  ANSWER_SUBMISSIONS_DAILY_2026_11_18
 ].reduce<Record<string, AnswerRecord[]>>((merged, additionsByPrompt) => {
   for (const [promptId, additions] of Object.entries(additionsByPrompt)) {
     merged[promptId] = [...(merged[promptId] ?? []), ...additions];
