@@ -377,6 +377,8 @@ export const ANSWER_SUBMISSIONS_DAILY_2026_11_18: Record<string, AnswerRecord[]>
     answer(["Jardín Botánico \"Alejandro Von Humboldt\"","Alejandro von Humboldt Botanic Garden"], 100, "BGCI GardenSearch institution; Ibagué, Colombia."),
     answer(["Botanical Garden, Natural History Museum - University of Oslo","Oslo Botanical Garden"], 85, "BGCI GardenSearch institution; Norway."),
     answer(["Royal Botanic Gardens of Trinidad and Tobago"], 85, "BGCI GardenSearch institution; Trinidad and Tobago."),
+    answer(["Denver Botanic Gardens"], 15, "BGCI GardenSearch institution; Denver, Colorado, United States."),
+    answer(["Botanic Garden and State Herbarium of South Australia","Adelaide Botanic Garden"], 60, "BGCI GardenSearch institution; Adelaide, Australia."),
     answer(["National Botanic Garden of Wales"], 85, "BGCI GardenSearch institution; Wales, United Kingdom."),
     answer(["Jardin Botanique de Montréal","Montreal Botanical Garden"], 30, "BGCI GardenSearch institution; Canada."),
     answer(["Peradeniya Royal Botanic Gardens","Royal Botanic Gardens, Peradeniya"], 85, "BGCI GardenSearch institution; Sri Lanka."),
