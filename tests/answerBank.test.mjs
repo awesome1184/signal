@@ -192,6 +192,8 @@ test('local preview prompt packs are stable and rotate on a three-day cycle', ()
 
 test('every catalog alias resolves to the record that owns it', () => {
   const entries = getAnswerEntries();
+  const batchEntries = entries.filter((entry) => ids.includes(entry.promptId));
+  assert.ok(batchEntries.length >= 500, `expected at least 500 archive-ready entries, got ${batchEntries.length}`);
   let checkedAliases = 0;
 
   for (const entry of entries) {
@@ -333,6 +335,14 @@ test('2026-11-18 Phase A questions are answer-ready after the separate Phase B c
   const entries = getAnswerEntries();
 
   assert.equal(ids.length, 14);
+  const batchAliases = new Set();
+  for (const entry of batchEntries) {
+    for (const alias of entry.aliases) {
+      const normalized = normalizeAnswer(alias);
+      assert.ok(!batchAliases.has(normalized), `duplicate normalized alias across the batch: ${alias}`);
+      batchAliases.add(normalized);
+    }
+  }
   for (const id of ids) {
     assert.ok(questionIds.has(id), `expected question catalog entry for ${id}`);
     const pool = entries.filter((entry) => entry.promptId === id);
@@ -340,6 +350,7 @@ test('2026-11-18 Phase A questions are answer-ready after the separate Phase B c
     for (const score of [10, 15, 30, 60, 85, 100]) {
       assert.ok(pool.some((entry) => entry.score === score), `expected ${score}-point entry for ${id}`);
     }
+    assert.equal(pool.filter((entry) => entry.score === 100).length, 1, `expected exactly one 100-point answer for ${id}`);
     const target = getTestAnswer(id, 100);
     assert.ok(target, `expected a 100-point target for ${id}`);
     assert.equal(evaluateAnswer(id, target)?.score, 100);
