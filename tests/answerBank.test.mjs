@@ -333,6 +333,7 @@ test('2026-11-18 Phase A questions are answer-ready after the separate Phase B c
   const entries = getAnswerEntries();
   const batchEntries = entries.filter((entry) => ids.includes(entry.promptId));
   assert.ok(batchEntries.length >= 500, `expected at least 500 archive-ready entries, got ${batchEntries.length}`);
+  assert.ok(batchEntries.filter((entry) => entry.score === 85).length > batchEntries.length / 2, 'expected 85-point DEEP CUT answers to be the majority');
 
   assert.equal(ids.length, 14);
   const batchAliases = new Set();
