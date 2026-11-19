@@ -120,7 +120,7 @@ export const ANSWER_SUBMISSIONS_DAILY_2026_11_18: Record<string, AnswerRecord[]>
     answer(["Beeshazar and Associated Lakes"], 85, "Official Ramsar List wetland site; Nepal."),
     answer(["Puerto Princesa Subterranean River National Park"], 60, "Official Ramsar List wetland site; Philippines."),
     answer(["Tubbataha Reefs Natural Park"], 60, "Official Ramsar List wetland site; Philippines."),
-    answer(["Lake Fertő","Lake Fertö"], 30, "Official Ramsar List wetland site; Hungary."),
+    answer(["Lake Fertő"], 30, "Official Ramsar List wetland site; Hungary."),
   ],
   'unesco-global-geopark': [
     answer(["Karawanken / Karavanke","Karawanken / Karavanke UNESCO Global Geopark"], 60, "UNESCO Global Geopark listed for Austria and Slovenia."),
@@ -368,7 +368,7 @@ export const ANSWER_SUBMISSIONS_DAILY_2026_11_18: Record<string, AnswerRecord[]>
     answer(["Royal Botanic Gardens, Kew","Kew Gardens"], 10, "BGCI GardenSearch institution; United Kingdom."),
     answer(["Wakehurst","Wakehurst Place"], 60, "BGCI GardenSearch institution; United Kingdom."),
     answer(["Royal Botanic Garden Edinburgh","Edinburgh Botanic Garden"], 15, "BGCI GardenSearch institution; United Kingdom."),
-            answer(["Royal Botanic Gardens Victoria - Melbourne Gardens","Melbourne Gardens"], 30, "BGCI GardenSearch institution; Australia."),
+    answer(["Royal Botanic Gardens Victoria - Melbourne Gardens","Melbourne Gardens"], 30, "BGCI GardenSearch institution; Australia."),
     answer(["Jardim Botânico do Recife","Recife Botanical Garden"], 85, "BGCI GardenSearch institution; Brazil."),
     answer(["Botanic Garden of the Science Faculty, Charles University","Charles University Botanical Garden"], 85, "BGCI GardenSearch institution; Czechia."),
     answer(["Jardín Botánico Nacional de Viña del Mar","National Botanic Garden of Viña del Mar"], 60, "BGCI GardenSearch institution; Chile."),

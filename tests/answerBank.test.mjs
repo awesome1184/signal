@@ -192,8 +192,6 @@ test('local preview prompt packs are stable and rotate on a three-day cycle', ()
 
 test('every catalog alias resolves to the record that owns it', () => {
   const entries = getAnswerEntries();
-  const batchEntries = entries.filter((entry) => ids.includes(entry.promptId));
-  assert.ok(batchEntries.length >= 500, `expected at least 500 archive-ready entries, got ${batchEntries.length}`);
   let checkedAliases = 0;
 
   for (const entry of entries) {
@@ -333,6 +331,8 @@ test('2026-11-18 Phase A questions are answer-ready after the separate Phase B c
   ];
   const questionIds = new Set(getQuestionBank().map((question) => question.id));
   const entries = getAnswerEntries();
+  const batchEntries = entries.filter((entry) => ids.includes(entry.promptId));
+  assert.ok(batchEntries.length >= 500, `expected at least 500 archive-ready entries, got ${batchEntries.length}`);
 
   assert.equal(ids.length, 14);
   const batchAliases = new Set();
