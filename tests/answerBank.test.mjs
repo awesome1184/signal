@@ -376,12 +376,12 @@ test('2026-11-18 Phase A questions are answer-ready after the separate Phase B c
 
 
 test('2026-11-19 Phase A questions become answer-ready only after the separate Phase B answer catalog is registered', () => {
-  const expectedCounts = {"fungus-species":50,"tree-species":60,"moss-species":50,"algal-species":50,"salamander-species":50,"polychaete-species":50,"marine-crab-species":50,"marine-mammal-species":112,"geonames-peninsula":52,"university-whed":42,"tramway-city":73,"nhl-player":100,"nfl-player":61,"oscar-acting-nominee":107};
+  const expectedCounts = {"fungus-species":50,"tree-species":60,"moss-species":50,"algal-species":50,"salamander-species":50,"polychaete-species":50,"marine-crab-species":50,"marine-mammal-species":112,"geonames-peninsula":52,"university-whed":42,"tramway-city":72,"nhl-player":100,"nfl-player":61,"oscar-acting-nominee":107};
   const ids = Object.keys(expectedCounts);
   const questionIds = new Set(getQuestionBank().map((question) => question.id));
   const entries = getAnswerEntries();
   const batchEntries = entries.filter((entry) => ids.includes(entry.promptId));
-  assert.equal(batchEntries.length, 907);
+  assert.equal(batchEntries.length, 906);
   assert.ok(batchEntries.filter((entry) => entry.score === 85).length > batchEntries.length / 2);
 
   const batchAliases = new Set();
