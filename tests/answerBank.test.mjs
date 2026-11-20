@@ -373,3 +373,52 @@ test('2026-11-18 Phase A questions are answer-ready after the separate Phase B c
     }
   }
 });
+
+
+test('2026-11-19 Phase A questions become answer-ready only after the separate Phase B answer catalog is registered', () => {
+  const expectedCounts = {"fungus-species":50,"tree-species":60,"moss-species":50,"algal-species":50,"salamander-species":50,"polychaete-species":50,"marine-crab-species":50,"marine-mammal-species":112,"geonames-peninsula":52,"university-whed":42,"tramway-city":73,"nhl-player":100,"nfl-player":61,"oscar-acting-nominee":107};
+  const ids = Object.keys(expectedCounts);
+  const questionIds = new Set(getQuestionBank().map((question) => question.id));
+  const entries = getAnswerEntries();
+  const batchEntries = entries.filter((entry) => ids.includes(entry.promptId));
+  assert.equal(batchEntries.length, 907);
+  assert.ok(batchEntries.filter((entry) => entry.score === 85).length > batchEntries.length / 2);
+
+  const batchAliases = new Set();
+  for (const entry of batchEntries) {
+    for (const alias of entry.aliases) {
+      const normalized = normalizeAnswer(alias);
+      assert.ok(!batchAliases.has(normalized), `duplicate normalized alias across the batch: ${alias}`);
+      batchAliases.add(normalized);
+    }
+  }
+  for (const id of ids) {
+    assert.ok(questionIds.has(id), `expected question catalog entry for ${id}`);
+    const pool = entries.filter((entry) => entry.promptId === id);
+    assert.equal(pool.length, expectedCounts[id], `wrong answer count for ${id}`);
+    for (const score of [10, 15, 30, 60, 85, 100]) {
+      assert.ok(pool.some((entry) => entry.score === score), `expected ${score}-point entry for ${id}`);
+    }
+    assert.equal(pool.filter((entry) => entry.score === 100).length, 1);
+    const seenAliases = new Set();
+    for (const entry of pool) {
+      assert.equal(entry.tier, ({
+        10: 'BACKGROUND', 15: 'FAMILIAR', 30: 'UNCOMMON',
+        60: 'RARE', 85: 'DEEP CUT', 100: 'SIGNAL FOUND'
+      })[entry.score]);
+      for (const alias of entry.aliases) {
+        const normalized = normalizeAnswer(alias);
+        assert.ok(!seenAliases.has(normalized), `duplicate normalized alias in ${id}: ${alias}`);
+        seenAliases.add(normalized);
+        const result = evaluateAnswer(id, alias);
+        assert.ok(result, `expected alias ${alias} to resolve for ${id}`);
+        assert.equal(result.score, entry.score);
+      }
+    }
+    const familiar = getTestAnswer(id, 10);
+    const signalFound = getTestAnswer(id, 100);
+    assert.ok(familiar && signalFound);
+    assert.equal(evaluateAnswer(id, familiar)?.score, 10);
+    assert.equal(evaluateAnswer(id, signalFound)?.score, 100);
+  }
+});
